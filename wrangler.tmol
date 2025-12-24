@@ -1,6 +1,0 @@
-name = "your-project-name"
-compatibility_date = "2025-12-24"
-main = "./dist/index.js"  # or your entry point
-
-[site]
-bucket = "./dist"
