@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonPlay | Modern Gaming Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Dark Theme (Default) */
+            --dark-bg: #0f0f1a;
+            --dark-surface: #1a1a2e;
+            --dark-surface-light: #252542;
+            --dark-primary: #6c63ff;
+            --dark-secondary: #ff6584;
+            --dark-text: #e0e0ff;
+            --dark-text-secondary: #a0a0cc;
+            --dark-border: #2d2d5a;
+            --dark-accent: #36d1dc;
+            
+            /* Current Theme Variables */
+            --bg: var(--dark-bg);
+            --surface: var(--dark-surface);
+            --surface-light: var(--dark-surface-light);
+            --primary: var(--dark-primary);
+            --secondary: var(--dark-secondary);
+            --text: var(--dark-text);
+            --text-secondary: var(--dark-text-secondary);
+            --border: var(--dark-border);
+            --accent: var(--dark-accent);
+            
+            --glow-primary: 0 0 15px var(--primary), 0 0 30px rgba(108, 99, 255, 0.3);
+            --glow-secondary: 0 0 15px var(--secondary), 0 0 25px rgba(255, 101, 132, 0.3);
+            --glow-selection: 0 0 20px currentColor, 0 0 40px rgba(108, 99, 255, 0.2);
+            
+            --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        h1, h2, h3, h4 { font-family: 'Orbitron', sans-serif; font-weight: 700; }
+        a { text-decoration: none; color: inherit; }
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+        /* Header */
+        header {
+            background-color: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; }
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 28px; font-weight: 800; color: var(--text); }
+        .logo-icon { color: var(--primary); font-size: 32px; filter: drop-shadow(0 0 10px var(--primary)); animation: pulse 2s infinite alternate; }
+        @keyframes pulse { 0% { filter: drop-shadow(0 0 8px var(--primary)); } 100% { filter: drop-shadow(0 0 15px var(--primary)); } }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { font-weight: 500; transition: var(--transition); padding: 10px 0; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--primary); transition: width 0.3s ease; }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; box-shadow: 0 0 10px var(--primary); }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 24px; color: var(--text); cursor: pointer; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(26, 26, 46, 0.8) 100%);
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 50px;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        .hero h1 { font-size: 56px; margin-bottom: 20px; background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 20px; max-width: 700px; margin: 0 auto 40px; opacity: 0.9; }
+
+        /* Categories */
+        .categories { margin-bottom: 50px; }
+        .categories h2 { font-size: 28px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
+        .category-filters { display: flex; flex-wrap: wrap; gap: 15px; }
+        .category-btn { padding: 12px 26px; background-color: var(--surface); border: 1px solid var(--border); border-radius: 50px; font-weight: 600; cursor: pointer; transition: var(--transition); color: var(--text-secondary); }
+        .category-btn:hover { color: white; border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--glow-primary); }
+        .category-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: var(--glow-primary); transform: translateY(-3px); }
+
+        /* Games Grid */
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; margin-bottom: 80px; }
+        .game-card { background-color: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid var(--border); }
+        .game-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--glow-primary); border-color: var(--primary); }
+        .game-image { width: 100%; height: 200px; object-fit: cover; transition: transform 0.5s ease; }
+        .game-card:hover .game-image { transform: scale(1.05); }
+        .game-info { padding: 22px; }
+        .game-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .game-category { display: inline-block; background-color: var(--surface-light); color: var(--primary); padding: 6px 15px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 15px; }
+        .game-description { color: var(--text-secondary); margin-bottom: 20px; font-size: 15px; }
+        .game-meta { display: flex; justify-content: space-between; align-items: center; }
+        .game-rating { color: #ffd700; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+        .game-rating span { color: var(--text-secondary); font-size: 14px; margin-left: 8px; }
+        .play-button { background: linear-gradient(90deg, var(--primary), var(--accent)); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+        .play-button:hover { box-shadow: var(--glow-primary); transform: translateY(-3px); }
+
+        /* Game Modal */
+        .game-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 2000; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .game-modal-content { width: 100%; height: 100%; display: flex; flex-direction: column; background-color: var(--surface); }
+        .game-modal-header { padding: 20px; background-color: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .game-modal-title { font-size: 24px; font-weight: 700; color: var(--text); }
+        .close-modal { background: none; border: none; color: var(--text); font-size: 28px; cursor: pointer; padding: 5px 15px; border-radius: 6px; }
+        .close-modal:hover { color: var(--secondary); background-color: rgba(244, 63, 94, 0.1); }
+        .game-iframe-container { flex: 1; padding: 20px; }
+        .game-iframe { width: 100%; height: 100%; border: none; border-radius: var(--radius); background-color: #000; }
+        .game-controls { padding: 20px; background-color: var(--surface); border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .fullscreen-btn, .sound-btn { background-color: var(--surface-light); border: 1px solid var(--border); color: var(--text); padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); display: flex; align-items: center; gap: 10px; }
+        .fullscreen-btn:hover, .sound-btn:hover { background-color: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Footer */
+        footer { background-color: var(--surface); color: var(--text); padding: 70px 0 30px; border-top: 1px solid var(--border); }
+        .footer-content { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; margin-bottom: 50px; }
+        .copyright { text-align: center; padding-top: 30px; border-top: 1px solid var(--border); color: var(--text-secondary); font-size: 15px; }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .hero h1 { font-size: 42px; }
+            .games-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+            .footer-content { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .games-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo"><i class="fas fa-gamepad logo-icon"></i>Neon<span style="color: var(--primary);">Play</span></a>
+                <div class="nav-links">
+                    <a href="#" class="active">Home</a>
+                    <a href="#games">Games</a>
+                    <a href="#categories">Categories</a>
+                    <a href="#trending">Trending</a>
+                </div>
+                <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <h1>PLAY INSTANT GAMES</h1>
+            <p>No downloads, no registration. Play free HTML5 games directly in your browser.</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Categories -->
+        <section class="categories">
+            <h2><i class="fas fa-filter"></i> Browse Categories</h2>
+            <div class="category-filters">
+                <button class="category-btn active" data-category="all">All Games</button>
+                <button class="category-btn" data-category="puzzle">Puzzle</button>
+                <button class="category-btn" data-category="sports">Sports</button>
+                <button class="category-btn" data-category="arcade">Arcade</button>
+                <button class="category-btn" data-category="strategy">Strategy</button>
+            </div>
+        </section>
+
+        <!-- Games Grid -->
+        <section id="games">
+            <h2><i class="fas fa-gamepad"></i> Featured Games</h2>
+            <div class="games-grid" id="games-container">
+                <!-- Games will be inserted here by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Game Modal -->
+    <div class="game-modal" id="gameModal">
+        <div class="game-modal-content">
+            <div class="game-modal-header">
+                <div class="game-modal-title" id="modalGameTitle">Playing Game</div>
+                <button class="close-modal" id="closeModal"><i class="fas fa-times"></i> Close</button>
+            </div>
+            <div class="game-iframe-container">
+                <iframe class="game-iframe" id="gameFrame" allowfullscreen></iframe>
+            </div>
+            <div class="game-controls">
+                <button class="fullscreen-btn" id="fullscreenBtn"><i class="fas fa-expand"></i> Fullscreen</button>
+                <button class="sound-btn" id="soundBtn"><i class="fas fa-volume-up"></i> Sound On</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>NeonPlay</h3>
+                    <p>Your destination for free browser gaming. No downloads required.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Categories</h3>
+                    <ul>
+                        <li><a href="#">Puzzle Games</a></li>
+                        <li><a href="#">Sports Games</a></li>
+                        <li><a href="#">Arcade Games</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Developers</h3>
+                    <ul>
+                        <li><a href="#">Submit Game</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">© 2023 NeonPlay. All games are free to play.</div>
+        </div>
+    </footer>
+
+    <script>
+        // Game Database - NOW WITH WORKING GAMESNACKS GAMES
+        const games = [
+            {
+                id: 1,
+                title: "Classic Solitaire",
+                category: "puzzle",
+                description: "The timeless card game. Arrange cards in descending order by suit.",
+                rating: 4.5,
+                plays: "3.2M",
+                image: "https://images.unsplash.com/photo-1549153141-ae88e4656c1e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                gameUrl: "https://gamesnacks.com/games/classicsolitaire?utm_source=embed_share",
+                embeddable: true
+            },
+            {
+                id: 2,
+                title: "Billiards Classic",
+                category: "sports",
+                description: "Play classic pool billiards. Perfect your shots and clear the table.",
+                rating: 4.3,
+                plays: "1.8M",
+                image: "https://images.unsplash.com/photo-1607577923691-b2e47e15bb34?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                gameUrl: "https://gamesnacks.com/games/billiardsclassic?utm_source=embed_share",
+                embeddable: true
+            },
+            {
+                id: 3,
+                title: "Minesweeper Mania",
+                category: "puzzle",
+                description: "The classic logic game. Find all mines without detonating any.",
+                rating: 4.4,
+                plays: "2.1M",
+                image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                gameUrl: "https://gamesnacks.com/games/minesweepermania?utm_source=embed_share",
+                embeddable: true
+            },
+            {
+                id: 7, // Change this to the next number (e.g., 7, 8, 9...)
+                title: "Block Blast",
+                category: "puzzle",
+                description: "A fast-paced block matching puzzle game.",
+                rating: 4.3,
+                plays: "1.2M",
+                image: "https://i.imgur.com/placeholder.jpg", // !!! You MUST change this !!!
+                gameUrl: "https://html5.gamedistribution.com/3a364ed8d075418abb7849e1d63b6015/?gd_sdk_referrer_url=https://www.example.com/games/blockblast",
+                embeddable: true
+            },
+            {
+                id: 4,
+                title: "Daily Sudoku",
+                category: "puzzle",
+                description: "Challenge your brain with this popular number puzzle game.",
+                rating: 4.6,
+                plays: "2.8M",
+                image: "https://images.unsplash.com/photo-1588159343494-28d2804c7d82?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                gameUrl: "https://gamesnacks.com/games/dailysudoku?utm_source=embed_share",
+                embeddable: true
+            },
+            {
+                id: 5,
+                title: "Bouncemasters",
+                category: "arcade",
+                description: "Bounce and flip through challenging obstacle courses.",
+                rating: 4.2,
+                plays: "1.5M",
+                image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                gameUrl: "https://gamesnacks.com/games/bouncemasters?utm_source=embed_share",
+                embeddable: true
+            },
+            {
+                id: 6,
+                title: "2048 v4",
+                category: "puzzle",
+                description: "Join numbers to reach the 2048 tile in this addictive puzzle.",
+                rating: 4.7,
+                plays: "4.5M",
+                image: "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                gameUrl: "https://gamesnacks.com/games/2048-v4?utm_source=embed_share",
+                embeddable: true
+            }
+        ];
+
+        // DOM Elements
+        const gamesContainer = document.getElementById('games-container');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const gameModal = document.getElementById('gameModal');
+        const gameFrame = document.getElementById('gameFrame');
+        const closeModal = document.getElementById('closeModal');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const modalGameTitle = document.getElementById('modalGameTitle');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+
+        // Render Games Function
+        function renderGames(filteredGames = games) {
+            gamesContainer.innerHTML = '';
+            filteredGames.forEach(game => {
+                const gameCard = document.createElement('div');
+                gameCard.className = 'game-card';
+                gameCard.setAttribute('data-category', game.category);
+                
+                // Create star rating
+                let starsHtml = '';
+                const fullStars = Math.floor(game.rating);
+                const hasHalfStar = game.rating % 1 >= 0.5;
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= fullStars) starsHtml += '<i class="fas fa-star"></i>';
+                    else if (i === fullStars + 1 && hasHalfStar) starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                    else starsHtml += '<i class="far fa-star"></i>';
+                }
+                
+                gameCard.innerHTML = `
+                    <img src="${game.image}" alt="${game.title}" class="game-image">
+                    <div class="game-info">
+                        <div class="game-title">
+                            <span>${game.title}</span>
+                            <i class="far fa-heart" style="cursor: pointer;"></i>
+                        </div>
+                        <div class="game-category">${game.category.charAt(0).toUpperCase() + game.category.slice(1)}</div>
+                        <p class="game-description">${game.description}</p>
+                        <div class="game-meta">
+                            <div class="game-rating">
+                                ${starsHtml}
+                                <span>${game.rating} (${game.plays})</span>
+                            </div>
+                            <button class="play-button" data-game-id="${game.id}">Play Now</button>
+                        </div>
+                    </div>
+                `;
+                gamesContainer.appendChild(gameCard);
+            });
+            
+            // Add event listeners to new play buttons
+            document.querySelectorAll('.play-button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const gameId = parseInt(this.getAttribute('data-game-id'));
+                    const game = games.find(g => g.id === gameId);
+                    if (game) openGameModal(game);
+                });
+            });
+            
+            // Favorite buttons
+            document.querySelectorAll('.fa-heart').forEach(heart => {
+                heart.addEventListener('click', function() {
+                    this.classList.toggle('far');
+                    this.classList.toggle('fas');
+                    this.style.color = this.classList.contains('fas') ? '#ff4757' : '';
+                });
+            });
+        }
+
+        // Category Filtering
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const category = this.getAttribute('data-category');
+                if (category === 'all') renderGames();
+                else renderGames(games.filter(game => game.category === category));
+            });
+        });
+
+        // Open Game Modal
+        function openGameModal(game) {
+            currentGame = game;
+            modalGameTitle.textContent = `Playing: ${game.title}`;
+            gameFrame.src = game.gameUrl;
+            gameModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Game Modal
+        closeModal.addEventListener('click', function() {
+            gameModal.style.display = 'none';
+            gameFrame.src = '';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Close modal when clicking outside
+        gameModal.addEventListener('click', function(e) {
+            if (e.target === gameModal) {
+                gameModal.style.display = 'none';
+                gameFrame.src = '';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Fullscreen functionality
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                if (gameFrame.requestFullscreen) gameFrame.requestFullscreen();
+                else if (gameFrame.webkitRequestFullscreen) gameFrame.webkitRequestFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Exit Fullscreen';
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i> Fullscreen';
+            }
+        });
+
+        // Mobile menu toggle
+        mobileMenuBtn.addEventListener('click', function() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Initialize the page
+        renderGames();
+    </script>
+</body>
+</html>
