@@ -329,7 +329,7 @@
                 rating: 4.8,
                 plays: "10M+",
                 image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                gameUrl: "eaglercraft-proxy.html",
+                gameUrl: "client.html",
                 embeddable: false, // Change this to false
                 openInNewTab: true // Add this property
             }
@@ -414,11 +414,11 @@
             });
         });
 
-        // Replace or modify your existing openGameModal function
+        // Open Game Modal - Updated to handle new tabs
         function openGameModal(game) {
             if (game.openInNewTab) {
         // Open in new tab instead of iframe
-            window.open(game.gameUrl, '_blank');
+                window.open(game.gameUrl, '_blank');
             } else {
                 currentGame = game;
                 modalGameTitle.textContent = `Playing: ${game.title}`;
