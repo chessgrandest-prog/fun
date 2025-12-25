@@ -1,7 +1,11 @@
 {
-  "name": "rapid-haze-3939",
+  "name": "chessgrandest-prog-fun",
   "compatibility_date": "2025-12-24",
   "assets": {
-    "directory": "./dist"  // Changed from "./dist" to "./" (current directory)
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "rules": [
+      { "type": "compress", "algorithm": "gzip" }
+    ]
   }
 }
