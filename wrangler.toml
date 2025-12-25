@@ -1,5 +1,5 @@
-{
-  "name": "chessgrandest-prog-fun",
-  "compatibility_date": "2025-12-24",
-  "assets": "./dist"
-}
+name = "chessgrandest-prog-fun"
+compatibility_date = "2025-12-24"
+
+[site]
+bucket = "./dist"
