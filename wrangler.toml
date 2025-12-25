@@ -1,11 +1,5 @@
 {
   "name": "chessgrandest-prog-fun",
   "compatibility_date": "2025-12-24",
-  "assets": {
-    "directory": "./dist",
-    "binding": "ASSETS",
-    "rules": [
-      { "type": "compress", "algorithm": "gzip" }
-    ]
-  }
+  "assets": "./dist"
 }
