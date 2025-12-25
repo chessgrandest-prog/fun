@@ -317,15 +317,16 @@
                 embeddable: true
             },
             {
-                id: 10, // Make sure this ID is unique
+                id: 10,
                 title: "Eaglercraft",
-                category: "strategy", // or "arcade", choose a fitting category
-                description: "A full version of Minecraft 1.5.2 running directly in your browser. Build, explore, and survive!",
+                category: "strategy",
+                description: "A full version of Minecraft 1.5.2 running directly in your browser.",
                 rating: 4.8,
                 plays: "10M+",
                 image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                gameUrl: "client.html", // This is the key - links to the local file
-                embeddable: true
+                gameUrl: "client.html",
+                embeddable: false, // Change this to false
+                openInNewTab: true // Add this property
             }
         ];
 
@@ -408,13 +409,18 @@
             });
         });
 
-        // Open Game Modal
+        // Replace or modify your existing openGameModal function
         function openGameModal(game) {
-            currentGame = game;
-            modalGameTitle.textContent = `Playing: ${game.title}`;
-            gameFrame.src = game.gameUrl;
-            gameModal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
+            if (game.openInNewTab) {
+        // Open in new tab instead of iframe
+            window.open(game.gameUrl, '_blank');
+            } else {
+                currentGame = game;
+                modalGameTitle.textContent = `Playing: ${game.title}`;
+                gameFrame.src = game.gameUrl;
+                gameModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
         }
 
         // Close Game Modal
