@@ -190,7 +190,12 @@
                 <button class="close-modal" id="closeModal"><i class="fas fa-times"></i> Close</button>
             </div>
             <div class="game-iframe-container">
-                <iframe class="game-iframe" id="gameFrame" allowfullscreen></iframe>
+                <iframe class="game-iframe" id="gameFrame" 
+                    allowfullscreen 
+                    allow="autoplay; fullscreen; microphone; camera; gamepad; vr"
+                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
             </div>
             <div class="game-controls">
                 <button class="fullscreen-btn" id="fullscreenBtn"><i class="fas fa-expand"></i> Fullscreen</button>
