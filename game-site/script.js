@@ -9,11 +9,22 @@ fetch('games.json')
   })
   .catch(err => {
     console.error('Could not load games.json', err);
-    container.textContent = 'Failed to load games.';
+    container.innerHTML =
+      `<p>Failed to load games. <a href="games.json">Try again?</a></p>`;
     return [];
   })
   .then(games => {
+    if (!games.length) return;
+
+    const frag = document.createDocumentFragment();
+
     games.forEach(game => {
+      /* Validate the entry */
+      if (!game.url || !game.title || !game.image) {
+        console.warn('Skipping malformed game entry', game);
+        return;
+      }
+
       /* Build a link that opens the viewer */
       const card = document.createElement('a');
       card.href = `viewer.html?src=${encodeURIComponent(game.url)}`;
@@ -22,9 +33,19 @@ fetch('games.json')
       card.className = 'card';
 
       card.innerHTML = `
-        <img src="${game.image}" alt="${game.title}">
-        <div class="card-title">${game.title}</div>
-      `;
-      container.appendChild(card);
+        <img src="${game.image}" alt="${game.title}" loading="lazy">
+        <div class="card-title">${game.title}</div>`;
+
+      /* Fade‑in image when loaded */
+      const img = card.querySelector('img');
+      img.addEventListener('load', () => img.classList.add('loaded'));
+      img.addEventListener('error', () => {
+        img.src = 'placeholder.png';
+        img.classList.add('loaded');
+      });
+
+      frag.appendChild(card);
     });
+
+    container.appendChild(frag);
   });

@@ -1,44 +1,62 @@
-/* ----- Reset & Layout ----- */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: system-ui, sans-serif; background: #f4f4f4; }
+/* ------------- Theme Variables ---------------- */
+:root {
+  /* Colors */
+  --primary: #333;
+  --bg: #f4f4f4;
+  --card-bg: #fff;
+  --text: #000;
+  --card-shadow: 0 1px 3px rgba(0,0,0,.1);
+  --card-shadow-hover: 0 4px 12px rgba(0,0,0,.15);
+  --card-hover-transform: translateY(-4px);
 
-header { text-align: center; margin: 1rem 0; }
-h1 { font-size: 2.5rem; color: #333; }
-
-/* ----- Grid of Cards ----- */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  padding: 0 1rem;
+  /* Spacing */
+  --grid-gap: 1rem;
+  --card-radius: 8px;
 }
 
-/* ----- Card ----- */
-.card {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+/* ------------- Reset & Layout ----------------- */
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+html, body { height:100%; font-family:system-ui, sans-serif; background:var(--bg); color:var(--primary); }
+
+/* ------------- Header ------------------------- */
+header{margin:1rem 0;text-align:center;}
+h1{font-size: clamp(1.8rem, 4vw, 3rem); margin-bottom:.5rem; color:var(--primary);}
+
+/* ------------- Grid of Cards ----------------- */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap:var(--grid-gap);
+  padding:0 1rem;
 }
 
-.card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+/* ------------- Card -------------------------- */
+.card{
+  display:flex; flex-direction:column;
+  background:var(--card-bg); border-radius:var(--card-radius);
+  overflow:hidden; text-decoration:none; color:inherit;
+  box-shadow:var(--card-shadow);
+  transition:transform .2s, box-shadow .2s;
+}
+.card:hover{ transform:var(--card-hover-transform); box-shadow:var(--card-shadow-hover); }
+.card:focus-visible{ outline:2px solid #0066ff; }
 
-/* ----- Image ----- */
-.card img {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
+/* ------------- Image ------------------------ */
+.card img{
+  width:100%; height:120px; object-fit:cover;
+  border-radius:calc(var(--card-radius)-2px);
+  opacity:0; transition:opacity .3s;
+}
+.card img.loaded{ opacity:1; }
+
+/* ------------- Title ------------------------ */
+.card-title{
+  padding:.5rem; font-size:1rem; font-weight:600; text-align:center;
 }
 
-/* ----- Title ----- */
-.card-title {
-  padding: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  text-align: center;
+/* ------------- Dark‑mode -------------------- */
+@media (prefers-color-scheme: dark){
+  body{background:#111; color:#eee;}
+  .card{background:#222; box-shadow:0 1px 3px rgba(255,255,255,.1);}
+  .card:hover{box-shadow:0 4px 12px rgba(255,255,255,.15);}
 }
