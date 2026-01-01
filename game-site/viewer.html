@@ -1,7 +1,29 @@
-<!-- viewer.html -->
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const rawUrl = params.get('src');          // e.g. raw.githubusercontent.com/…
-  // Call the API route we just created
-  document.getElementById('gameFrame').src = `/api/viewer?src=${encodeURIComponent(rawUrl)}`;
-</script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Game Viewer</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#000; }
+    iframe { width:100%; height:100%; border:none; }
+  </style>
+</head>
+<body>
+  <iframe id="gameFrame" src=""></iframe>
+
+  <script>
+    // Grab the game URL from the query string
+    const params = new URLSearchParams(window.location.search);
+    const rawUrl = params.get('src');
+
+    if (!rawUrl) {
+      document.body.textContent = 'No game specified.';
+      throw new Error('No src parameter');
+    }
+
+    // Use the Vercel API proxy we created
+    const proxyUrl = `/api/viewer?src=${encodeURIComponent(rawUrl)}`;
+    document.getElementById('gameFrame').src = proxyUrl;
+  </script>
+</body>
+</html>
