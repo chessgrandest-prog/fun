@@ -61,7 +61,7 @@ btnAbout.onclick = () => {
   // 1️⃣  Open a brand‑new blank tab (about:blank)
   const blank = window.open('', '_blank');
 
-  // 2️⃣  Write a *minimal* page that only loads the CSS + the script again
+  // 2️⃣  Write a *minimal* page that contains an empty <header> and loads the CSS + script
   const page = `
     <!doctype html>
     <html lang="en">
@@ -72,7 +72,9 @@ btnAbout.onclick = () => {
         <!-- Re‑run the original JS – it will create the toolbar, grid, etc. -->
         <script src="script.js" defer></script>
       </head>
-      <body></body>
+      <body>
+        <header></header>   <!-- <header> is required so script.js can find it -->
+      </body>
     </html>
   `;
 
@@ -81,7 +83,7 @@ btnAbout.onclick = () => {
   blank.document.write(page);
   blank.document.close();
 
-  /* ---------- After the new tab is ready, patch the links ----------------- */
+  /* ---------- After the new tab is ready, patch the links ---------------- */
   blank.addEventListener('load', () => {
     // Helper: open a URL in a brand‑new about:blank tab that shows the game inside an <iframe>
     const openGameInBlank = href => {
@@ -114,6 +116,7 @@ btnAbout.onclick = () => {
 };
 
 header.appendChild(btnAbout);
+
 
 /* ──────────────────────────────────────────────────────────────────────
    7️⃣ Favorites – only mark when the user clicks the star
