@@ -1,8 +1,12 @@
-/* ------------------ 1️⃣ DOM ELEMENTS ------------------ */
+/* ----------------------------------------------------
+   1️⃣ DOM ELEMENTS
+   ---------------------------------------------------- */
 const container = document.getElementById('games');
 const header    = document.querySelector('header');
 
-/* ------------------ 2️⃣ Local‑Storage helpers ------------------ */
+/* ----------------------------------------------------
+   2️⃣ LocalStorage helpers
+   ---------------------------------------------------- */
 const LS = {
   THEME:        'gamehub-theme',
   FAVORITES:    'gamehub-favs',
@@ -12,23 +16,26 @@ const LS = {
   setFavs: (d)  => localStorage.setItem('gamehub-favs', JSON.stringify(d)),
 };
 
-/* ------------------ 3️⃣ Theme (Dark/Light) ------------------ */
-const applyTheme = theme => document.documentElement.dataset.theme = theme;
+/* ----------------------------------------------------
+   3️⃣ Theme (Dark/Light) – persistent toggle
+   ---------------------------------------------------- */
+const applyTheme = t => document.documentElement.dataset.theme = t;
 applyTheme(LS.getTheme());
 
-const toggleTheme = () => {
+const btnTheme = document.createElement('button');
+btnTheme.className = 'toolbar-btn';
+btnTheme.textContent = LS.getTheme() === 'light' ? '🌙 Dark' : '☀️ Light';
+btnTheme.onclick = () => {
   const next = LS.getTheme() === 'light' ? 'dark' : 'light';
   LS.setTheme(next);
   applyTheme(next);
   btnTheme.textContent = next === 'light' ? '🌙 Dark' : '☀️ Light';
 };
-const btnTheme = document.createElement('button');
-btnTheme.className = 'toolbar-btn';
-btnTheme.textContent = LS.getTheme() === 'light' ? '🌙 Dark' : '☀️ Light';
-btnTheme.onclick = toggleTheme;
 header.appendChild(btnTheme);
 
-/* ------------------ 4️⃣ Search ------------------ */
+/* ----------------------------------------------------
+   4️⃣ Search input
+   ---------------------------------------------------- */
 const searchInput = document.createElement('input');
 searchInput.id   = 'searchInput';
 searchInput.type = 'text';
@@ -36,21 +43,27 @@ searchInput.placeholder = 'Search…';
 searchInput.oninput = () => renderGames(filterGames(searchInput.value, allGames));
 header.appendChild(searchInput);
 
-/* ------------------ 5️⃣ Random Game ------------------ */
+/* ----------------------------------------------------
+   5️⃣ Random Game button
+   ---------------------------------------------------- */
 const btnRandom = document.createElement('button');
 btnRandom.className = 'toolbar-btn';
 btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ------------------ 6️⃣ About Page ------------------ */
+/* ----------------------------------------------------
+   6️⃣ About button (opens a clean tab)
+   ---------------------------------------------------- */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
 btnAbout.onclick = () => window.open('about.html', '_blank');
 header.appendChild(btnAbout);
 
-/* ------------------ 7️⃣ Favorites ------------------ */
+/* ----------------------------------------------------
+   7️⃣ Favorites – store URL → true in localStorage
+   ---------------------------------------------------- */
 const toggleFavorite = (card, url) => {
   const favs = LS.getFavs();
   if (favs[url]) delete favs[url]; else favs[url] = true;
@@ -63,7 +76,9 @@ const updateCardFavorite = (card, isFav) => {
   star.classList.toggle('fav-active', isFav);
 };
 
-/* ------------------ 8️⃣ Card Builder ------------------ */
+/* ----------------------------------------------------
+   8️⃣ Build a single card (no innerHTML mutation)
+   ---------------------------------------------------- */
 const buildCard = game => {
   const card = document.createElement('a');
   card.href = `viewer.html?src=${encodeURIComponent(game.url)}`;
@@ -71,7 +86,7 @@ const buildCard = game => {
   card.rel = 'noopener noreferrer';
   card.className = 'card';
 
-  /* Star icon (favorite) */
+  /* Favorite icon (star) */
   const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   star.setAttribute('viewBox', '0 0 24 24');
   star.className = 'favorite';
@@ -82,20 +97,26 @@ const buildCard = game => {
     e.stopPropagation();
     toggleFavorite(card, game.url);
   };
-  card.appendChild(star); // will be positioned absolutely
+  card.appendChild(star);  // absolutely positioned by CSS
 
-  /* Image & title */
-  card.innerHTML += `
-    <img src="${game.image}" alt="${game.title}" loading="lazy">
-    <div class="card-title">${game.title}</div>`;
-
-  /* Image load handling */
-  const img = card.querySelector('img');
+  /* Image */
+  const img = document.createElement('img');
+  img.src = game.image;
+  img.alt = game.title;
+  img.loading = 'lazy';
+  img.className = 'card-img';
   img.addEventListener('load', () => img.classList.add('loaded'));
   img.addEventListener('error', () => {
     img.src = 'placeholder.png';
     img.classList.add('loaded');
   });
+  card.appendChild(img);
+
+  /* Title */
+  const title = document.createElement('div');
+  title.className = 'card-title';
+  title.textContent = game.title;
+  card.appendChild(title);
 
   /* Set initial favorite state */
   const favs = LS.getFavs();
@@ -104,7 +125,9 @@ const buildCard = game => {
   return card;
 };
 
-/* ------------------ 9️⃣ Random / Search helpers ------------------ */
+/* ----------------------------------------------------
+   9️⃣ Random / Search helpers
+   ---------------------------------------------------- */
 const openRandom = games => {
   if (!games.length) return;
   const r = games[Math.floor(Math.random() * games.length)];
@@ -117,7 +140,9 @@ const filterGames = (query, games) => {
   return games.filter(g => g.title.toLowerCase().includes(q));
 };
 
-/* ------------------ 10️⃣ Rendering ------------------ */
+/* ----------------------------------------------------
+   1️⃣0️⃣ Rendering the grid
+   ---------------------------------------------------- */
 let allGames = [];
 
 fetch('games.json')
@@ -137,7 +162,7 @@ fetch('games.json')
   });
 
 function renderGames(games) {
-  container.innerHTML = '';
+  container.innerHTML = '';                    // clear first
   const frag = document.createDocumentFragment();
   games.forEach(g => frag.appendChild(buildCard(g)));
   container.appendChild(frag);
