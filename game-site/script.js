@@ -1,7 +1,7 @@
-// Grab the container
+// script.js (modified)
+
 const container = document.getElementById('games');
 
-// Fetch the JSON file
 fetch('games.json')
   .then(r => r.json())
   .catch(err => {
@@ -10,10 +10,9 @@ fetch('games.json')
     return [];
   })
   .then(games => {
-    // Build one card per game
     games.forEach(game => {
       const card = document.createElement('a');
-      card.href = game.url;
+      card.href = `viewer.html?src=${encodeURIComponent(game.url)}`;
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
       card.className = 'card';
@@ -22,7 +21,6 @@ fetch('games.json')
         <img src="${game.image}" alt="${game.title}">
         <div class="card-title">${game.title}</div>
       `;
-
       container.appendChild(card);
     });
   });
