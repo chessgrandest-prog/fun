@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-
+// api/viewer.js
 export default async function handler(req, res) {
   const { src } = req.query;
 
@@ -8,8 +7,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Fetch the raw file from GitHub
+    // Fetch the raw file from GitHub (standard Fetch API)
     const resp = await fetch(src, {
+      // GitHub sends text/html already, but we can set Accept just in case
       headers: { Accept: 'text/html' }
     });
 
@@ -19,11 +19,11 @@ export default async function handler(req, res) {
 
     const html = await resp.text();
 
-    // Strip the X-Frame-Options header and force correct MIME type
+    // Remove X-Frame-Options and set proper content type
     res.setHeader('Content-Type', 'text/html');
     res.setHeader('X-Frame-Options', 'ALLOWALL');
 
-    // Cache for 1 hour (optional)
+    // Optional: cache the result for 1 hour
     res.setHeader('Cache-Control', 'public, max-age=3600');
 
     res.send(html);
