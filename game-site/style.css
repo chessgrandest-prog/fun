@@ -108,12 +108,31 @@ header h1{
   padding:.5rem; font-size:1rem; font-weight:600; text-align:center;
 }
 
-/* ------------- Dark‑mode ---------------- */
-@media (prefers-color-scheme: dark){
-  body{background:#111; color:#eee;}
-  .card{background:#222; box-shadow:0 1px 3px rgba(255,255,255,.1);}
-  .card:hover{box-shadow:0 4px 12px rgba(255,255,255,.15);}
-  .toolbar-btn{background:#444;}
-  .toolbar-btn:hover{background:#555;}
-  #searchInput{background:#333; border-color:#555; color:#eee;}
+/* ------------- Dark / Light theme overrides ------------- */
+html[data-theme='dark'] {
+  --bg-color: #111;
+  --text-color: #eee;
+  --card-bg: #222;
+  --card-shadow: 0 1px 3px rgba(255,255,255,.1);
 }
+html[data-theme='light'] {
+  --bg-color: #fff;
+  --text-color: #000;
+  --card-bg: #fff;
+  --card-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+
+/* Use the variables everywhere */
+body,
+.card,
+.toolbar-btn,
+#searchInput {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+.card {
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+
