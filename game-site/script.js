@@ -52,77 +52,63 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* -----------------------------------------------------------------------
-   About button – re‑open the *entire* site in an about:blank tab
-   ----------------------------------------------------------------------- */
+/* ── About button – open a clean copy of the site in about:blank ── */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
 
 btnAbout.onclick = () => {
-  /* 1️⃣ Open a brand‑new blank tab */
+  // 1️⃣  Open a brand‑new blank tab (about:blank)
   const blank = window.open('', '_blank');
 
-  /* 2️⃣ Take a snapshot of the *entire* current document */
-  const fullHTML = document.documentElement.outerHTML
-    /* a) Remove the <script> that is already running in the opener – we’ll insert a fresh copy. */
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/g, '')
-    /* b) Keep the same title / styles / meta tags – nothing changes. */
-    .replace('<body>', '<body>');   // no-op, just shows intent
-
-  /* 3️⃣ Build a minimal HTML wrapper that loads our script again (deferred) */
+  // 2️⃣  Write a *minimal* page that only loads the CSS + the script again
   const page = `
     <!doctype html>
     <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <title>Game Hub – About</title>
-      <link rel="stylesheet" href="style.css">
-      <!-- Re‑run the original JS – it will create the grid, toolbar, etc. -->
-      <script src="script.js" defer></script>
-    </head>
-    <body>
-      ${fullHTML.replace(/<html[^>]*>/, '').replace(/<\/html>/, '')}  <!-- paste the snapshot -->
-    </body>
+      <head>
+        <meta charset="utf-8">
+        <title>Game Hub – About</title>
+        <link rel="stylesheet" href="style.css">
+        <!-- Re‑run the original JS – it will create the toolbar, grid, etc. -->
+        <script src="script.js" defer></script>
+      </head>
+      <body></body>
     </html>
   `;
 
-  /* 4️⃣ Write the page into the new tab */
+  // 3️⃣  Write the page into the new tab
   blank.document.open();
   blank.document.write(page);
   blank.document.close();
 
-  /* -----------------------------------------------------------------------
-     4️⃣ When the new tab has finished loading, hook every game link
-         so that it opens in its own clean tab (about:blank).
-     ----------------------------------------------------------------------- */
+  /* ---------- After the new tab is ready, patch the links ----------------- */
   blank.addEventListener('load', () => {
-    // helper that opens a URL in a clean tab
-    const openInAboutBlank = (href) => {
+    // Helper: open a URL in a brand‑new about:blank tab that shows the game inside an <iframe>
+    const openGameInBlank = href => {
       const win = window.open('', '_blank');
       win.document.write(`
         <!doctype html>
         <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <title>Playing ${href}</title>
-          <link rel="stylesheet" href="style.css">
-        </head>
-        <body>
-          <iframe src="${href}" style="width:100%;height:100%;border:0;"></iframe>
-        </body>
+          <head>
+            <meta charset="utf-8">
+            <title>Playing… ${href}</title>
+            <link rel="stylesheet" href="style.css">
+          </head>
+          <body style="margin:0;">
+            <iframe src="${href}" style="width:100%;height:100%;border:0;"></iframe>
+          </body>
         </html>
       `);
       win.document.close();
     };
 
-    // Change every <a> that points to a game
-    const cards = blank.document.querySelectorAll('#games a');
-    cards.forEach(a => {
+    // Hook every game link that appears in the grid
+    const links = blank.document.querySelectorAll('#games a');
+    links.forEach(a => {
       const realHref = a.getAttribute('href');
       a.removeAttribute('href');
       a.style.cursor = 'pointer';
-      a.addEventListener('click', () => openInAboutBlank(realHref));
+      a.addEventListener('click', () => openGameInBlank(realHref));
     });
   });
 };
