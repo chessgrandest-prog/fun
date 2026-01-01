@@ -52,41 +52,39 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ── About button – open a clean copy of the site in about:blank ── */
+/* ── About button – open a true about:blank copy of the whole page ── */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
-btnAbout.textContent = 'ℹ️ About';
+btnAbout.textContent = 'About : blank';   // <-- new label
 
 btnAbout.onclick = () => {
-  const blank = window.open('', '_blank');
+  // 1️⃣ Open a fresh about:blank window
+  const aboutWin = window.open('', '_blank');
 
-  // Minimal page – header **and** an empty #games container
-  const page = `
+  // 2️⃣ Write the full page (header, grid, script, style) into it
+  aboutWin.document.write(`
     <!doctype html>
     <html lang="en">
       <head>
         <meta charset="utf-8">
         <title>Game Hub – About</title>
         <link rel="stylesheet" href="style.css">
-        <!-- Re‑run the original JS – it will create the toolbar, grid, etc. -->
         <script src="script.js" defer></script>
       </head>
       <body>
         <header></header>
-        <div id="games"></div>   <!-- <div id="games"> is required -->
+        <main id="games" class="grid"></main>
       </body>
     </html>
-  `;
+  `);
+  aboutWin.document.close();   // make the browser render it
 
-  blank.document.open();
-  blank.document.write(page);
-  blank.document.close();
-
-  /* ---------- After the new tab is ready, patch the links ---------------- */
-  blank.addEventListener('load', () => {
+  // 3️⃣ Once the new page is ready, patch its links
+  aboutWin.addEventListener('load', () => {
+    // The new window’s DOM is now fully available
     const openGameInBlank = href => {
-      const win = window.open('', '_blank');
-      win.document.write(`
+      const gameWin = window.open('', '_blank');
+      gameWin.document.write(`
         <!doctype html>
         <html lang="en">
           <head>
@@ -99,13 +97,13 @@ btnAbout.onclick = () => {
           </body>
         </html>
       `);
-      win.document.close();
+      gameWin.document.close();
     };
 
-    const links = blank.document.querySelectorAll('#games a');
+    const links = aboutWin.document.querySelectorAll('#games a');
     links.forEach(a => {
       const realHref = a.getAttribute('href');
-      a.removeAttribute('href');
+      a.removeAttribute('href');          // break default navigation
       a.style.cursor = 'pointer';
       a.addEventListener('click', () => openGameInBlank(realHref));
     });
@@ -113,6 +111,7 @@ btnAbout.onclick = () => {
 };
 
 header.appendChild(btnAbout);
+
 
 /* ──────────────────────────────────────────────────────────────────────
    7️⃣ Favorites – only mark when the user clicks the star
