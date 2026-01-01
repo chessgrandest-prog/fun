@@ -52,16 +52,16 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ── About button – open a true about:blank copy of the whole page ── */
+// ── About button – real about:blank copy, games open in another blank tab ──
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
-btnAbout.textContent = 'About : blank';   // <-- new label
+btnAbout.textContent = 'About : blank';
 
 btnAbout.onclick = () => {
-  // 1️⃣ Open a fresh about:blank window
+  // 1️⃣ Create a fresh about:blank page for the About content
   const aboutWin = window.open('', '_blank');
 
-  // 2️⃣ Write the full page (header, grid, script, style) into it
+  // 2️⃣ Inject the full page (header, grid, script, style) into that blank window
   aboutWin.document.write(`
     <!doctype html>
     <html lang="en">
@@ -77,41 +77,49 @@ btnAbout.onclick = () => {
       </body>
     </html>
   `);
-  aboutWin.document.close();   // make the browser render it
+  aboutWin.document.close();
 
-  // 3️⃣ Once the new page is ready, patch its links
+  // 3️⃣ After the page has finished loading, replace each game link
   aboutWin.addEventListener('load', () => {
-    // The new window’s DOM is now fully available
-    const openGameInBlank = href => {
-      const gameWin = window.open('', '_blank');
-      gameWin.document.write(`
-        <!doctype html>
-        <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <title>Playing… ${href}</title>
-            <link rel="stylesheet" href="style.css">
-          </head>
-          <body style="margin:0;">
-            <iframe src="${href}" style="width:100%;height:100%;border:0;"></iframe>
-          </body>
-        </html>
-      `);
-      gameWin.document.close();
+    const patchLinks = () => {
+      const links = aboutWin.document.querySelectorAll('#games a');
+      links.forEach(a => {
+        const gameUrl = a.getAttribute('href');   // viewer.html?src=…
+        a.removeAttribute('href');                // stop normal navigation
+        a.style.cursor = 'pointer';
+
+        // Click handler: open the game in a *new* blank tab
+        a.onclick = () => {
+          const gameWin = window.open('', '_blank');
+          gameWin.document.write(`
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>Playing… ${gameUrl}</title>
+                <link rel="stylesheet" href="style.css">
+              </head>
+              <body style="margin:0;">
+                <iframe src="${gameUrl}" style="width:100%;height:100%;border:0;"></iframe>
+              </body>
+            </html>
+          `);
+          gameWin.document.close();
+        };
+      });
     };
 
-    const links = aboutWin.document.querySelectorAll('#games a');
-    links.forEach(a => {
-      const realHref = a.getAttribute('href');
-      a.removeAttribute('href');          // break default navigation
-      a.style.cursor = 'pointer';
-      a.addEventListener('click', () => openGameInBlank(realHref));
-    });
+    // The grid may be populated asynchronously – wait for it
+    const checkReady = setInterval(() => {
+      if (aboutWin.document.querySelectorAll('#games .card').length) {
+        clearInterval(checkReady);
+        patchLinks();
+      }
+    }, 100);
   });
 };
 
 header.appendChild(btnAbout);
-
 
 /* ──────────────────────────────────────────────────────────────────────
    7️⃣ Favorites – only mark when the user clicks the star
