@@ -12,7 +12,6 @@
   <iframe id="gameFrame" src=""></iframe>
 
   <script>
-    // Grab the game URL from the query string
     const params = new URLSearchParams(window.location.search);
     const rawUrl = params.get('src');
 
@@ -21,7 +20,6 @@
       throw new Error('No src parameter');
     }
 
-    // Use the Vercel API proxy we created
     const proxyUrl = `/api/viewer?src=${encodeURIComponent(rawUrl)}`;
     document.getElementById('gameFrame').src = proxyUrl;
   </script>

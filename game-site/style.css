@@ -1,11 +1,34 @@
-/* ----- Reset & Layout ----- */
+/* ===== 1️⃣ Reset & Layout ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; font-family: system-ui, sans-serif; background: #f4f4f4; }
+html, body { height: 100%; font-family: system-ui, sans-serif; }
 
-header { text-align: center; margin: 1rem 0; }
-h1 { font-size: 2.5rem; color: #333; }
+/* ===== 2️⃣ Theme Variables ===== */
+:root {
+  --bg: #f4f4f4;
+  --fg: #222;
+  --card-bg: #fff;
+  --card-shadow: rgba(0,0,0,.1);
+}
+[data-theme="dark"] {
+  --bg: #1e1e1e;
+  --fg: #e0e0e0;
+  --card-bg: #2b2b2b;
+  --card-shadow: rgba(255,255,255,.1);
+}
+body { background: var(--bg); color: var(--fg); }
 
-/* ----- Grid of Cards ----- */
+/* ===== 3️⃣ Header & Theme Toggle ===== */
+header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; }
+h1 { font-size: 2.5rem; }
+#themeToggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: .2rem .4rem;
+}
+
+/* ===== 4️⃣ Grid of Cards ===== */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -13,32 +36,59 @@ h1 { font-size: 2.5rem; color: #333; }
   padding: 0 1rem;
 }
 
-/* ----- Card ----- */
+/* ===== 5️⃣ Card & Flip Animation ===== */
 .card {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
+  position: relative;
+  perspective: 1000px;
+  background: var(--card-bg);
   border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px var(--card-shadow);
   transition: transform 0.2s, box-shadow 0.2s;
 }
+.card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px var(--card-shadow); }
 
-.card:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-
-/* ----- Image ----- */
-.card img {
+.card-inner {
   width: 100%;
-  height: 120px;
-  object-fit: cover;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
 }
+.card:hover .card-inner { transform: rotateY(180deg); }
 
-/* ----- Title ----- */
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  top: 0;
+  left: 0;
+}
+.card-back { transform: rotateY(180deg); }
+
+/* ===== 6️⃣ Image & Title ===== */
+.card img { width: 100%; height: 120px; object-fit: cover; }
 .card-title {
   padding: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
   text-align: center;
 }
+
+/* ===== 7️⃣ Favorite Button ===== */
+.favBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255,255,255,.7);
+  border: none;
+  border-radius: 50%;
+  width: 1.8rem;
+  height: 1.8rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background .2s;
+}
+.favBtn:hover { background: rgba(255,255,255,.9); }
