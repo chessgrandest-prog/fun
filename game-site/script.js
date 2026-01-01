@@ -52,35 +52,47 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-// ──  About button that opens a blank tab ────────────────────────
+/* ── About button – opens a clean tab that still shows the game list ── */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
+
 btnAbout.onclick = () => {
+  // 1️⃣  Open a brand‑new tab (it starts at about:blank)
   const blank = window.open('', '_blank');
 
+  // 2️⃣  Build a tiny page that *loads the same assets* you use on the main page.
+  //     That page will run script.js automatically, which fetches games.json
+  //     and renders the grid in <div id="games"></div>.
   const html = `
     <!doctype html>
     <html lang="en">
     <head>
       <meta charset="utf-8">
       <title>Game Hub – About</title>
+      <!-- Same stylesheet -->
       <link rel="stylesheet" href="style.css">
+      <!-- Run the original JavaScript (defer so it runs after the DOM loads) -->
       <script src="script.js" defer></script>
     </head>
     <body>
+      <!-- Keep the same structure so script.js finds the container -->
       <header>
         <h1>Game Hub – About</h1>
-        <p>This page is a single‑page application that lists web‑based games.</p>
+        <p>This page shows the same game list as the main site, but the
+        address bar stays empty (about:blank).</p>
       </header>
-      <div id="games" style="display:none"></div>
+      <div id="games"></div>   <!-- <script> will automatically render here -->
     </body>
     </html>
   `;
+
+  // 3️⃣  Write the page into the new tab and close the stream
   blank.document.open();
   blank.document.write(html);
   blank.document.close();
 };
+
 header.appendChild(btnAbout);
 
 
