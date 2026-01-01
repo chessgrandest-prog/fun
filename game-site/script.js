@@ -58,10 +58,9 @@ btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
 
 btnAbout.onclick = () => {
-  // 1️⃣  Open a brand‑new blank tab (about:blank)
   const blank = window.open('', '_blank');
 
-  // 2️⃣  Write a *minimal* page that contains an empty <header> and loads the CSS + script
+  // Minimal page – header **and** an empty #games container
   const page = `
     <!doctype html>
     <html lang="en">
@@ -73,19 +72,18 @@ btnAbout.onclick = () => {
         <script src="script.js" defer></script>
       </head>
       <body>
-        <header></header>   <!-- <header> is required so script.js can find it -->
+        <header></header>
+        <div id="games"></div>   <!-- <div id="games"> is required -->
       </body>
     </html>
   `;
 
-  // 3️⃣  Write the page into the new tab
   blank.document.open();
   blank.document.write(page);
   blank.document.close();
 
   /* ---------- After the new tab is ready, patch the links ---------------- */
   blank.addEventListener('load', () => {
-    // Helper: open a URL in a brand‑new about:blank tab that shows the game inside an <iframe>
     const openGameInBlank = href => {
       const win = window.open('', '_blank');
       win.document.write(`
@@ -104,7 +102,6 @@ btnAbout.onclick = () => {
       win.document.close();
     };
 
-    // Hook every game link that appears in the grid
     const links = blank.document.querySelectorAll('#games a');
     links.forEach(a => {
       const realHref = a.getAttribute('href');
@@ -116,7 +113,6 @@ btnAbout.onclick = () => {
 };
 
 header.appendChild(btnAbout);
-
 
 /* ──────────────────────────────────────────────────────────────────────
    7️⃣ Favorites – only mark when the user clicks the star
