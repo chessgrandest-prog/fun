@@ -1,33 +1,7 @@
 <!-- viewer.html -->
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Game Viewer</title>
-  <style>
-    html,body{margin:0;height:100%;overflow:hidden}
-    iframe{border:0;width:100%;height:100%}
-  </style>
-</head>
-<body>
-  <!-- The game URL will be injected via a query string -->
-  <iframe id="gameFrame" src=""></iframe>
-
-  <script>
-    // Grab the URL passed in the query string
-    const params = new URLSearchParams(window.location.search);
-    const gameUrl = params.get('src');
-
-    // Use jsDelivr to render the raw GitHub file as HTML
-    // Example: https://cdn.jsdelivr.net/gh/owner/repo/path/file.html
-    // Replace owner/repo with your own repo that hosts the game
-    if (gameUrl) {
-      const parsed = new URL(gameUrl);
-      const jsDelivrUrl = `https://cdn.jsdelivr.net/gh${parsed.pathname}`;
-      document.getElementById('gameFrame').src = jsDelivrUrl;
-    } else {
-      document.body.innerHTML = '<p>No game specified.</p>';
-    }
-  </script>
-</body>
-</html>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const rawUrl = params.get('src');          // e.g. raw.githubusercontent.com/…
+  // Call the API route we just created
+  document.getElementById('gameFrame').src = `/api/viewer?src=${encodeURIComponent(rawUrl)}`;
+</script>
