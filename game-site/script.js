@@ -52,49 +52,34 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ── About button – opens a clean tab that still shows the game list ── */
+/* ── About button – re‑open the **exact same page** in an about:blank tab ── */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
 
 btnAbout.onclick = () => {
-  // 1️⃣  Open a brand‑new tab (it starts at about:blank)
-  const blank = window.open('', '_blank');
+  /* 1️⃣ Open a fresh tab that starts at about:blank */
+  const aboutWin = window.open('', '_blank');
 
-  // 2️⃣  Build a tiny page that *loads the same assets* you use on the main page.
-  //     That page will run script.js automatically, which fetches games.json
-  //     and renders the grid in <div id="games"></div>.
-  const html = `
-    <!doctype html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <title>Game Hub – About</title>
-      <!-- Same stylesheet -->
-      <link rel="stylesheet" href="style.css">
-      <!-- Run the original JavaScript (defer so it runs after the DOM loads) -->
-      <script src="script.js" defer></script>
-    </head>
-    <body>
-      <!-- Keep the same structure so script.js finds the container -->
-      <header>
-        <h1>Game Hub – About</h1>
-        <p>This page shows the same game list as the main site, but the
-        address bar stays empty (about:blank).</p>
-      </header>
-      <div id="games"></div>   <!-- <script> will automatically render here -->
-    </body>
-    </html>
-  `;
+  /* 2️⃣ Build the *full* document from the current page
+       – copy the outer‑HTML of the <html> element,
+       – strip out the current script tag so we don’t double‑run it,
+       – then add a fresh <script src="script.js"> tag.           */
+  const copy = document.documentElement.outerHTML
+                  .replace(/<script[^>]*>[\s\S]*?<\/script>/g, '')   // drop existing <script>
+                  .replace('src="script.js"', 'src="script.js" defer'); // keep our main JS
 
-  // 3️⃣  Write the page into the new tab and close the stream
-  blank.document.open();
-  blank.document.write(html);
-  blank.document.close();
+  aboutWin.document.open();
+  aboutWin.document.write(copy);
+  aboutWin.document.close();
+
+  /* 3️⃣ Let the new tab run the same JavaScript again.  
+       The <script src="script.js" defer> we just inserted will do it automatically.
+       If you prefer to re‑run it inline, you could also do:
+       aboutWin.eval('renderGames(allGames);');  */
 };
 
 header.appendChild(btnAbout);
-
 
 /* ──────────────────────────────────────────────────────────────────────
    7️⃣ Favorites – only mark when the user clicks the star
