@@ -52,14 +52,37 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ──────────────────────────────────────────────────────────────────────
-   6️⃣ About button
-   ────────────────────────────────────────────────────────────────────── */
+// ──  About button that opens a blank tab ────────────────────────
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
-btnAbout.onclick = () => window.open('about.html', '_blank');
+btnAbout.onclick = () => {
+  const blank = window.open('', '_blank');
+
+  const html = `
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>Game Hub – About</title>
+      <link rel="stylesheet" href="style.css">
+      <script src="script.js" defer></script>
+    </head>
+    <body>
+      <header>
+        <h1>Game Hub – About</h1>
+        <p>This page is a single‑page application that lists web‑based games.</p>
+      </header>
+      <div id="games" style="display:none"></div>
+    </body>
+    </html>
+  `;
+  blank.document.open();
+  blank.document.write(html);
+  blank.document.close();
+};
 header.appendChild(btnAbout);
+
 
 /* ──────────────────────────────────────────────────────────────────────
    7️⃣ Favorites – only mark when the user clicks the star
