@@ -52,31 +52,79 @@ btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ── About button – re‑open the **exact same page** in an about:blank tab ── */
+/* -----------------------------------------------------------------------
+   About button – re‑open the *entire* site in an about:blank tab
+   ----------------------------------------------------------------------- */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
 
 btnAbout.onclick = () => {
-  /* 1️⃣ Open a fresh tab that starts at about:blank */
-  const aboutWin = window.open('', '_blank');
+  /* 1️⃣ Open a brand‑new blank tab */
+  const blank = window.open('', '_blank');
 
-  /* 2️⃣ Build the *full* document from the current page
-       – copy the outer‑HTML of the <html> element,
-       – strip out the current script tag so we don’t double‑run it,
-       – then add a fresh <script src="script.js"> tag.           */
-  const copy = document.documentElement.outerHTML
-                  .replace(/<script[^>]*>[\s\S]*?<\/script>/g, '')   // drop existing <script>
-                  .replace('src="script.js"', 'src="script.js" defer'); // keep our main JS
+  /* 2️⃣ Take a snapshot of the *entire* current document */
+  const fullHTML = document.documentElement.outerHTML
+    /* a) Remove the <script> that is already running in the opener – we’ll insert a fresh copy. */
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/g, '')
+    /* b) Keep the same title / styles / meta tags – nothing changes. */
+    .replace('<body>', '<body>');   // no-op, just shows intent
 
-  aboutWin.document.open();
-  aboutWin.document.write(copy);
-  aboutWin.document.close();
+  /* 3️⃣ Build a minimal HTML wrapper that loads our script again (deferred) */
+  const page = `
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>Game Hub – About</title>
+      <link rel="stylesheet" href="style.css">
+      <!-- Re‑run the original JS – it will create the grid, toolbar, etc. -->
+      <script src="script.js" defer></script>
+    </head>
+    <body>
+      ${fullHTML.replace(/<html[^>]*>/, '').replace(/<\/html>/, '')}  <!-- paste the snapshot -->
+    </body>
+    </html>
+  `;
 
-  /* 3️⃣ Let the new tab run the same JavaScript again.  
-       The <script src="script.js" defer> we just inserted will do it automatically.
-       If you prefer to re‑run it inline, you could also do:
-       aboutWin.eval('renderGames(allGames);');  */
+  /* 4️⃣ Write the page into the new tab */
+  blank.document.open();
+  blank.document.write(page);
+  blank.document.close();
+
+  /* -----------------------------------------------------------------------
+     4️⃣ When the new tab has finished loading, hook every game link
+         so that it opens in its own clean tab (about:blank).
+     ----------------------------------------------------------------------- */
+  blank.addEventListener('load', () => {
+    // helper that opens a URL in a clean tab
+    const openInAboutBlank = (href) => {
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <!doctype html>
+        <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <title>Playing ${href}</title>
+          <link rel="stylesheet" href="style.css">
+        </head>
+        <body>
+          <iframe src="${href}" style="width:100%;height:100%;border:0;"></iframe>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    };
+
+    // Change every <a> that points to a game
+    const cards = blank.document.querySelectorAll('#games a');
+    cards.forEach(a => {
+      const realHref = a.getAttribute('href');
+      a.removeAttribute('href');
+      a.style.cursor = 'pointer';
+      a.addEventListener('click', () => openInAboutBlank(realHref));
+    });
+  });
 };
 
 header.appendChild(btnAbout);
