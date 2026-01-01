@@ -12,17 +12,57 @@
   /* Spacing */
   --grid-gap: 1rem;
   --card-radius: 8px;
+
+  /* Buttons */
+  --btn-bg: #e0e0e0;
+  --btn-hover: #d5d5d5;
+  --btn-size: 1.4rem;
+  --btn-spacing: 0.8rem;
 }
 
-/* ------------- Reset & Layout ----------------- */
+/* ------------- Reset & Layout -------------- */
 *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
 html, body { height:100%; font-family:system-ui, sans-serif; background:var(--bg); color:var(--primary); }
 
-/* ------------- Header ------------------------- */
-header{margin:1rem 0;text-align:center;}
-h1{font-size: clamp(1.8rem, 4vw, 3rem); margin-bottom:.5rem; color:var(--primary);}
+/* ------------- Header --------------------- */
+header{
+  margin:1rem 0;
+  text-align:center;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:var(--btn-spacing);
+  align-items:center;
+}
+header h1{
+  margin:0;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color:var(--primary);
+}
 
-/* ------------- Grid of Cards ----------------- */
+/* ------------- Toolbar Buttons ------------- */
+.toolbar-btn{
+  background:var(--btn-bg);
+  border:none;
+  padding:0.4rem 0.8rem;
+  border-radius:4px;
+  cursor:pointer;
+  font-size:var(--btn-size);
+  transition:background .2s;
+}
+.toolbar-btn:hover{background:var(--btn-hover);}
+.toolbar-btn:focus{outline:2px solid #0066ff;}
+
+/* ------------- Search Input -------------- */
+#searchInput{
+  padding:0.4rem 0.6rem;
+  font-size:var(--btn-size);
+  border:1px solid #bbb;
+  border-radius:4px;
+}
+#searchInput:focus{outline:none;border-color:#0066ff;}
+
+/* ------------- Grid of Cards -------------- */
 .grid{
   display:grid;
   grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
@@ -30,18 +70,32 @@ h1{font-size: clamp(1.8rem, 4vw, 3rem); margin-bottom:.5rem; color:var(--primary
   padding:0 1rem;
 }
 
-/* ------------- Card -------------------------- */
+/* ------------- Card ---------------------- */
 .card{
   display:flex; flex-direction:column;
   background:var(--card-bg); border-radius:var(--card-radius);
   overflow:hidden; text-decoration:none; color:inherit;
   box-shadow:var(--card-shadow);
   transition:transform .2s, box-shadow .2s;
+  position:relative; /* for favorite icon */
 }
 .card:hover{ transform:var(--card-hover-transform); box-shadow:var(--card-shadow-hover); }
 .card:focus-visible{ outline:2px solid #0066ff; }
 
-/* ------------- Image ------------------------ */
+/* ------------- Favorite Icon ------------- */
+.favorite {
+  position:absolute;
+  top:8px; right:8px;
+  width:1.2rem; height:1.2rem;
+  cursor:pointer;
+  fill:transparent;
+  stroke:#ffb600;
+  stroke-width:2;
+  transition:fill .2s;
+}
+.favorite.fav-active{ fill:#ffb600; }
+
+/* ------------- Image --------------------- */
 .card img{
   width:100%; height:120px; object-fit:cover;
   border-radius:calc(var(--card-radius)-2px);
@@ -49,14 +103,17 @@ h1{font-size: clamp(1.8rem, 4vw, 3rem); margin-bottom:.5rem; color:var(--primary
 }
 .card img.loaded{ opacity:1; }
 
-/* ------------- Title ------------------------ */
+/* ------------- Title --------------------- */
 .card-title{
   padding:.5rem; font-size:1rem; font-weight:600; text-align:center;
 }
 
-/* ------------- Dark‑mode -------------------- */
+/* ------------- Dark‑mode ---------------- */
 @media (prefers-color-scheme: dark){
   body{background:#111; color:#eee;}
   .card{background:#222; box-shadow:0 1px 3px rgba(255,255,255,.1);}
   .card:hover{box-shadow:0 4px 12px rgba(255,255,255,.15);}
+  .toolbar-btn{background:#444;}
+  .toolbar-btn:hover{background:#555;}
+  #searchInput{background:#333; border-color:#555; color:#eee;}
 }
