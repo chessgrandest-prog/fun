@@ -1,12 +1,8 @@
-/* ----------------------------------------------------
-   1️⃣ DOM ELEMENTS
-   ---------------------------------------------------- */
+/* ---------------------------------- 1️⃣ DOM ELEMENTS ---- */
 const container = document.getElementById('games');
 const header    = document.querySelector('header');
 
-/* ----------------------------------------------------
-   2️⃣ LocalStorage helpers
-   ---------------------------------------------------- */
+/* --------- 2️⃣ LocalStorage helpers ------------- */
 const LS = {
   THEME:        'gamehub-theme',
   FAVORITES:    'gamehub-favs',
@@ -16,9 +12,7 @@ const LS = {
   setFavs: (d)  => localStorage.setItem('gamehub-favs', JSON.stringify(d)),
 };
 
-/* ----------------------------------------------------
-   3️⃣ Theme (Dark/Light) – persistent toggle
-   ---------------------------------------------------- */
+/* --------- 3️⃣ Theme toggle -------- */
 const applyTheme = t => document.documentElement.dataset.theme = t;
 applyTheme(LS.getTheme());
 
@@ -33,9 +27,7 @@ btnTheme.onclick = () => {
 };
 header.appendChild(btnTheme);
 
-/* ----------------------------------------------------
-   4️⃣ Search input
-   ---------------------------------------------------- */
+/* --------- 4️⃣ Search input -------- */
 const searchInput = document.createElement('input');
 searchInput.id   = 'searchInput';
 searchInput.type = 'text';
@@ -43,27 +35,21 @@ searchInput.placeholder = 'Search…';
 searchInput.oninput = () => renderGames(filterGames(searchInput.value, allGames));
 header.appendChild(searchInput);
 
-/* ----------------------------------------------------
-   5️⃣ Random Game button
-   ---------------------------------------------------- */
+/* --------- 5️⃣ Random button -------- */
 const btnRandom = document.createElement('button');
 btnRandom.className = 'toolbar-btn';
 btnRandom.textContent = '🎲 Random';
 btnRandom.onclick = () => openRandom(allGames);
 header.appendChild(btnRandom);
 
-/* ----------------------------------------------------
-   6️⃣ About button (opens a clean tab)
-   ---------------------------------------------------- */
+/* --------- 6️⃣ About button -------- */
 const btnAbout = document.createElement('button');
 btnAbout.className = 'toolbar-btn';
 btnAbout.textContent = 'ℹ️ About';
 btnAbout.onclick = () => window.open('about.html', '_blank');
 header.appendChild(btnAbout);
 
-/* ----------------------------------------------------
-   7️⃣ Favorites – store URL → true in localStorage
-   ---------------------------------------------------- */
+/* --------- 7️⃣ Favorites -------- */
 const toggleFavorite = (card, url) => {
   const favs = LS.getFavs();
   if (favs[url]) delete favs[url]; else favs[url] = true;
@@ -73,12 +59,11 @@ const toggleFavorite = (card, url) => {
 
 const updateCardFavorite = (card, isFav) => {
   const star = card.querySelector('.favorite');
+  if (!star) return;          // guard just in case
   star.classList.toggle('fav-active', isFav);
 };
 
-/* ----------------------------------------------------
-   8️⃣ Build a single card (no innerHTML mutation)
-   ---------------------------------------------------- */
+/* --------- 8️⃣ Build a card (no innerHTML mutation) -------- */
 const buildCard = game => {
   const card = document.createElement('a');
   card.href = `viewer.html?src=${encodeURIComponent(game.url)}`;
@@ -86,18 +71,16 @@ const buildCard = game => {
   card.rel = 'noopener noreferrer';
   card.className = 'card';
 
-  /* Favorite icon (star) */
-  const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  star.setAttribute('viewBox', '0 0 24 24');
+  /* Favorite icon (plain span) */
+  const star = document.createElement('span');
   star.className = 'favorite';
-  star.innerHTML =
-    '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
+  star.textContent = '☆';            // empty star
   star.onclick = e => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(card, game.url);
   };
-  card.appendChild(star);  // absolutely positioned by CSS
+  card.appendChild(star);            // append first so it stays on top
 
   /* Image */
   const img = document.createElement('img');
@@ -125,9 +108,7 @@ const buildCard = game => {
   return card;
 };
 
-/* ----------------------------------------------------
-   9️⃣ Random / Search helpers
-   ---------------------------------------------------- */
+/* --------- 9️⃣ Random / Search helpers -------- */
 const openRandom = games => {
   if (!games.length) return;
   const r = games[Math.floor(Math.random() * games.length)];
@@ -140,9 +121,7 @@ const filterGames = (query, games) => {
   return games.filter(g => g.title.toLowerCase().includes(q));
 };
 
-/* ----------------------------------------------------
-   1️⃣0️⃣ Rendering the grid
-   ---------------------------------------------------- */
+/* --------- 10️⃣ Rendering the grid -------- */
 let allGames = [];
 
 fetch('games.json')
