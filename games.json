@@ -4,6 +4,11 @@
     "url": "https://terraria.mercurywork.shop/",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Terraria.jpg"
   },
+    {
+    "title": "DragonX",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/DragonX_V4.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
+  },
   {
     "title": "Slime Rancher",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/slime-ranchers/index.html",
@@ -6079,11 +6084,6 @@
     "title": "Pibbyapocalypse",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/UGS%20Files%203/clpibbyapocalypse.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Pibbyapocalypse.webp"
-  },
-  {
-    "title": "Pi Client",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/pi-client.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
   },
   {
     "title": "Pico 8",
