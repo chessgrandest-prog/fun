@@ -4,27 +4,22 @@
     "url": "https://terraria.mercurywork.shop/",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Terraria.jpg"
   },
-    {
+  {
     "title": "Minecraft DragonX Client v4",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/DragonX_V4.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
   },
-    {
-    "title": "Minecraft Pixel Client 1.12.2",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/PixelClient%201.12.2%20JS.html",
+  {
+    "title": "Minecraft 1.12.2",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/Minecraft%201.12.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
   },
-    {
-    "title": "Minecraft Pixel Client",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/PixelClient%201.8.8%20JS%20(2).html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
-  },
-    {
+  {
     "title": "Minecraft Resent Client 5.0",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/ResentClient_5.0_PROD_WASM.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
   },
-    {
+  {
     "title": "Minecraft Astra Client",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/astra.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Minecraft_1_5_2.jpg"
