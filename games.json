@@ -1,5 +1,30 @@
 [
   {
+    "title": "Celeste",
+    "url": "/advanced/celeste/",
+    "image": "https://media.wired.com/photos/5a6a8b5e2c3a6112ee631cc0/master/w_1600%2Cc_limit/00.png"
+  },
+  {
+    "title": "Hollow Knight",
+    "url": "/advanced/hollow-knight/",
+    "image": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/367520/ss_d5b6edd94e77ba6db31c44d8a3c09d807ab27751.jpg"
+  },
+  {
+    "title": "Getting Over It",
+    "url": "/advanced/getting-over-it/",
+    "image": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/240720/ss_413828bfd197dae1e356f6b43c4c38a9d3466591.1920x1080.jpg?t=1666987027"
+  },
+  {
+    "title": "Slime Rancher",
+    "url": "/advanced/slime-rancher/",
+    "image": "https://indiegamereviewer.com/wp-content/uploads/2017/12/slime-rancher-screenshot.1920x1080.jpg"
+  },
+  {
+    "title": "Terraria",
+    "url": "/advanced/terraria/",
+    "image": "https://i.imgur.com/aC1hFS4.jpg"
+  },
+  {
     "title": "Minecraft DragonX Client v4",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/DragonX_V4.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/Minecraft%20DragonX%20v4%20Client.png"
