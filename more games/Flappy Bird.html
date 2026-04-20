@@ -1,139 +1,658 @@
 <!DOCTYPE html>
-<html lang="en-us">
-
+<html lang="en">
 <head>
-    
-    
-    
-    <base href="https://cdn.jsdelivr.net/gh/gn-math/assets@main/129/">
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Flappy Bird Multiplayer</title>
-    <style>
-        html,
-        body {
-            background: #000;
-            width: 100%;
-            height: 100%;
-            overflow: visible;
-            padding: 0;
-            margin: 0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>💀 NEONSKULL · FLAPPY SKULL</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      user-select: none;
+    }
 
-        div#gameContainer {
-            background: transparent !important;
-            position: absolute;
-        }
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 30% 20%, #0b0e1a, #010101);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      padding: 16px;
+      margin: 0;
+    }
 
-        div#gameContainer canvas {
-            position: absolute;
-        }
+    .game-container {
+      max-width: 500px;
+      width: 100%;
+      background: rgba(5, 8, 18, 0.85);
+      backdrop-filter: blur(8px);
+      border: 2px solid #ff3b9a;
+      box-shadow: 0 0 30px #ff3b9a88, 0 0 10px #00f7ff inset;
+      border-radius: 40px;
+      padding: 24px 20px 30px;
+      transition: box-shadow 0.2s;
+    }
 
-        div#gameContainer canvas[data-pixel-art="true"] {
-            position: absolute;
-            image-rendering: optimizeSpeed;
-            image-rendering: -webkit-crisp-edges;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: -o-crisp-edges;
-            image-rendering: crisp-edges;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: optimize-contrast;
-            image-rendering: pixelated;
-            -ms-interpolation-mode: nearest-neighbor;
-        }
-    </style>
+    .skull-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 1.9rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 
+        0 0 8px #ff00c1,
+        0 0 20px #00ffff,
+        0 0 35px #b000ff;
+      margin: 0;
+      line-height: 1;
+    }
+
+    h1 span {
+      font-size: 2.4rem;
+      filter: drop-shadow(0 0 10px cyan);
+    }
+
+    .scores {
+      display: flex;
+      gap: 12px;
+    }
+
+    .score-box {
+      background: #0b0e14;
+      border: 1.5px solid #0ff;
+      border-radius: 30px;
+      padding: 6px 16px;
+      text-align: center;
+      box-shadow: 0 0 12px #0ff6, inset 0 0 6px #ff00b3;
+    }
+
+    .score-label {
+      color: #b7f9ff;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.7rem;
+      text-shadow: 0 0 5px cyan;
+    }
+
+    .score-value {
+      color: #fff5b0;
+      font-weight: 800;
+      font-size: 1.8rem;
+      line-height: 1.2;
+      text-shadow: 0 0 15px #ffb3ff, 0 0 5px #0ff;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 400px;
+      aspect-ratio: 3 / 5;
+      border-radius: 24px;
+      background: #0a0c16;
+      box-shadow: 
+        0 0 0 2px #ff2b9e,
+        0 0 30px #ff00c8,
+        inset 0 0 20px #0ff4;
+      border: 1px solid cyan;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .control-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: #1f1337;
+      border: 2px solid #ff00d0;
+      color: #fff3d1;
+      font-weight: bold;
+      font-size: 1.2rem;
+      padding: 12px 30px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow: 0 5px 0 #0d0716, 0 0 20px #f0f, inset 0 -2px 0 #b284ff;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: 0.08s;
+      text-shadow: 0 0 8px #ffb3ff;
+    }
+
+    .action-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #0d0716, 0 0 30px cyan;
+    }
+
+    .hint {
+      color: #aad0ff;
+      text-shadow: 0 0 6px magenta;
+      font-size: 0.9rem;
+      margin-top: 12px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    .message-area {
+      min-height: 28px;
+      font-weight: 600;
+      text-align: center;
+      color: #bbf5ff;
+      text-shadow: 0 0 12px magenta;
+      font-size: 1.2rem;
+      margin-top: 10px;
+    }
+
+    .neon-credit {
+      text-align: right;
+      margin-top: 8px;
+      color: #7b8fbb;
+      font-size: 0.75rem;
+      opacity: 0.8;
+      text-shadow: 0 0 5px black;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
 </head>
-
 <body>
-    <div id="gameContainer">
-        <canvas id="unity-canvas" data-pixel-art=""></canvas>
-        <script src="Build/V0.1.loader.js"></script>
-        <script>
-            function mergeFiles(fileParts) {
-                return new Promise((resolve, reject) => {
-                    let buffers = [];
-
-                    function fetchPart(index) {
-                        if (index >= fileParts.length) {
-                            let mergedBlob = new Blob(buffers);
-                            let mergedFileUrl = URL.createObjectURL(mergedBlob);
-                            resolve(mergedFileUrl);
-                            return;
-                        }
-                        fetch(fileParts[index]).then(response => response.arrayBuffer()).then(data => {
-                            buffers.push(data);
-                            fetchPart(index + 1);
-                        }).catch(reject);
-                    }
-                    fetchPart(0);
-                });
-            }
-            var parts = ["Build/V0.1.wasm.part1", "Build/V0.1.wasm.part2"];
-            Promise.all([
-                mergeFiles(parts)
-            ]).then(([mergedUrl]) => {
-                var canvas = document.querySelector("#unity-canvas");
-                var config = {
-                    dataUrl: "Build/V0.1.data",
-                    frameworkUrl: "Build/V0.1.framework.js",
-                    codeUrl: mergedUrl,
-                    streamingAssetsUrl: "StreamingAssets",
-                    companyName: "eli_hoffman",
-                    productName: "Flappy Bird Multiplayer",
-                    productVersion: "0.1",
-                };
-                var scaleToFit;
-                try {
-                    scaleToFit = !!JSON.parse("");
-                } catch (e) {
-                    scaleToFit = true;
-                }
-
-                function progressHandler(progress) {
-                    var percent = progress * 100 + '%';
-                    canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-                    canvas.style.backgroundSize = '100% 1rem';
-                }
-
-                function onResize() {
-                    var container = canvas.parentElement;
-                    var w;
-                    var h;
-                    if (scaleToFit) {
-                        w = window.innerWidth;
-                        h = window.innerHeight;
-                        var r = 800 / 600;
-                        if (w * r > window.innerHeight) {
-                            w = Math.min(w, Math.ceil(h / r));
-                        }
-                        h = Math.floor(w * r);
-                    } else {
-                        w = 600;
-                        h = 800;
-                    }
-                    container.style.width = canvas.style.width = w + "px";
-                    container.style.height = canvas.style.height = h + "px";
-                    container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
-                    container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
-                }
-                createUnityInstance(canvas, config, progressHandler).then(function (instance) {
-                    canvas = instance.Module.canvas;
-                    onResize();
-                });
-                window.addEventListener('resize', onResize);
-                onResize();
-                if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-                    // Mobile device style: fill the whole browser client area with the game canvas:
-                    const meta = document.createElement('meta');
-                    meta.name = 'viewport';
-                    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-                    document.getElementsByTagName('head')[0].appendChild(meta);
-                }
-            }).catch(error => {
-                console.error(error);
-            });
-        </script>
+<div class="game-container">
+  <div class="skull-header">
+    <h1>
+      <span>💀</span> FLAPPY SKULL
+    </h1>
+    <div class="scores">
+      <div class="score-box">
+        <div class="score-label">SCORE</div>
+        <div class="score-value" id="currentScoreDisplay">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">BEST</div>
+        <div class="score-value" id="bestScoreDisplay">0</div>
+      </div>
     </div>
-</body>
+  </div>
 
+  <div class="canvas-wrapper">
+    <canvas id="gameCanvas" width="360" height="600"></canvas>
+  </div>
+
+  <div class="control-panel">
+    <button class="action-btn" id="restartButton">⟳ NEW FLIGHT</button>
+  </div>
+  <div id="messageDisplay" class="message-area"></div>
+  <div class="hint">⚡ TAP / CLICK / SPACE · FLAP ⚡</div>
+  <div class="neon-credit">💀 NEONSKULL · REAL EMOJI SKULL 💀</div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ----- CANVAS & CONTEXT -----
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const currentScoreSpan = document.getElementById('currentScoreDisplay');
+    const bestScoreSpan = document.getElementById('bestScoreDisplay');
+    const messageEl = document.getElementById('messageDisplay');
+
+    // ----- GAME CONSTANTS -----
+    const GRAVITY = 0.22;
+    const JUMP_FORCE = -5.2;
+    const SKULL_SIZE = 22; // used for collision radius
+    const PIPE_WIDTH = 52;
+    const PIPE_GAP = 135;
+    const PIPE_SPEED = 2.6;
+    const PIPE_SPAWN_INTERVAL = 110;
+    
+    const SKULL_START_X = 80;
+    const SKULL_START_Y = 280;
+
+    // ----- GAME STATE -----
+    let skull = {
+      x: SKULL_START_X,
+      y: SKULL_START_Y,
+      vy: 0,
+      alive: true,
+      rotation: 0
+    };
+    
+    let pipes = [];
+    let frame = 0;
+    let score = 0;
+    let bestScore = 0;
+    let gameActive = false;
+    let gameOverFlag = false;
+    let animFrameId = null;
+    
+    // Load best
+    try {
+      const saved = localStorage.getItem('neonskull_flappy_best');
+      if (saved) bestScore = parseInt(saved, 10) || 0;
+    } catch(e) {}
+    bestScoreSpan.textContent = bestScore;
+
+    // ----- AUDIO SYSTEM (Web Audio) -----
+    let audioCtx = null;
+    let audioEnabled = false;
+    
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        audioEnabled = true;
+      } catch(e) {
+        console.warn("Web Audio not supported");
+        audioEnabled = false;
+      }
+    }
+    
+    function playSound(type) {
+      if (!audioEnabled || !audioCtx) return;
+      
+      const now = audioCtx.currentTime;
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.setValueAtTime(0.3, now);
+      gainNode.connect(audioCtx.destination);
+      
+      if (type === 'flap') {
+        const osc = audioCtx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1000, now + 0.08);
+        osc.connect(gainNode);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start();
+        osc.stop(now + 0.1);
+      } else if (type === 'hit') {
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
+        osc.connect(gainNode);
+        gainNode.gain.setValueAtTime(0.35, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start();
+        osc.stop(now + 0.25);
+        
+        const osc2 = audioCtx.createOscillator();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(80, now);
+        osc2.connect(gainNode);
+        const gain2 = audioCtx.createGain();
+        gain2.gain.setValueAtTime(0.2, now);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start();
+        osc2.stop(now + 0.2);
+      }
+    }
+
+    // ----- UPDATE BEST SCORE -----
+    function updateBestScore() {
+      if (score > bestScore) {
+        bestScore = score;
+        bestScoreSpan.textContent = bestScore;
+        try {
+          localStorage.setItem('neonskull_flappy_best', bestScore);
+        } catch(e) {}
+      }
+    }
+
+    // ----- RESET GAME -----
+    function resetGame() {
+      skull = {
+        x: SKULL_START_X,
+        y: SKULL_START_Y,
+        vy: 0,
+        alive: true,
+        rotation: 0
+      };
+      pipes = [];
+      frame = 0;
+      score = 0;
+      gameActive = true;
+      gameOverFlag = false;
+      messageEl.textContent = '';
+      currentScoreSpan.textContent = '0';
+      bestScoreSpan.textContent = bestScore;
+    }
+
+    // ----- COLLISION (circle vs rect) -----
+    function circleRectCollision(cx, cy, r, rx, ry, rw, rh) {
+      const closestX = Math.max(rx, Math.min(cx, rx + rw));
+      const closestY = Math.max(ry, Math.min(cy, ry + rh));
+      const dx = cx - closestX;
+      const dy = cy - closestY;
+      return (dx * dx + dy * dy) < r * r;
+    }
+
+    function checkCollisions() {
+      if (!skull.alive) return true;
+      if (skull.y - SKULL_SIZE <= 0 || skull.y + SKULL_SIZE >= canvas.height) return true;
+      
+      for (let p of pipes) {
+        if (circleRectCollision(skull.x, skull.y, SKULL_SIZE, p.x, 0, PIPE_WIDTH, p.topHeight)) return true;
+        const bottomY = p.topHeight + PIPE_GAP;
+        if (circleRectCollision(skull.x, skull.y, SKULL_SIZE, p.x, bottomY, PIPE_WIDTH, canvas.height - bottomY)) return true;
+      }
+      return false;
+    }
+
+    // ----- UPDATE LOGIC -----
+    function updateGame() {
+      if (!gameActive || !skull.alive) return;
+
+      skull.vy += GRAVITY;
+      skull.y += skull.vy;
+      
+      // Rotation based on vertical velocity (tilt up when rising, down when falling)
+      let targetRot = skull.vy * 0.12;
+      targetRot = Math.min(Math.max(targetRot, -0.5), 0.8);
+      skull.rotation = targetRot;
+      
+      // Pipes movement
+      for (let p of pipes) {
+        p.x -= PIPE_SPEED;
+      }
+      
+      // Remove offscreen pipes & scoring
+      pipes = pipes.filter(p => {
+        if (p.x + PIPE_WIDTH < 0) return false;
+        if (!p.passed && p.x + PIPE_WIDTH < skull.x) {
+          p.passed = true;
+          score++;
+          currentScoreSpan.textContent = score;
+          updateBestScore();
+        }
+        return true;
+      });
+      
+      // Spawn pipes
+      if (frame % PIPE_SPAWN_INTERVAL === 0) {
+        const minTop = 45;
+        const maxTop = canvas.height - PIPE_GAP - 45;
+        const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+        pipes.push({
+          x: canvas.width,
+          topHeight: topHeight,
+          passed: false
+        });
+      }
+      
+      // Collision
+      if (checkCollisions()) {
+        skull.alive = false;
+        gameActive = false;
+        gameOverFlag = true;
+        messageEl.textContent = '💀 GAME OVER · TAP OR NEW FLIGHT 💀';
+        updateBestScore();
+        playSound('hit');
+      }
+      
+      // Keep skull inside bounds
+      if (skull.y - SKULL_SIZE < 0) skull.y = SKULL_SIZE;
+      if (skull.y + SKULL_SIZE > canvas.height) skull.y = canvas.height - SKULL_SIZE;
+      
+      frame++;
+    }
+
+    // ----- DRAWING: EMOJI SKULL (💀) with neon glow -----
+    function drawSkull() {
+      ctx.save();
+      ctx.translate(skull.x, skull.y);
+      ctx.rotate(skull.rotation);
+      
+      // Neon glow effect
+      ctx.shadowColor = '#ff00c1';
+      ctx.shadowBlur = 30;
+      
+      // Draw the emoji
+      ctx.font = '42px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "EmojiOne Color", "Twemoji Mozilla", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Fill with slight opacity to blend with glow, but emoji is colorful
+      ctx.fillStyle = '#ffffff'; // Not really used for emoji, but ensures visibility
+      ctx.fillText('💀', 0, 0);
+      
+      // Add an extra glow stroke
+      ctx.shadowBlur = 40;
+      ctx.strokeStyle = '#ff99ee';
+      ctx.lineWidth = 2;
+      ctx.strokeText('💀', 0, 0);
+      
+      ctx.restore();
+    }
+
+    function drawScene() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Neon grid background
+      ctx.strokeStyle = '#ff2b9e22';
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < canvas.width; i += 30) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = '#0ff22';
+      for (let i = 0; i < canvas.height; i += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+      
+      // Pipes (neon)
+      pipes.forEach(p => {
+        const x = p.x;
+        const topH = p.topHeight;
+        
+        ctx.shadowColor = '#ff00c1';
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = '#1e2b4a';
+        ctx.fillRect(x, 0, PIPE_WIDTH, topH);
+        ctx.shadowBlur = 22;
+        ctx.strokeStyle = '#0ff';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, 0, PIPE_WIDTH, topH);
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = '#ff66d9';
+        ctx.lineWidth = 1.8;
+        ctx.strokeRect(x+2, 2, PIPE_WIDTH-4, topH-4);
+        
+        const bottomY = topH + PIPE_GAP;
+        const bottomH = canvas.height - bottomY;
+        ctx.fillStyle = '#1e2b4a';
+        ctx.fillRect(x, bottomY, PIPE_WIDTH, bottomH);
+        ctx.shadowBlur = 22;
+        ctx.strokeStyle = '#0ff';
+        ctx.strokeRect(x, bottomY, PIPE_WIDTH, bottomH);
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = '#ff66d9';
+        ctx.strokeRect(x+2, bottomY+2, PIPE_WIDTH-4, bottomH-4);
+        
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = '#b02cff';
+        ctx.fillRect(x-4, topH-8, PIPE_WIDTH+8, 8);
+        ctx.fillRect(x-4, bottomY, PIPE_WIDTH+8, 8);
+      });
+      
+      ctx.shadowBlur = 0;
+      
+      // Draw the skull emoji
+      drawSkull();
+      
+      // Score on canvas
+      ctx.font = 'bold 28px "Segoe UI", "Poppins", monospace';
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#ff00d0';
+      ctx.shadowBlur = 20;
+      ctx.fillText(`${score}`, canvas.width-70, 58);
+      ctx.shadowBlur = 0;
+      
+      // Overlays
+      if (!gameActive && !gameOverFlag && skull.alive) {
+        ctx.font = 'bold 18px "Segoe UI", sans-serif';
+        ctx.fillStyle = '#e0f0ff';
+        ctx.shadowColor = '#0ff';
+        ctx.shadowBlur = 18;
+        ctx.fillText('TAP TO FLAP', 105, 280);
+        ctx.shadowBlur = 0;
+      }
+      
+      if (gameOverFlag) {
+        ctx.font = 'bold 22px "Segoe UI", sans-serif';
+        ctx.fillStyle = '#ffb0d9';
+        ctx.shadowColor = '#ff0055';
+        ctx.shadowBlur = 22;
+        ctx.fillText('☠ GAME OVER ☠', 70, 280);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // ----- GAME LOOP -----
+    function gameLoop() {
+      if (gameActive && skull.alive) {
+        updateGame();
+      }
+      drawScene();
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    // ----- FLAP ACTION -----
+    function flap() {
+      // Initialize audio on first interaction
+      if (!audioCtx) {
+        initAudio();
+      } else if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      if (!gameActive) {
+        if (gameOverFlag) {
+          resetGame();
+        } else {
+          gameActive = true;
+          skull.vy = JUMP_FORCE;
+          playSound('flap');
+        }
+        return;
+      }
+      
+      if (skull.alive) {
+        skull.vy = JUMP_FORCE;
+        playSound('flap');
+      } else {
+        resetGame();
+      }
+    }
+
+    function restartGame() {
+      resetGame();
+      gameActive = true;
+      gameOverFlag = false;
+      messageEl.textContent = '';
+    }
+
+    // ----- EVENT LISTENERS -----
+    function handleAction(e) {
+      e.preventDefault();
+      flap();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        flap();
+      }
+      if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+      }
+    });
+
+    canvas.addEventListener('click', (e) => {
+      e.preventDefault();
+      flap();
+    });
+    
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      flap();
+    }, { passive: false });
+
+    document.getElementById('restartButton').addEventListener('click', (e) => {
+      restartGame();
+    });
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key === ' ' || e.key.startsWith('Arrow')) {
+        e.preventDefault();
+      }
+    }, false);
+
+    // Initialize (inactive)
+    (function initialize() {
+      skull = {
+        x: SKULL_START_X,
+        y: SKULL_START_Y,
+        vy: 0,
+        alive: true,
+        rotation: 0
+      };
+      pipes = [];
+      frame = 0;
+      score = 0;
+      gameActive = false;
+      gameOverFlag = false;
+      currentScoreSpan.textContent = '0';
+      bestScoreSpan.textContent = bestScore;
+      messageEl.textContent = '';
+      drawScene();
+      
+      if (animFrameId) cancelAnimationFrame(animFrameId);
+      animFrameId = requestAnimationFrame(gameLoop);
+    })();
+
+    ctx.imageSmoothingEnabled = false;
+  })();
+</script>
+</body>
 </html>
