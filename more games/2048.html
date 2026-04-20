@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>💀 NEONSKULL · 2048</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      user-select: none;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 30%, #0d0f1e, #010101);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .game-container {
+      max-width: 550px;
+      width: 100%;
+      background: rgba(5, 8, 15, 0.85);
+      backdrop-filter: blur(8px);
+      border: 2px solid #ff3b9a;
+      box-shadow: 0 0 30px #ff3b9a88, 0 0 10px #00f7ff inset;
+      border-radius: 40px;
+      padding: 24px 20px 30px;
+      transition: box-shadow 0.2s;
+    }
+
+    .skull-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 2.2rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 
+        0 0 8px #ff00c1,
+        0 0 20px #00ffff,
+        0 0 35px #b000ff;
+      margin: 0;
+      line-height: 1;
+    }
+
+    h1 span {
+      font-size: 2.8rem;
+      filter: drop-shadow(0 0 10px cyan);
+    }
+
+    .scores {
+      display: flex;
+      gap: 12px;
+    }
+
+    .score-box {
+      background: #0b0e14;
+      border: 1.5px solid #0ff;
+      border-radius: 30px;
+      padding: 8px 16px;
+      text-align: center;
+      box-shadow: 0 0 12px #0ff6, inset 0 0 6px #ff00b3;
+    }
+
+    .score-label {
+      color: #b7f9ff;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.8rem;
+      text-shadow: 0 0 5px cyan;
+    }
+
+    .score-value {
+      color: #fff5b0;
+      font-weight: 800;
+      font-size: 1.9rem;
+      line-height: 1.2;
+      text-shadow: 0 0 15px #ffb3ff, 0 0 5px #0ff;
+    }
+
+    /* board grid */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      background: rgba(10, 3, 20, 0.7);
+      padding: 18px;
+      border-radius: 30px;
+      border: 1px solid #ff2b9e;
+      box-shadow: 0 0 30px #ff1e8c55, inset 0 0 15px #1affea33;
+      margin-bottom: 25px;
+    }
+
+    .tile {
+      aspect-ratio: 1 / 1;
+      background: #151e2c;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 2.2rem;
+      color: #f0e9ff;
+      text-shadow: 0 0 12px currentColor;
+      box-shadow: 0 0 0 1.5px #ff2b9e, 0 6px 0 #03060a, inset 0 -3px 0 #7f00b2;
+      transition: all 0.1s ease;
+      transform: scale(1);
+      border: 1px solid #0ff6;
+    }
+
+    /* tile colors — neon skull palette */
+    .tile[data-value="0"] {
+      background: #0e121f;
+      box-shadow: inset 0 0 10px #1e2a3a, 0 2px 0 #04080c;
+      border: 1px solid #3f3f6b;
+      color: transparent;
+      text-shadow: none;
+    }
+    .tile[data-value="2"] {
+      background: #1a2a4a;
+      box-shadow: 0 0 15px #3cc6ff, 0 4px 0 #0e1a2b, inset 0 -2px 0 #a0dbff;
+      border-color: #0cf;
+    }
+    .tile[data-value="4"] {
+      background: #1f3d5e;
+      box-shadow: 0 0 18px #6ef5ff, 0 4px 0 #112233, inset 0 -2px 0 #b1f0ff;
+      border-color: #2df;
+    }
+    .tile[data-value="8"] {
+      background: #2e1f5e;
+      box-shadow: 0 0 20px #c85bff, 0 4px 0 #1f1440, inset 0 -2px 0 #e3b0ff;
+      border-color: #c35eff;
+    }
+    .tile[data-value="16"] {
+      background: #4f2366;
+      box-shadow: 0 0 22px #ff6ec7, 0 4px 0 #2a1038, inset 0 -2px 0 #ffb0f0;
+      border-color: #ff8ad0;
+    }
+    .tile[data-value="32"] {
+      background: #7a2a6b;
+      box-shadow: 0 0 24px #ff4090, 0 4px 0 #3e1535, inset 0 -2px 0 #ffafd0;
+      border-color: #ff5ea0;
+    }
+    .tile[data-value="64"] {
+      background: #b32e5e;
+      box-shadow: 0 0 26px #ff1a4f, 0 4px 0 #5c152b, inset 0 -2px 0 #ffa7b9;
+      border-color: #ff3366;
+    }
+    .tile[data-value="128"] {
+      background: #d43f76;
+      box-shadow: 0 0 28px #ffb347, 0 4px 0 #6e1d3a, inset 0 -2px 0 #ffe694;
+      border-color: #ffb86b;
+      font-size: 1.9rem;
+    }
+    .tile[data-value="256"] {
+      background: #e05a3c;
+      box-shadow: 0 0 30px #ffae00, 0 4px 0 #732e1a, inset 0 -2px 0 #ffdb9c;
+      border-color: #ffbc3b;
+      font-size: 1.9rem;
+    }
+    .tile[data-value="512"] {
+      background: #e07c1f;
+      box-shadow: 0 0 32px #f0e65c, 0 4px 0 #804d0e, inset 0 -2px 0 #fff3aa;
+      border-color: #ffd966;
+      font-size: 1.8rem;
+    }
+    .tile[data-value="1024"] {
+      background: #e6b422;
+      box-shadow: 0 0 35px #fffca8, 0 4px 0 #8b6f0e, inset 0 -2px 0 #ffffbb;
+      border-color: #f9f3b0;
+      font-size: 1.5rem;
+    }
+    .tile[data-value="2048"] {
+      background: #f5d33c;
+      box-shadow: 0 0 45px #ffffff, 0 4px 0 #9e8b1c, inset 0 -2px 0 #ffffe0;
+      border-color: #fff9cf;
+      color: #1a1f2a;
+      text-shadow: 0 0 20px #fffbd0;
+      font-size: 1.5rem;
+    }
+    .tile[data-value="4096"], .tile[data-value="8192"] {
+      background: #3d2b3d;
+      box-shadow: 0 0 40px #ffa0fc, 0 4px 0 #201520;
+      font-size: 1.3rem;
+    }
+
+    /* controls */
+    .control-panel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .direction-pad {
+      display: flex;
+      gap: 14px;
+      background: #0a0e17c9;
+      padding: 10px 18px;
+      border-radius: 60px;
+      border: 1px solid #ff2b9e;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 18px #ff00b388;
+    }
+
+    .dir-btn {
+      background: #151e2e;
+      border: none;
+      color: #e1f5ff;
+      font-size: 2.4rem;
+      font-weight: bold;
+      width: 70px;
+      height: 70px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 0 #03080f, 0 0 18px #0ff, inset 0 -3px 0 #5f9ea0;
+      cursor: pointer;
+      transition: 0.08s;
+      border: 1px solid cyan;
+      text-shadow: 0 0 8px white;
+      user-select: none;
+    }
+
+    .dir-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #03080f, 0 0 25px #ff00de;
+    }
+
+    .new-game-btn {
+      background: #1f1337;
+      border: 2px solid #ff00d0;
+      color: #fff3d1;
+      font-weight: bold;
+      font-size: 1.3rem;
+      padding: 12px 26px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow: 0 5px 0 #0d0716, 0 0 20px #f0f, inset 0 -2px 0 #b284ff;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: 0.1s;
+      text-shadow: 0 0 8px #ffb3ff;
+    }
+
+    .new-game-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #0d0716, 0 0 30px cyan;
+    }
+
+    .message-area {
+      margin-top: 16px;
+      min-height: 32px;
+      font-weight: 600;
+      text-align: center;
+      color: #bbf5ff;
+      text-shadow: 0 0 12px magenta;
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+    }
+
+    /* footer neon vibe */
+    .neon-credit {
+      text-align: right;
+      margin-top: 6px;
+      color: #7b8fbb;
+      font-size: 0.8rem;
+      opacity: 0.8;
+      text-shadow: 0 0 5px black;
+    }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <div class="skull-header">
+    <h1>
+      <span>💀</span> NEONSKULL
+    </h1>
+    <div class="scores">
+      <div class="score-box">
+        <div class="score-label">SCORE</div>
+        <div class="score-value" id="scoreDisplay">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">BEST</div>
+        <div class="score-value" id="bestDisplay">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4x4 grid -->
+  <div class="board" id="boardContainer"></div>
+
+  <div class="control-panel">
+    <div class="direction-pad">
+      <button class="dir-btn" id="moveUp">↑</button>
+      <button class="dir-btn" id="moveLeft">←</button>
+      <button class="dir-btn" id="moveDown">↓</button>
+      <button class="dir-btn" id="moveRight">→</button>
+    </div>
+    <button class="new-game-btn" id="newGameBtn">⟳ NEW GAME</button>
+  </div>
+  <div id="messageDisplay" class="message-area"></div>
+  <div class="neon-credit">⚡ 2048 · NEON SKULL EDITION ⚡</div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ----- CORE STATE -----
+    let board = Array(4).fill().map(() => Array(4).fill(0));
+    let score = 0;
+    let bestScore = 0;
+    let gameOverFlag = false;
+    let winFlag = false;       // reached 2048 at least once
+
+    // DOM elements
+    const boardEl = document.getElementById('boardContainer');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const bestDisplay = document.getElementById('bestDisplay');
+    const messageEl = document.getElementById('messageDisplay');
+
+    // Load best from localStorage
+    try {
+      const saved = localStorage.getItem('neonskull_2048_best');
+      if (saved) bestScore = parseInt(saved, 10) || 0;
+    } catch(e) { /* ignore */ }
+    bestDisplay.textContent = bestScore;
+
+    // ----- UTILS -----
+    function updateBest() {
+      if (score > bestScore) {
+        bestScore = score;
+        bestDisplay.textContent = bestScore;
+        try {
+          localStorage.setItem('neonskull_2048_best', bestScore);
+        } catch(e) {}
+      }
+    }
+
+    // render board from array
+    function renderBoard() {
+      boardEl.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const val = board[r][c];
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.setAttribute('data-value', val);
+          tile.textContent = val === 0 ? '' : val;
+          boardEl.appendChild(tile);
+        }
+      }
+      scoreDisplay.textContent = score;
+    }
+
+    // Add random tile (2 with 90%, 4 with 10%)
+    function addRandomTile() {
+      const empty = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board[r][c] === 0) empty.push([r, c]);
+        }
+      }
+      if (empty.length === 0) return false;
+      const [r, c] = empty[Math.floor(Math.random() * empty.length)];
+      board[r][c] = Math.random() < 0.9 ? 2 : 4;
+      return true;
+    }
+
+    // Initialize / reset board
+    function initBoard() {
+      board = Array(4).fill().map(() => Array(4).fill(0));
+      score = 0;
+      gameOverFlag = false;
+      winFlag = false;
+      messageEl.textContent = '';
+      addRandomTile();
+      addRandomTile();
+      renderBoard();
+      updateBest(); // ensures best display updated (score=0)
+      scoreDisplay.textContent = score;
+    }
+
+    // ----- GAME LOGIC (slide & merge) -----
+    function slideAndMerge(row) {
+      // filter non-zero
+      let arr = row.filter(v => v !== 0);
+      // merge
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === arr[i+1]) {
+          arr[i] *= 2;
+          score += arr[i];
+          arr[i+1] = 0;
+        }
+      }
+      // filter zeros again and pad
+      arr = arr.filter(v => v !== 0);
+      while (arr.length < 4) arr.push(0);
+      return arr;
+    }
+
+    function moveLeft() {
+      let moved = false;
+      for (let r = 0; r < 4; r++) {
+        const oldRow = [...board[r]];
+        const newRow = slideAndMerge(oldRow);
+        if (oldRow.join(',') !== newRow.join(',')) moved = true;
+        board[r] = newRow;
+      }
+      return moved;
+    }
+
+    function moveRight() {
+      let moved = false;
+      for (let r = 0; r < 4; r++) {
+        const oldRow = [...board[r]];
+        const reversed = oldRow.reverse();
+        const merged = slideAndMerge(reversed);
+        const newRow = merged.reverse();
+        if (oldRow.join(',') !== newRow.join(',')) moved = true;
+        board[r] = newRow;
+      }
+      return moved;
+    }
+
+    function moveUp() {
+      let moved = false;
+      for (let c = 0; c < 4; c++) {
+        const col = [board[0][c], board[1][c], board[2][c], board[3][c]];
+        const newCol = slideAndMerge(col);
+        if (col.join(',') !== newCol.join(',')) moved = true;
+        for (let r = 0; r < 4; r++) board[r][c] = newCol[r];
+      }
+      return moved;
+    }
+
+    function moveDown() {
+      let moved = false;
+      for (let c = 0; c < 4; c++) {
+        const col = [board[0][c], board[1][c], board[2][c], board[3][c]];
+        const reversed = col.reverse();
+        const merged = slideAndMerge(reversed);
+        const newCol = merged.reverse();
+        if (col.join(',') !== newCol.join(',')) moved = true;
+        for (let r = 0; r < 4; r++) board[r][c] = newCol[r];
+      }
+      return moved;
+    }
+
+    // check if any moves possible
+    function canMove() {
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board[r][c] === 0) return true;
+          if (c < 3 && board[r][c] === board[r][c+1]) return true;
+          if (r < 3 && board[r][c] === board[r+1][c]) return true;
+        }
+      }
+      return false;
+    }
+
+    // check for 2048 (win) — only show message once
+    function checkWinCondition() {
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board[r][c] === 2048) return true;
+        }
+      }
+      return false;
+    }
+
+    // after move: add tile, check game over / win, render
+    function afterMove(moved) {
+      if (!moved) {
+        // still need to check if game over? No change but could be already game over.
+        if (!canMove() && !gameOverFlag) {
+          gameOverFlag = true;
+          messageEl.textContent = '💀 GAME OVER · PRESS NEW GAME 💀';
+        }
+        renderBoard();
+        updateBest();
+        return;
+      }
+
+      // add new random tile
+      addRandomTile();
+      
+      // check win (2048)
+      const reached2048 = checkWinCondition();
+      if (reached2048 && !winFlag) {
+        winFlag = true;
+        messageEl.textContent = '✨🏆 YOU REACHED 2048! KEEP GOING 🏆✨';
+      } else if (!reached2048) {
+        // clear win message if board changed and 2048 disappeared? (unlikely)
+        if (winFlag) winFlag = false;
+      }
+
+      // check game over
+      if (!canMove()) {
+        gameOverFlag = true;
+        messageEl.textContent = '💀 GAME OVER · NO MOVES LEFT 💀';
+      } else {
+        if (!reached2048) messageEl.textContent = '';
+      }
+
+      renderBoard();
+      updateBest();
+    }
+
+    // unified move handler
+    function handleMove(direction) {
+      if (gameOverFlag) {
+        messageEl.textContent = '💀 GAME OVER · START NEW GAME 💀';
+        renderBoard();
+        return;
+      }
+
+      let moved = false;
+      const scoreBefore = score;
+
+      switch (direction) {
+        case 'left':  moved = moveLeft(); break;
+        case 'right': moved = moveRight(); break;
+        case 'up':    moved = moveUp(); break;
+        case 'down':  moved = moveDown(); break;
+        default: return;
+      }
+
+      if (moved) {
+        afterMove(true);
+      } else {
+        // no tiles moved, but check if already game over
+        if (!canMove()) {
+          gameOverFlag = true;
+          messageEl.textContent = '💀 GAME OVER · NO MOVES 💀';
+        }
+        renderBoard();
+        updateBest();
+      }
+    }
+
+    // ----- EVENT LISTENERS -----
+    // Keyboard
+    window.addEventListener('keydown', (e) => {
+      const key = e.key;
+      // prevent arrow scrolling
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(key)) {
+        e.preventDefault();
+      }
+      if (key === 'ArrowLeft') handleMove('left');
+      else if (key === 'ArrowRight') handleMove('right');
+      else if (key === 'ArrowUp') handleMove('up');
+      else if (key === 'ArrowDown') handleMove('down');
+    });
+
+    // Buttons
+    document.getElementById('moveUp').addEventListener('click', () => handleMove('up'));
+    document.getElementById('moveDown').addEventListener('click', () => handleMove('down'));
+    document.getElementById('moveLeft').addEventListener('click', () => handleMove('left'));
+    document.getElementById('moveRight').addEventListener('click', () => handleMove('right'));
+
+    // New game
+    document.getElementById('newGameBtn').addEventListener('click', () => {
+      initBoard();
+      gameOverFlag = false;
+      winFlag = false;
+      messageEl.textContent = '';
+    });
+
+    // Touch / mobile: prevent default touch events on buttons only, but board works.
+    // Also prevent page zoom on double-tap (passive maybe)
+    const allBtns = document.querySelectorAll('button');
+    allBtns.forEach(btn => {
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();  // prevents emulated mouse event if needed
+      }, { passive: false });
+    });
+
+    // START!
+    initBoard();
+
+    // Additional: prevent window moving on arrow keys for older browsers
+    window.addEventListener('keydown', (e) => {
+      if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+  })();
+</script>
+</body>
+</html>
