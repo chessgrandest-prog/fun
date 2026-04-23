@@ -1099,6 +1099,26 @@
   "url": "/advanced/terraria/",
   "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/105600/capsule_616x353.jpg"
 },
+{
+    "title": "Minecraft Wurst hacks",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Wurst.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/wurst.png"
+  },
+{
+    "title": "Minecraft EB client",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/EB.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/EB.png"
+  },
+{
+    "title": "Minecraft Pixel Client 1.12.2",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Pixel%20Client%201.12.2.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/pixel%20client.png"
+  },
+  {
+    "title": "Minecraft Pixel Client 1.8.8",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/PixelClient%201.8.8%20WASM.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/pixel%20client.png"
+  },
   {
     "title": "Minecraft DragonX Client v4",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/DragonX_V4.html",
