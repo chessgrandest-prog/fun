@@ -1100,6 +1100,11 @@
   "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/105600/capsule_616x353.jpg"
 },
 {
+    "title": "Minecraft Aero Client",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/AeroClient.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/aero%20client.jpg"
+  },
+{
     "title": "Minecraft Wurst hacks",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Wurst.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/wurst.png"
@@ -1130,7 +1135,7 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/Minecraft%201.12.jpg"
   },
   {
-    "title": "Minecraft Resent 5.0",
+    "title": "Minecraft Resent 5.1",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/ResentClient_5.0_PROD_WASM.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/Minecraft%20Resent%20Client%205.0%20.png"
   },
