@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NeonSkull Wordle – Fixed & Refined</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* ────────────────────── THEMES (data‑theme) ────────────────────── */
+:root{
+    --bg:#0f1115;            --card-bg:#1a1d24;
+    --text:#e0e6ed;          --text-secondary:#94a3b8;
+    --accent:#00f2ff;        --accent-rgb:0,242,255;
+    --correct:#10b981;       --present:#f59e0b;
+    --absent:#374151;        --tile-border:#334155;
+    --key-bg:#374151;        --key-text:#e0e6ed;
+    --tile-size:52px;        /* adjustable via slider */
+}
+[data-theme="retro"]{
+    --bg:#1e1b2a;            --card-bg:#2c2a3e;
+    --text:#f8f8f2;          --text-secondary:#c5c6c7;
+    --accent:#ff6b6b;        --accent-rgb:255,107,107;
+    --correct:#28a745;       --present:#ffca3a;
+    --absent:#555555;        --tile-border:#777777;
+    --key-bg:#555555;        --key-text:#f8f8f2;
+}
+[data-theme="halloween"]{
+    --bg:#1a001a;            --card-bg:#260026;
+    --text:#ffccff;          --text-secondary:#ff99ff;
+    --accent:#ff00ff;        --accent-rgb:255,0,255;
+    --correct:#ff6600;       --present:#ffcc00;
+    --absent:#330033;        --tile-border:#660066;
+    --key-bg:#660066;        --key-text:#ffccff;
+}
+[data-theme="cyber"]{
+    --bg:#0a0a0a;            --card-bg:#111111;
+    --text:#00ffcc;          --text-secondary:#66ffdd;
+    --accent:#00ffcc;        --accent-rgb:0,255,204;
+    --correct:#00ff00;       --present:#ffaa00;
+    --absent:#222222;        --tile-border:#333333;
+    --key-bg:#222222;        --key-text:#00ffcc;
+}
+
+/* ────────────────────── LIGHT‑MODE (data‑mode) ────────────────────── */
+[data-mode="light"]{
+    --bg:#f5f5f5;            --card-bg:#ffffff;
+    --text:#222;             --text-secondary:#555;
+    --accent:#0066ff;        --accent-rgb:0,102,255;
+    --correct:#28a745;       --present:#d39e00;
+    --absent:#c0c0c0;        --tile-border:#bbb;
+    --key-bg:#ddd;           --key-text:#222;
+}
+
+/* ────────────────────── GLOBAL STYLES ────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;overflow-x:hidden;position:relative;
+}
+#particle-canvas{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    z-index:0;pointer-events:none;
+}
+.header{
+    position:relative;z-index:10;width:100%;max-width:600px;
+    padding:20px 20px 10px;text-align:center;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    margin-bottom:20px;
+}
+.skull-img{
+    width:64px;height:auto;margin-bottom:8px;
+    border-radius:12px;filter:drop-shadow(0 0 6px var(--accent));
+}
+.header h1{
+    font-size:2.5rem;font-weight:800;text-transform:uppercase;
+    letter-spacing:4px;background:linear-gradient(45deg,var(--accent),#7000ff);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;margin-bottom:10px;
+}
+#game-board{
+    display:grid;grid-template-rows:repeat(6,1fr);gap:6px;
+    margin-bottom:20px;position:relative;z-index:10;
+    filter:drop-shadow(0 0 8px rgba(0,0,0,0.4));
+}
+.row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.tile{
+    width:var(--tile-size);height:var(--tile-size);
+    border:2px solid var(--tile-border);border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;font-weight:700;text-transform:uppercase;
+    background:var(--card-bg);color:var(--text);
+    transition:background .3s,border-color .3s,transform .1s;
+    user-select:none;
+}
+.tile.pop{animation:pop .1s ease;}
+.tile.flip{animation:flip .5s ease;}
+.tile.shake{animation:shake .4s ease;}
+.tile.correct{
+    background:var(--correct);border-color:var(--correct);color:#fff;
+    box-shadow:0 0 12px rgba(16,185,129,.5);
+    animation:pulse 1.5s infinite;
+}
+.tile.present{
+    background:var(--present);border-color:var(--present);color:#fff;
+    box-shadow:0 0 12px rgba(245,158,11,.5);
+}
+.tile.absent{
+    background:var(--absent);border-color:var(--absent);color:#9ca3af;
+}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes flip{0%{transform:rotateX(0deg)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+
+/* ────────────────────── KEYBOARD ────────────────────── */
+#keyboard{
+    display:flex;flex-direction:column;gap:6px;
+    max-width:520px;width:100%;position:relative;z-index:10;
+}
+.keyboard-row{display:flex;justify-content:center;gap:4px;}
+.key{
+    flex:1;max-width:40px;height:50px;border:none;border-radius:6px;
+    background:var(--key-bg);color:var(--key-text);
+    font-size:.9rem;font-weight:600;cursor:pointer;
+    transition:background .2s,transform .1s;text-transform:uppercase;
+    display:flex;align-items:center;justify-content:center;
+}
+.key:hover{filter:brightness(1.3);}
+.key:active{transform:scale(.95);}
+.key.wide{max-width:60px;flex:1.5;font-size:.75rem;}
+.key.correct{background:var(--correct);color:#fff;
+    box-shadow:0 0 8px rgba(16,185,129,.5);}
+.key.present{background:var(--present);color:#fff;
+    box-shadow:0 0 8px rgba(245,158,11,.5);}
+.key.absent{background:#1f2937;color:#6b7280;}
+
+/* ────────────────────── PANELS & MESSAGES ────────────────────── */
+#message{
+    min-height:24px;font-size:.95rem;margin:8px 0;
+    color:var(--accent);text-align:center;position:relative;z-index:10;
+}
+.stats-panel,.extra-panel{
+    display:flex;gap:20px;margin-top:15px;
+    flex-wrap:wrap;justify-content:center;position:relative;z-index:10;
+}
+.stat-card{
+    background:var(--card-bg);border:1px solid rgba(255,255,255,0.1);
+    border-radius:10px;padding:12px 18px;text-align:center;min-width:70px;
+}
+.stat-card .stat-value{font-size:1.5rem;font-weight:700;color:var(--accent);}
+.stat-card .stat-label{font-size:.7rem;color:var(--text-secondary);
+    text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.btn-row{
+    display:flex;gap:10px;margin-top:12px;
+    flex-wrap:wrap;justify-content:center;position:relative;z-index:10;
+}
+.btn{
+    background:var(--card-bg);border:1px solid rgba(255,255,255,0.1);
+    color:var(--text);padding:8px 18px;border-radius:8px;
+    cursor:pointer;font-size:.85rem;transition:all .2s;
+}
+.btn:hover{
+    border-color:var(--accent);
+    box-shadow:0 0 12px rgba(var(--accent-rgb),.3);
+    transform:translateY(-1px);
+}
+#loading-overlay{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:var(--bg);display:flex;align-items:center;justify-content:center;
+    z-index:9999;font-size:1.2rem;color:var(--accent);
+}
+
+/* ────────────────────── MODALS ────────────────────── */
+.modal{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;
+    z-index:10000;
+}
+.modal-content{
+    background:var(--card-bg);border:1px solid rgba(255,255,255,0.2);
+    border-radius:12px;padding:20px;max-width:90%;max-height:80%;overflow:auto;
+    color:var(--text);
+}
+.modal-close{
+    background:none;border:none;color:var(--accent);font-size:1.2rem;
+    cursor:pointer;float:right;
+}
+
+/* ────────────────────── CONTROLS LAYOUT (split groups) ────────────────────── */
+.controls{
+    width:100%;max-width:620px;display:flex;flex-wrap:wrap;justify-content:space-between;
+    gap:12px;margin-top:12px;
+}
+.controls .group{
+    display:flex;gap:8px;flex-wrap:wrap;
+}
+
+/* ────────────────────── RESPONSIVE (portrait‑only) ────────────────────── */
+@media (max-width:500px){
+    .tile{width:44px;height:44px;font-size:1.4rem;}
+    .key{max-width:32px;height:44px;font-size:.75rem;}
+    .key.wide{max-width:48px;}
+    .header h1{font-size:1.8rem;}
+    .skull-img{width:48px;}
+}
+
+/* ────────────────────── SLIDER FOR TILE SIZE (feature 42) ────────────────────── */
+#size-slider{width:180px;}
+</style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+
+<div id="loading-overlay">🕱 Loading word lists…</div>
+
+<div class="header">
+    <img class="skull-img" src="#" alt="Skull Logo"
+         onerror="this.style.display='none'">
+    <h1>SKULL WORDLE</h1>
+</div>
+
+<div id="game-board"></div>
+<div id="message"></div>
+<div id="keyboard"></div>
+
+<div class="stats-panel" id="stats-panel">
+    <div class="stat-card"><div class="stat-value" id="stat-played">0</div><div class="stat-label">Played</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-wins">0</div><div class="stat-label">Wins</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-streak">0</div><div class="stat-label">Streak</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-maxstreak">0</div><div class="stat-label">Best Streak</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-accuracy">0%</div><div class="stat-label">Win %</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-xp">0</div><div class="stat-label">XP</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-level">1</div><div class="stat-label">Level</div></div>
+</div>
+
+<div class="controls">
+    <div class="group">
+        <button class="btn" id="btn-new">🔄 New Game</button>
+        <button class="btn" id="btn-hard">🧠 Hard Mode: <span id="hard-state">OFF</span></button>
+        <button class="btn" id="btn-hint">❓ Hint</button>
+        <button class="btn" id="btn-invite">📨 Invite</button>
+    </div>
+    <div class="group">
+        <button class="btn" id="btn-theme">🎨 Theme</button>
+        <button class="btn" id="btn-leaderboard">🏆 Leaderboard</button>
+        <button class="btn" id="btn-store">🛒 Store</button>
+        <button class="btn" id="btn-toggle-dark">🌙 Dark/Light</button>
+        <button class="btn" id="btn-reset-stats">🗑️ Reset Stats</button>
+    </div>
+</div>
+
+<div class="extra-panel">
+    <div class="stat-card"><div class="stat-value" id="stat-wordbank">0</div><div class="stat-label">Words Solved</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-quest">—</div><div class="stat-label">Today’s Quest</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-quest-status">❌</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-tile-size">52</div><div class="stat-label">Tile Size</div></div>
+    <input type="range" id="size-slider" min="40" max="70" value="52">
+</div>
+
+<div class="btn-row" id="share-row" style="display:none;">
+    <button class="btn" id="btn-share">📋 Copy results</button>
+</div>
+
+<!-- MODALS -->
+<div id="modal-leaderboard" class="modal" style="display:none;">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-leaderboard')">✖</button>
+        <h2>🏆 Leaderboard</h2>
+        <ol id="lb-list"></ol>
+    </div>
+</div>
+
+<div id="modal-theme" class="modal" style="display:none;">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-theme')">✖</button>
+        <h2>🎨 Choose Theme</h2>
+        <ul id="theme-list"></ul>
+    </div>
+</div>
+
+<div id="modal-store" class="modal" style="display:none;">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('modal-store')">✖</button>
+        <h2>🛒 Skin Store</h2>
+        <p>Free demo – click “Buy” to unlock a theme.</p>
+        <ul id="store-list"></ul>
+    </div>
+</div>
+
+<script>
+/* ────────────────────── PARTICLE BACKGROUND (unchanged) ────────────────────── */
+(function(){
+    const canvas=document.getElementById('particle-canvas');
+    const ctx=canvas.getContext('2d');
+    const COUNT=45;
+    const particles=[];
+    function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
+    addEventListener('resize',resize);resize();
+    const getAccent=()=>getComputedStyle(document.documentElement)
+        .getPropertyValue('--accent').trim()||'#00f2ff';
+    class Particle{
+        constructor(){this.reset();}
+        reset(){
+            this.x=Math.random()*canvas.width;
+            this.y=Math.random()*canvas.height;
+            this.vx=(Math.random()-0.5)*0.35;
+            this.vy=(Math.random()-0.5)*0.35;
+            this.size=Math.random()*2.5+0.5;
+            this.opacity=Math.random()*0.35+0.05;
+        }
+        update(){this.x+=this.vx;this.y+=this.vy;
+            if(this.x<0||this.x>canvas.width) this.vx*=-1;
+            if(this.y<0||this.y>canvas.height) this.vy*=-1;}
+        draw(color){
+            ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+            ctx.fillStyle=color+Math.floor(this.opacity*255).toString(16).padStart(2,'0');
+            ctx.fill();}
+    }
+    for(let i=0;i<COUNT;i++) particles.push(new Particle());
+    function animate(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const accent=getAccent();
+        particles.forEach(p=>{p.update();p.draw(accent);});
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+
+/* ────────────────────── CORE GAME & FEATURES ────────────────────── */
+(function(){
+    /* ---------- WORD LISTS ---------- */
+    const ALLOWED_URL='https://gist.githubusercontent.com/cfreshman/dec102adb5e60a8299857cbf78f6cf57/raw/15ec4eb961a969d6e263cea4d5b4a180bdeee7bd/allowed.txt';
+    const ANSWERS_URL='https://gist.githubusercontent.com/cfreshman/dec102adb5e60a8299857cbf78f6cf57/raw/15ec4eb961a969d6e263cea4d5b4a180bdeee7bd/answers.txt';
+    let ALLOWED_SET=new Set();
+    let ANSWERS_ARRAY=[];
+    async function fetchWords(){
+        try{
+            const [aRes,ansRes]=await Promise.all([fetch(ALLOWED_URL),fetch(ANSWERS_URL)]);
+            const aTxt=await aRes.text(); const ansTxt=await ansRes.text();
+            aTxt.split(/\s+/).filter(w=>w.length===5).forEach(w=>ALLOWED_SET.add(w.toLowerCase()));
+            ansTxt.split(/\s+/).filter(w=>w.length===5).forEach(w=>{const lw=w.toLowerCase();ALLOWED_SET.add(lw);ANSWERS_ARRAY.push(lw);});
+            document.getElementById('loading-overlay').style.display='none';
+            initGame();
+        }catch(e){
+            document.getElementById('loading-overlay').textContent='❌ Failed to load word lists.';
+        }
+    }
+
+    /* ---------- STATE (localStorage) ---------- */
+    const STORAGE_KEY='neonskull_wordle_state';
+    const DEFAULT_STATE={
+        stats:{played:0,wins:0,streak:0,maxStreak:0,xp:0,level:1},
+        leaderboard:[],
+        achievements:{},
+        unlockedThemes:['default'],
+        wordBank:new Set(),
+        hardModeUnlocked:false,
+        theme:'default',
+        dailyQuest:null
+    };
+    let state=DEFAULT_STATE;
+    function loadState(){
+        const raw=localStorage.getItem(STORAGE_KEY);
+        if(raw){
+            const parsed=JSON.parse(raw);
+            parsed.wordBank=new Set(parsed.wordBank||[]);
+            state=Object.assign({},DEFAULT_STATE,parsed);
+        }else state=DEFAULT_STATE;
+    }
+    function saveState(){
+        const toSave={...state, wordBank:Array.from(state.wordBank)};
+        localStorage.setItem(STORAGE_KEY,JSON.stringify(toSave));
+    }
+
+    /* ---------- DOM REFERENCES ---------- */
+    const boardEl=document.getElementById('game-board');
+    const msgEl=document.getElementById('message');
+    const keyboardEl=document.getElementById('keyboard');
+    const shareRow=document.getElementById('share-row');
+    const sizeSlider=document.getElementById('size-slider');
+
+    let tiles=[];                // tiles[row][col] → DOM element
+    let currentRow=0, currentCol=0;
+    let answer='';              // current word
+    let gameOver=false;
+    let keyStates={};           // letter → state
+    let lastResult=[];          // result of final guess
+    let pendingTimeouts=[];     // for clearing on reset
+    let hardMode=false;         // toggled by button
+
+    /* ---------- BUILD BOARD & KEYBOARD ---------- */
+    function buildBoard(){
+        boardEl.innerHTML=''; tiles=[];
+        for(let r=0;r<6;r++){
+            const rowDiv=document.createElement('div'); rowDiv.className='row';
+            tiles[r]=[];
+            for(let c=0;c<5;c++){
+                const tile=document.createElement('div'); tile.className='tile';
+                rowDiv.appendChild(tile); tiles[r][c]=tile;
+            }
+            boardEl.appendChild(rowDiv);
+        }
+    }
+    function buildKeyboard(){
+        const rows=[
+            'q w e r t y u i o p',
+            'a s d f g h j k l',
+            'Enter z x c v b n m Backspace'
+        ];
+        keyboardEl.innerHTML='';
+        rows.forEach(row=>{
+            const rowDiv=document.createElement('div'); rowDiv.className='keyboard-row';
+            row.split(' ').forEach(k=>{
+                const btn=document.createElement('button');
+                btn.className='key';
+                if(k==='Enter' || k==='Backspace'){
+                    btn.classList.add('wide');
+                    btn.textContent=k==='Backspace'?'⌫':'↵';
+                }else{
+                    btn.textContent=k;
+                }
+                btn.dataset.key=k.toLowerCase();
+                btn.addEventListener('click',()=>handleKey(k));
+                rowDiv.appendChild(btn);
+            });
+            keyboardEl.appendChild(rowDiv);
+        });
+        updateKeyboardStyles();
+    }
+    function clearAllTiles(){
+        for(let r=0;r<6;r++) for(let c=0;c<5;c++){
+            const t=tiles[r][c];
+            t.textContent=''; t.className='tile';
+        }
+    }
+
+    /* ---------- ANIMATION / TIMEOUT CLEAN‑UP ---------- */
+    function clearAnimations(){
+        for(let r=0;r<6;r++){
+            for(let c=0;c<5;c++) tiles[r][c].classList.remove('flip');
+            const rowEl=boardEl.children[r];
+            rowEl && rowEl.classList.remove('shake');
+        }
+    }
+    function clearPendingTimeouts(){
+        pendingTimeouts.forEach(id=>clearTimeout(id));
+        pendingTimeouts=[];
+    }
+
+    /* ---------- PICK RANDOM ANSWER ---------- */
+    function pickAnswer(){
+        answer=ANSWERS_ARRAY[Math.floor(Math.random()*ANSWERS_ARRAY.length)];
+        console.log('%c[DEBUG] answer → '+answer,'color:#f90');
+    }
+
+    /* ---------- RESET / NEW GAME ---------- */
+    function resetGame(){
+        clearAnimations(); clearPendingTimeouts();
+        buildBoard(); buildKeyboard();
+        pickAnswer();
+        currentRow=0; currentCol=0; gameOver=false;
+        keyStates={}; lastResult=[]; msgEl.textContent=''; shareRow.style.display='none';
+        document.getElementById('hard-state').textContent=hardMode?'ON':'OFF';
+        renderStats(); renderWordBank(); renderQuest();
+    }
+
+    /* ---------- INPUT HANDLING ---------- */
+    function handleKey(key){
+        if(gameOver) return;
+
+        if(key==='Enter'){
+            if(currentCol!==5){
+                showMsg('Not enough letters!'); shakeRow(currentRow); return;
+            }
+            const guess=tiles[currentRow].map(t=>t.textContent).join('');
+            if(!ALLOWED_SET.has(guess)){
+                showMsg('Word not in list'); shakeRow(currentRow); return;
+            }
+            if(hardMode && !hardModeCheck(guess)){
+                showMsg('Must reuse revealed letters!'); shakeRow(currentRow); return;
+            }
+            submitGuess(guess);
+        }else if(key==='Backspace'){
+            if(currentCol>0){
+                currentCol--;
+                const tile=tiles[currentRow][currentCol];
+                tile.textContent=''; tile.classList.remove('pop');
+            }
+        }else if(/^[a-z]$/i.test(key)){
+            if(currentCol<5){
+                const tile=tiles[currentRow][currentCol];
+                tile.textContent=key.toLowerCase();
+                tile.classList.add('pop');
+                const t=setTimeout(()=>tile.classList.remove('pop'),100);
+                pendingTimeouts.push(t);
+                currentCol++;
+                playSound('type');
+            }
+        }
+    }
+
+    function hardModeCheck(guess){
+        // All revealed letters (correct/present) must appear in the guess
+        for(let r=0;r<currentRow;r++){
+            for(let c=0;c<5;c++){
+                const tile=tiles[r][c];
+                if(tile.classList.contains('correct') && guess[c]!==tile.textContent) return false;
+                if(tile.classList.contains('present') && !guess.includes(tile.textContent)) return false;
+            }
+        }
+        return true;
+    }
+
+    /* ---------- SUBMIT GUESS ---------- */
+    function submitGuess(guess){
+        const result=evaluateGuess(guess);
+        lastResult=result;
+        for(let c=0;c<5;c++){
+            const tile=tiles[currentRow][c];
+            tile.classList.remove('correct','present','absent');
+            tile.classList.add(result[c]);
+            const flip=setTimeout(()=>{
+                tile.classList.add('flip');
+                playSound('flip');
+                const rm=setTimeout(()=>tile.classList.remove('flip'),500);
+                pendingTimeouts.push(rm);
+            },c*200);
+            pendingTimeouts.push(flip);
+        }
+        updateKeyboardStates(guess,result);
+        updateKeyboardStyles();
+        addXP(2); // XP per guess
+
+        if(guess===answer){
+            gameOver=true;
+            addXP(10);
+            updateStats(true);
+            confetti();
+            skullRise();
+            const tries=currentRow+1;
+            setTimeout(()=>showMsg(`🎉 You won in ${tries===1?'1 try':tries+' tries'}!`),1500);
+            unlockAchievement('first-win');
+            if(hardMode) unlockAchievement('hard-mode-win');
+            state.wordBank.add(answer);
+            checkQuest(guess);
+            showShareButton(guess,tries);
+        }else if(currentRow===5){
+            gameOver=true;
+            updateStats(false);
+            setTimeout(()=>showMsg(`💀 The word was ${answer.toUpperCase()}`),1500);
+            checkQuest(guess);
+            showShareButton(guess,6);
+        }else{
+            currentRow++; currentCol=0;
+        }
+    }
+
+    function evaluateGuess(guess){
+        const res=Array(5).fill('absent');
+        const ansArr=answer.split('');
+        const guessArr=guess.split('');
+        for(let i=0;i<5;i++){
+            if(guessArr[i]===ansArr[i]){
+                res[i]='correct';
+                ansArr[i]=null; guessArr[i]=null;
+            }
+        }
+        for(let i=0;i<5;i++){
+            if(guessArr[i]===null) continue;
+            const idx=ansArr.indexOf(guessArr[i]);
+            if(idx!==-1){res[i]='present'; ansArr[idx]=null;}
+        }
+        return res;
+    }
+
+    function shakeRow(rowIdx){
+        const row=boardEl.children[rowIdx];
+        row.classList.add('shake');
+        const id=setTimeout(()=>row.classList.remove('shake'),400);
+        pendingTimeouts.push(id);
+    }
+
+    /* ---------- KEYBOARD STATE ---------- */
+    function updateKeyboardStates(guess,result){
+        for(let i=0;i<5;i++){
+            const l=guess[i];
+            const r=result[i];
+            const cur=keyStates[l];
+            if(!cur || r==='correct' || (r==='present' && cur==='absent')){
+                keyStates[l]=r;
+            }
+        }
+    }
+    function updateKeyboardStyles(){
+        document.querySelectorAll('.key').forEach(btn=>{
+            const l=btn.dataset.key;
+            if(l && l.length===1 && keyStates[l]){
+                btn.classList.remove('correct','present','absent');
+                btn.classList.add(keyStates[l]);
+            }else if(l && l.length===1){
+                btn.classList.remove('correct','present','absent');
+            }
+        });
+    }
+
+    /* ---------- MESSAGES ---------- */
+    function showMsg(txt){
+        msgEl.textContent=txt;
+        const id=setTimeout(()=>{if(msgEl.textContent===txt)msgEl.textContent='';},3000);
+        pendingTimeouts.push(id);
+    }
+
+    /* ---------- STATISTICS, XP & LEVEL ---------- */
+    function addXP(amount){
+        state.stats.xp+=amount;
+        const newLevel=Math.floor(state.stats.xp/100)+1;
+        if(newLevel>state.stats.level){
+            state.stats.level=newLevel;
+            unlockAchievement('level-'+newLevel);
+            if(newLevel>=2 && !state.hardModeUnlocked){
+                state.hardModeUnlocked=true;
+                unlockAchievement('hard-mode-unlocked');
+                // Enable hard‑mode button now
+                document.getElementById('btn-hard').disabled=false;
+            }
+        }
+        renderStats();
+    }
+
+    function updateStats(won){
+        const s=state.stats;
+        s.played++;
+        if(won){s.wins++; s.streak++; if(s.streak>s.maxStreak) s.maxStreak=s.streak;}
+        else s.streak=0;
+        state.leaderboard.push({date:new Date().toISOString().slice(0,10), guesses:currentRow+1});
+        state.leaderboard.sort((a,b)=>a.guesses-b.guesses);
+        state.leaderboard=state.leaderboard.slice(0,10);
+        saveState();
+        renderStats();
+    }
+
+    function renderStats(){
+        const s=state.stats;
+        document.getElementById('stat-played').textContent=s.played;
+        document.getElementById('stat-wins').textContent=s.wins;
+        document.getElementById('stat-streak').textContent=s.streak;
+        document.getElementById('stat-maxstreak').textContent=s.maxStreak;
+        const acc=s.played?Math.round(s.wins/s.played*100):0;
+        document.getElementById('stat-accuracy').textContent=acc+'%';
+        document.getElementById('stat-xp').textContent=s.xp;
+        document.getElementById('stat-level').textContent=s.level;
+    }
+
+    /* ---------- ACHIEVEMENTS ---------- */
+    const ACH_DEF={
+        'first-win':{name:'First Win',desc:'Win your first game'},
+        'hard-mode-win':{name:'Hard‑Mode Hero',desc:'Win while Hard‑Mode is ON'},
+        'hard-mode-unlocked':{name:'Hard‑Mode Unlocked',desc:'Reach Level 2'},
+        'level-2':{name:'Level 2',desc:'Reach Level 2'}
+    };
+    function unlockAchievement(id){
+        if(state.achievements[id]) return;
+        state.achievements[id]=true;
+        saveState();
+        showMsg(`🏅 Achievement unlocked: ${ACH_DEF[id].name}`);
+    }
+
+    /* ---------- LEADERBOARD MODAL ---------- */
+    function showLeaderboard(){
+        const list=document.getElementById('lb-list');
+        list.innerHTML='';
+        state.leaderboard.forEach(e=>{
+            const li=document.createElement('li');
+            li.textContent=`${e.date} – ${e.guesses} guess${e.guesses>1?'es':''}`;
+            list.appendChild(li);
+        });
+        openModal('modal-leaderboard');
+    }
+
+    /* ---------- THEME MODAL & STORE ---------- */
+    const THEMES={
+        default:{name:'Neon',locked:false},
+        retro:{name:'Retro',locked:true},
+        halloween:{name:'Halloween',locked:true},
+        cyber:{name:'Cyber',locked:true}
+    };
+    function openThemePicker(){
+        const ul=document.getElementById('theme-list');
+        ul.innerHTML='';
+        Object.keys(THEMES).forEach(id=>{
+            const li=document.createElement('li');
+            li.textContent=THEMES[id].name+' ';
+            const btn=document.createElement('button');
+            btn.textContent=state.unlockedThemes.includes(id)||!THEMES[id].locked?'Select':'Locked';
+            btn.disabled=!(state.unlockedThemes.includes(id)||!THEMES[id].locked);
+            btn.onclick=()=>{setTheme(id); closeModal('modal-theme');};
+            li.appendChild(btn);
+            ul.appendChild(li);
+        });
+        openModal('modal-theme');
+    }
+    function setTheme(id){
+        document.documentElement.setAttribute('data-theme',id);
+        state.theme=id;
+        saveState();
+    }
+    function initStore(){
+        const ul=document.getElementById('store-list');
+        ul.innerHTML='';
+        Object.keys(THEMES).forEach(id=>{
+            if(id==='default') return;
+            const li=document.createElement('li');
+            li.textContent=THEMES[id].name+' ';
+            const btn=document.createElement('button');
+            btn.textContent=state.unlockedThemes.includes(id)?'Owned':'Buy';
+            btn.disabled=state.unlockedThemes.includes(id);
+            btn.onclick=()=>{
+                state.unlockedThemes.push(id);
+                saveState();
+                btn.textContent='Owned';
+                btn.disabled=true;
+                showMsg(`${THEMES[id].name} theme unlocked!`);
+            };
+            li.appendChild(btn);
+            ul.appendChild(li);
+        });
+    }
+
+    /* ---------- HINT ---------- */
+    function giveHint(){
+        if(gameOver) return;
+        const unrevealed=[];
+        for(let i=0;i<5;i++){
+            const tile=tiles[currentRow][i];
+            if(tile.textContent==='' && answer[i]) unrevealed.push(i);
+        }
+        if(unrevealed.length===0){showMsg('No hint available right now');return;}
+        const idx=unrevealed[Math.floor(Math.random()*unrevealed.length)];
+        const letter=answer[idx];
+        const tile=tiles[currentRow][idx];
+        tile.textContent=letter;
+        tile.classList.add('pop');
+        const id=setTimeout(()=>tile.classList.remove('pop'),100);
+        pendingTimeouts.push(id);
+    }
+
+    /* ---------- SHARE BUTTON ---------- */
+    function showShareButton(guess,tries){
+        shareRow.style.display='flex';
+        const emojiRow=lastResult.map(r=>r==='correct'?'🟩':r==='present'?'🟨':'⬜').join('');
+        const txt=`NeonSkull Wordle ${tries===6?'X':tries}/6\n${guess.toUpperCase()}\n${emojiRow}`;
+        document.getElementById('btn-share').onclick=async()=>{
+            try{
+                await navigator.clipboard.writeText(txt);
+                showMsg('Result copied to clipboard!');
+            }catch{showMsg('Copy failed – try manually');}
+        };
+    }
+
+    /* ---------- MINI‑QUEST ---------- */
+    function generateQuest(){
+        const letters='abcdefghijklmnopqrstuvwxyz';
+        const target=letters[Math.floor(Math.random()*letters.length)];
+        state.dailyQuest={text:`Find a word that contains the letter “${target.toUpperCase()}”.`,
+            condition:(guess)=>guess.includes(target),
+            completed:false};
+        saveState();
+        renderQuest();
+    }
+    function renderQuest(){
+        const quest=document.getElementById('stat-quest');
+        const status=document.getElementById('stat-quest-status');
+        if(state.dailyQuest){
+            quest.textContent=state.dailyQuest.text;
+            status.textContent=state.dailyQuest.completed?'✅':'❌';
+        }else{
+            quest.textContent='—';
+            status.textContent='❌';
+        }
+    }
+    function checkQuest(guess){
+        if(state.dailyQuest && !state.dailyQuest.completed && state.dailyQuest.condition(guess)){
+            state.dailyQuest.completed=true;
+            unlockAchievement('quest-completed');
+            showMsg('✅ Quest completed!');
+            saveState();
+            renderQuest();
+        }
+    }
+
+    /* ---------- WORD‑BANK ---------- */
+    function renderWordBank(){
+        document.getElementById('stat-wordbank').textContent=state.wordBank.size;
+    }
+
+    /* ---------- TILE‑SIZE SLIDER ---------- */
+    sizeSlider.addEventListener('input',e=>{
+        const sz=e.target.value;
+        document.documentElement.style.setProperty('--tile-size',sz+'px');
+        document.getElementById('stat-tile-size').textContent=sz;
+    });
+
+    /* ---------- SOUND EFFECTS ---------- */
+    const sounds={
+        type:new Audio('https://freesound.org/data/previews/66/66773_931655-lq.mp3'),
+        pop:new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3'),
+        flip:new Audio('https://freesound.org/data/previews/331/331911_3248244-lq.mp3')
+    };
+    function playSound(name){
+        const s=sounds[name];
+        if(s){s.currentTime=0; s.play();}
+    }
+
+    /* ---------- CONFETTI & RISING SKULL ---------- */
+    function confetti(){
+        const c=document.createElement('canvas');
+        c.style.position='fixed';c.style.left='0';c.style.top='0';
+        c.width=innerWidth;c.height=innerHeight;c.style.pointerEvents='none';
+        c.style.zIndex='9999';document.body.appendChild(c);
+        const ctx=c.getContext('2d');
+        const particles=[];
+        const colors=['#fcd34d','#fbbf24','#ef4444','#34d399','#60a5fa'];
+        for(let i=0;i<120;i++){
+            particles.push({
+                x:innerWidth/2, y:innerHeight/2,
+                vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8,
+                size:Math.random()*4+2,
+                color:colors[Math.floor(Math.random()*colors.length)],
+                life:Math.random()*30+30
+            });
+        }
+        function draw(){
+            ctx.clearRect(0,0,c.width,c.height);
+            particles.forEach(p=>{
+                p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.life--;
+                ctx.fillStyle=p.color;
+                ctx.fillRect(p.x,p.y,p.size,p.size);
+            });
+            if(particles.some(p=>p.life>0)) requestAnimationFrame(draw);
+            else c.remove();
+        }
+        draw();
+    }
+    function skullRise(){
+        const img=document.createElement('img');
+        img.src='https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/logos/NeonSkull.png';
+        img.style.position='fixed';
+        img.style.left='50%'; img.style.bottom='-100px';
+        img.style.width='150px'; img.style.height='150px';
+        img.style.transform='translateX(-50%)';
+        img.style.zIndex='9999';
+        document.body.appendChild(img);
+        let y=-100;
+        const rise=setInterval(()=>{
+            y+=5;
+            img.style.bottom=`${y}px`;
+            img.style.opacity=1-(y/500);
+            if(y>500){clearInterval(rise); img.remove();}
+        },30);
+    }
+
+    /* ────────────────────── MODAL HELPERS (global) ────────────────────── */
+    function openModal(id){document.getElementById(id).style.display='flex';}
+    function closeModal(id){document.getElementById(id).style.display='none';}
+    // expose globally so inline onclick works
+    window.openModal = openModal;
+    window.closeModal = closeModal;
+
+    /* ────────────────────── PHYSICAL KEYBOARD ────────────────────── */
+    addEventListener('keydown',e=>{
+        if(e.ctrlKey||e.metaKey||e.altKey) return;
+        if(e.key==='Enter'){e.preventDefault();handleKey('Enter');}
+        else if(e.key==='Backspace'){e.preventDefault();handleKey('Backspace');}
+        else if(e.key==='?'){giveHint();}
+        else if(/^[a-z]$/i.test(e.key)) handleKey(e.key.toLowerCase());
+    });
+
+    /* ────────────────────── BUTTON LISTENERS ────────────────────── */
+    document.getElementById('btn-new').addEventListener('click',resetGame);
+    document.getElementById('btn-hard').addEventListener('click',()=>{
+        if(!state.hardModeUnlocked){
+            showMsg('Hard‑Mode locked – reach Level 2 first');
+            return;
+        }
+        hardMode=!hardMode;
+        document.getElementById('hard-state').textContent=hardMode?'ON':'OFF';
+    });
+    document.getElementById('btn-hint').addEventListener('click',giveHint);
+    document.getElementById('btn-toggle-dark').addEventListener('click',()=>{
+        const cur=document.documentElement.getAttribute('data-mode');
+        document.documentElement.setAttribute('data-mode',cur==='light'?'':'light');
+    });
+    document.getElementById('btn-reset-stats').addEventListener('click',()=>{
+        if(confirm('Clear all stats & progress?')){localStorage.removeItem(STORAGE_KEY);location.reload();}
+    });
+    document.getElementById('btn-leaderboard').addEventListener('click',showLeaderboard);
+    document.getElementById('btn-theme').addEventListener('click',openThemePicker);
+    document.getElementById('btn-store').addEventListener('click',()=>{
+        initStore(); openModal('modal-store');
+    });
+    document.getElementById('btn-invite').addEventListener('click',()=>{
+        const link=`${location.origin}${location.pathname}`;
+        navigator.clipboard.writeText(link).then(()=>showMsg('Invite link copied!'));
+    });
+
+    /* ────────────────────── GAME INITIALISATION ────────────────────── */
+    function initGame(){
+        loadState();
+        buildBoard(); buildKeyboard(); pickAnswer();
+        renderStats(); renderWordBank(); renderQuest();
+        // apply saved theme
+        setTheme(state.theme||'default');
+        // hard‑mode button disabled until unlocked
+        document.getElementById('btn-hard').disabled=!state.hardModeUnlocked;
+        // generate a quest if none exists for today
+        if(!state.dailyQuest) generateQuest();
+    }
+
+    fetchWords();
+})();
+</script>
+</body>
+</html>
