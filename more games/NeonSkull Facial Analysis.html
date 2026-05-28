@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonSKull - Looksmaxxing Analyzer</title>
+    
+    <!-- MediaPipe dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --neon-green: #00ff00;
+            --neon-green-dim: rgba(0, 255, 0, 0.2);
+            --text-color: #e0e0e0;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(var(--neon-green-dim) 1px, transparent 1px),
+                linear-gradient(90deg, var(--neon-green-dim) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: center center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .glitch {
+            font-size: 4rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+            letter-spacing: 5px;
+        }
+
+        header p {
+            color: var(--neon-green);
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green);
+            border-radius: 5px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1); /* Mirror */
+            pointer-events: none;
+            object-fit: contain; /* Ensures aspect ratio is preserved */
+        }
+        
+        .input_video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transform: scaleX(-1); /* Mirror */
+            object-fit: contain;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-green), 0 0 30px var(--neon-green);
+            animation: scan 3s linear infinite;
+            display: none;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        .neon-button {
+            background: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: var(--font-main);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px var(--neon-green-dim) inset, 0 0 10px var(--neon-green-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .neon-button:hover {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-green) inset, 0 0 20px var(--neon-green);
+        }
+
+        .neon-button:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .warning-banner {
+            background-color: #ff0000;
+            color: #000;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px #ff0000;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 640px;
+            border-radius: 5px;
+        }
+
+        .results-panel {
+            border: 1px solid var(--neon-green);
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 15px var(--neon-green-dim);
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .results-panel h2 {
+            color: var(--neon-green);
+            text-align: center;
+            text-shadow: 0 0 5px var(--neon-green);
+            border-bottom: 1px solid var(--neon-green);
+            padding-bottom: 10px;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 5rem;
+            color: var(--neon-green);
+            text-shadow: 0 0 20px var(--neon-green);
+            font-weight: bold;
+        }
+
+        .phi-display {
+            text-align: center;
+            font-size: 2rem;
+            color: #ffd700;
+            text-shadow: 0 0 15px #ffd700;
+            font-weight: bold;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            font-family: 'Times New Roman', serif;
+            letter-spacing: 2px;
+        }
+
+        .score-display .out-of {
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .metric-card {
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .metric-title {
+            font-weight: bold;
+            color: var(--neon-green);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .metric-rating {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+        
+        .rating-excellent { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+        .rating-good { color: #aaff00; }
+        .rating-average { color: #ffff00; }
+        .rating-poor { color: #ff5500; }
+        .rating-bad { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+
+        .loading {
+            color: var(--neon-green);
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1 class="glitch" data-text="NeonSKull">NeonSKull</h1>
+            <p>SYSTEM.MALE_ANALYSIS_PROTOCOL</p>
+        </header>
+
+        <div class="main-content">
+            <div class="warning-banner">
+                WARNING: SELFIES DISTORT FACIAL PROPORTIONS. FOR MAXIMUM ACCURACY, STAND 5 FEET AWAY FROM CAMERA AND ZOOM IN.
+            </div>
+            <div id="status-text" class="loading">INITIALIZING NEURAL NET...</div>
+            <div class="video-container">
+                <video class="input_video" autoplay playsinline></video>
+                <canvas class="output_canvas" width="640" height="480"></canvas>
+                <div class="scanner-line" id="scanner-line"></div>
+            </div>
+            
+            <div class="controls">
+                <button id="scan-btn" class="neon-button" disabled>AWAITING SIGNAL</button>
+                <div style="margin-top: 15px; text-align: center;">
+                    <label for="image-upload" class="neon-button" style="font-size: 1rem; padding: 10px 20px; cursor: pointer; border-style: dashed;">UPLOAD PHOTO INSTEAD</label>
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <div class="results-panel" id="results-panel">
+            <h2>ANALYSIS COMPLETE</h2>
+            <div class="score-display">
+                <span id="final-score">--</span><span class="out-of">/10</span>
+            </div>
+            <div class="phi-display" id="phi-score">PHI: --</div>
+            <div class="metrics-grid" id="metrics-grid">
+                <!-- Metrics injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoElement = document.getElementsByClassName('input_video')[0];
+        const canvasElement = document.getElementsByClassName('output_canvas')[0];
+        const canvasCtx = canvasElement.getContext('2d');
+        const scanBtn = document.getElementById('scan-btn');
+        const statusText = document.getElementById('status-text');
+        const resultsPanel = document.getElementById('results-panel');
+        const metricsGrid = document.getElementById('metrics-grid');
+        const finalScoreEl = document.getElementById('final-score');
+        const phiScoreEl = document.getElementById('phi-score');
+        const scannerLine = document.getElementById('scanner-line');
+
+        const imageUpload = document.getElementById('image-upload');
+        let currentLandmarks = null;
+        let isScanning = false;
+        let modelLoaded = false;
+        let isPhotoUpload = false;
+
+        // --- LOOKSMAX METRIC CALCULATOR ---
+
+        // Helper to calculate distance on pre-scaled coordinates
+        function getDistance(p1, p2) {
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const dz = p1.z - p2.z;
+            return Math.sqrt(dx*dx + dy*dy + dz*dz);
+        }
+
+        function analyzeFace(landmarks) {
+            // LANDMARK INDICES (MediaPipe Face Mesh)
+            // Expanded with additional points for maximum accuracy
+            const idx = {
+                // Eyes
+                leftEyeInner: 133, leftEyeOuter: 33,
+                rightEyeInner: 362, rightEyeOuter: 263,
+                leftPupil: 468, rightPupil: 473,
+                leftEyeTop: 159, leftEyeBottom: 145,
+                rightEyeTop: 386, rightEyeBottom: 374,
+                // Iris (refined)
+                leftIrisLeft: 471, leftIrisRight: 469,
+                leftIrisTop: 470, leftIrisBottom: 472,
+                rightIrisLeft: 476, rightIrisRight: 474,
+                rightIrisTop: 475, rightIrisBottom: 477,
+                // Brows
+                leftEyebrowInner: 107, leftEyebrowOuter: 105,
+                leftEyebrowPeak: 70,
+                rightEyebrowInner: 336, rightEyebrowOuter: 334,
+                rightEyebrowPeak: 300,
+                // Nose
+                nasion: 8,
+                noseTip: 4,
+                subnasale: 2,
+                noseLeft: 129, noseRight: 358,
+                noseBridgeMid: 6,
+                // Mouth & Lips
+                prosthion: 0,
+                mouthLeft: 61, mouthRight: 291,
+                upperLipTop: 0, upperLipBottom: 13,
+                lowerLipTop: 14, lowerLipBottom: 17,
+                cupidBowLeft: 37, cupidBowRight: 267,
+                // Chin & Jaw
+                menton: 152,
+                pogonion: 199,
+                jawLeft: 132, jawRight: 361,
+                gonionLeft: 58, gonionRight: 288,
+                // Face frame
+                bizygomaticLeft: 234, bizygomaticRight: 454,
+                glabella: 9,
+                trichion: 10,
+                // Symmetry anchors (multi-point)
+                symLeftCheekUpper: 116, symRightCheekUpper: 345,
+                symLeftCheekLower: 187, symRightCheekLower: 411,
+                symLeftJawMid: 177, symRightJawMid: 401,
+                symLeftEyeMid: 160, symRightEyeMid: 385,
+                symLeftNostril: 48, symRightNostril: 278,
+                symLeftMouth: 57, symRightMouth: 287
+            };
+
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const pts = {};
+
+            // 1. Convert to true pixel space
+            for (const key in idx) {
+                let p = landmarks[idx[key]];
+                pts[key] = { x: p.x * w, y: p.y * h, z: p.z * w };
+            }
+
+            // --- 3D AFFINE NORMALIZATION MATRIX ---
+            const sub = (v1, v2) => ({ x: v1.x - v2.x, y: v1.y - v2.y, z: v1.z - v2.z });
+            const cross = (v1, v2) => ({
+                x: v1.y * v2.z - v1.z * v2.y,
+                y: v1.z * v2.x - v1.x * v2.z,
+                z: v1.x * v2.y - v1.y * v2.x
+            });
+            const norm = (v) => {
+                const mag = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+                if (mag === 0) return { x: 0, y: 0, z: 1 };
+                return { x: v.x/mag, y: v.y/mag, z: v.z/mag };
+            };
+
+            const leftOfScreenPupil = pts.leftPupil.x < pts.rightPupil.x ? pts.leftPupil : pts.rightPupil;
+            const rightOfScreenPupil = pts.leftPupil.x > pts.rightPupil.x ? pts.leftPupil : pts.rightPupil;
+            
+            const xAxis = norm(sub(rightOfScreenPupil, leftOfScreenPupil));
+            const tempYAxis = norm(sub(pts.menton, pts.nasion));
+            const zAxis = norm(cross(xAxis, tempYAxis));
+            const yAxis = norm(cross(zAxis, xAxis));
+
+            // Apply rotation to flatten face
+            for (const key in pts) {
+                let p = pts[key];
+                pts[key] = {
+                    x: p.x * xAxis.x + p.y * xAxis.y + p.z * xAxis.z,
+                    y: p.x * yAxis.x + p.y * yAxis.y + p.z * yAxis.z,
+                    z: p.x * zAxis.x + p.y * zAxis.y + p.z * zAxis.z
+                };
+            }
+
+            const getFeatureTilt = (inner, outer) => {
+                const leftPoint = inner.x < outer.x ? inner : outer;
+                const rightPoint = inner.x > outer.x ? inner : outer;
+                const dx = rightPoint.x - leftPoint.x;
+                const dy = leftPoint.y - rightPoint.y; 
+                let rawAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+                if (outer === leftPoint) rawAngle = -rawAngle;
+                return rawAngle;
+            };
+
+            // --- ABSOLUTE SCALE ESTIMATION (Iris = 11.7mm) ---
+            const leftIrisW = getDistance(pts.leftIrisLeft, pts.leftIrisRight);
+            const rightIrisW = getDistance(pts.rightIrisLeft, pts.rightIrisRight);
+            const leftIrisH = getDistance(pts.leftIrisTop, pts.leftIrisBottom);
+            const rightIrisH = getDistance(pts.rightIrisTop, pts.rightIrisBottom);
+            // Average horizontal and vertical for robustness against squinting
+            const avgIrisW = (leftIrisW + rightIrisW + leftIrisH + rightIrisH) / 4;
+            const mmPerPixel = 11.7 / avgIrisW;
+            const getMM = (dist) => dist * mmPerPixel;
+
+            // =====================================================
+            // METRIC CALCULATIONS
+            // =====================================================
+
+            // 1. Canthal Tilt
+            const leftTilt = getFeatureTilt(pts.leftEyeInner, pts.leftEyeOuter);
+            const rightTilt = getFeatureTilt(pts.rightEyeInner, pts.rightEyeOuter);
+            const avgTilt = (leftTilt + rightTilt) / 2;
+
+            // 2. Midface Ratio
+            const ipd = getDistance(pts.leftPupil, pts.rightPupil);
+            const midfaceHeight = getDistance(pts.nasion, pts.prosthion);
+            const midfaceRatio = ipd / midfaceHeight;
+
+            // 3. FWHR
+            const fwhrWidth = getDistance(pts.bizygomaticLeft, pts.bizygomaticRight);
+            const fwhr = fwhrWidth / midfaceHeight;
+
+            // 4. Eye Spacing (averaged both eyes for precision)
+            const intercanthal = getDistance(pts.leftEyeInner, pts.rightEyeInner);
+            const leftEyeW = getDistance(pts.leftEyeInner, pts.leftEyeOuter);
+            const rightEyeW = getDistance(pts.rightEyeInner, pts.rightEyeOuter);
+            const eyeWidth = (leftEyeW + rightEyeW) / 2;
+            const eyeSpacing = intercanthal / eyeWidth;
+
+            // 5. Nose to Mouth Ratio
+            const noseWidth = getDistance(pts.noseLeft, pts.noseRight);
+            const mouthWidth = getDistance(pts.mouthLeft, pts.mouthRight);
+            const noseMouthRatio = noseWidth / mouthWidth;
+
+            // 6. Chin to Philtrum Ratio
+            const philtrumLength = getDistance(pts.subnasale, pts.prosthion);
+            const chinLength = getDistance(pts.lowerLipBottom, pts.menton);
+            const chinPhiltrumRatio = chinLength / philtrumLength;
+            
+            // 7. Lip Fullness Ratio
+            const upperLipThickness = getDistance(pts.upperLipTop, pts.upperLipBottom);
+            const lowerLipThickness = getDistance(pts.lowerLipTop, pts.lowerLipBottom);
+            const lipRatio = upperLipThickness / lowerLipThickness;
+
+            // 8. Nasal Index
+            const noseLength = getDistance(pts.nasion, pts.subnasale);
+            const nasalIndex = noseWidth / noseLength;
+
+            // 9. Jaw/Cheek Ratio
+            const jawWidth = getDistance(pts.jawLeft, pts.jawRight);
+            const jawCheekRatio = jawWidth / fwhrWidth;
+
+            // 10. Eyebrow Tilt
+            const leftBrowTilt = getFeatureTilt(pts.leftEyebrowInner, pts.leftEyebrowOuter);
+            const rightBrowTilt = getFeatureTilt(pts.rightEyebrowInner, pts.rightEyebrowOuter);
+            const avgBrowTilt = (leftBrowTilt + rightBrowTilt) / 2;
+
+            // 11. Multi-Point Facial Symmetry (6-pair average)
+            const symPairs = [
+                [pts.bizygomaticLeft, pts.bizygomaticRight],
+                [pts.symLeftCheekUpper, pts.symRightCheekUpper],
+                [pts.symLeftCheekLower, pts.symRightCheekLower],
+                [pts.symLeftJawMid, pts.symRightJawMid],
+                [pts.symLeftNostril, pts.symRightNostril],
+                [pts.symLeftMouth, pts.symRightMouth]
+            ];
+            // Midline X is the average X of nasion and menton (after rotation they should be close)
+            const midlineX = (pts.nasion.x + pts.menton.x) / 2;
+            let symSum = 0;
+            symPairs.forEach(([left, right]) => {
+                const dL = Math.abs(left.x - midlineX);
+                const dR = Math.abs(right.x - midlineX);
+                symSum += Math.min(dL, dR) / Math.max(dL, dR);
+            });
+            const symmetryRatio = symSum / symPairs.length;
+
+            // 12. Absolute Scales & Phi
+            const fwhrWidthMM = getMM(fwhrWidth);
+            const jawWidthMM = getMM(jawWidth);
+            const mouthNosePhi = mouthWidth / noseWidth;
+            const ipdNosePhi = ipd / noseWidth;
+
+            // =====================================================
+            // NEW SCANS
+            // =====================================================
+
+            // 13. Eye Aspect Ratio (palpebral fissure height / width — hunter vs prey eyes)
+            const leftEyeH = getDistance(pts.leftEyeTop, pts.leftEyeBottom);
+            const rightEyeH = getDistance(pts.rightEyeTop, pts.rightEyeBottom);
+            const eyeAspect = ((leftEyeH / leftEyeW) + (rightEyeH / rightEyeW)) / 2;
+
+            // 14. Brow-Eye Distance (orbital set — deep vs protruding)
+            const leftBrowEyeDist = getMM(getDistance(pts.leftEyebrowPeak, pts.leftEyeTop));
+            const rightBrowEyeDist = getMM(getDistance(pts.rightEyebrowPeak, pts.rightEyeTop));
+            const avgBrowEyeDist = (leftBrowEyeDist + rightBrowEyeDist) / 2;
+
+            // 15. Lower Third Harmony (subnasale to menton proportions)
+            const lowerThirdTotal = getDistance(pts.subnasale, pts.menton);
+            const upperLipToMouth = getDistance(pts.subnasale, pts.lowerLipTop);
+            const lowerLipToChin = getDistance(pts.lowerLipBottom, pts.menton);
+            // Ideal: upper lip portion = 1/3, lower/chin portion = 2/3
+            const lowerThirdSplit = upperLipToMouth / lowerThirdTotal;
+
+            // 16. Facial Index (face height / bizygomatic width — leptoprosopic vs euryprosopic)
+            const totalFaceHeight = getDistance(pts.nasion, pts.menton);
+            const facialIndex = totalFaceHeight / fwhrWidth;
+
+            // 17. Nose Projection Ratio (nose tip protrusion relative to nose length)
+            // After rotation, Z-depth difference between nose tip and nose bridge = projection
+            const noseProjection = Math.abs(pts.noseTip.z - pts.noseBridgeMid.z);
+            const noseProjRatio = getMM(noseProjection) / getMM(noseLength);
+
+            // 18. Lip Width Phi (mouth width / philtrum width)
+            const cupidBowWidth = getDistance(pts.cupidBowLeft, pts.cupidBowRight);
+            const lipWidthPhi = mouthWidth / cupidBowWidth;
+
+            // 19. Face Height / Width Phi (total face height / bizygomatic width)
+            const faceHeightWidthPhi = totalFaceHeight / fwhrWidth;
+
+            // 20. IPD in mm (absolute interpupillary distance)
+            const ipdMM = getMM(ipd);
+
+            // =====================================================
+            // SCORING
+            // =====================================================
+            let scores = [];
+            let phiScores = [];
+            let metrics = [];
+
+            function addMetric(name, value, idealStr, scoreFunc, unit = "") {
+                let s = Math.max(0, Math.min(10, scoreFunc(value)));
+                if (name.includes("Phi")) phiScores.push(s);
+                else scores.push(s);
+                
+                let ratingClass = 'rating-average';
+                let ratingText = 'AVERAGE';
+                if (s >= 8.5) { ratingClass = 'rating-excellent'; ratingText = 'EXCELLENT'; }
+                else if (s >= 7) { ratingClass = 'rating-good'; ratingText = 'GOOD'; }
+                else if (s <= 4 && s > 2) { ratingClass = 'rating-poor'; ratingText = 'SUBOPTIMAL'; }
+                else if (s <= 2) { ratingClass = 'rating-bad'; ratingText = 'POOR'; }
+
+                metrics.push({ name, value, idealStr, score: s, ratingClass, ratingText, unit });
+            }
+
+            // Smooth Gaussian-like scorer (center, sigma)
+            const gaussScore = (val, center, sigma) => {
+                const z = (val - center) / sigma;
+                return 9.5 * Math.exp(-0.5 * z * z);
+            };
+            // Plateau scorer (ideal range, falloff)
+            const plateauScore = (val, lo, hi, falloff) => {
+                if (val >= lo && val <= hi) return 9.5;
+                const dist = val < lo ? lo - val : val - hi;
+                return Math.max(0.5, 9.5 - dist * falloff);
+            };
+
+            // --- FEATURE SCORES ---
+
+            addMetric("Canthal Tilt", avgTilt, "+3° to +8°", (v) => {
+                if (v >= 3 && v <= 8) return 9.5;
+                if (v > 0 && v < 3) return 7 + (v / 1.5);
+                if (v > 8 && v <= 12) return 9 - ((v-8)*0.5);
+                if (v > -3 && v <= 0) return 5 - Math.abs(v);
+                return Math.max(0.5, 4 - Math.abs(v) * 0.8);
+            }, "°");
+
+            addMetric("Midface Ratio", midfaceRatio, "~1.0", (v) => gaussScore(v, 1.0, 0.08));
+
+            addMetric("FWHR", fwhr, "1.8 - 2.0", (v) => plateauScore(v, 1.8, 2.0, 12));
+
+            addMetric("Eye Spacing", eyeSpacing, "~1.0", (v) => gaussScore(v, 1.0, 0.1));
+
+            addMetric("Chin/Philtrum", chinPhiltrumRatio, "~2.25", (v) => gaussScore(v, 2.25, 0.35));
+
+            addMetric("Mouth/Nose Ratio", 1/noseMouthRatio, "~1.5 - 1.6", (v) => gaussScore(v, 1.55, 0.15));
+
+            addMetric("Lip Fullness", lipRatio, "0.8 - 1.0", (v) => plateauScore(v, 0.75, 1.0, 15));
+
+            addMetric("Jaw/Cheek Width", jawCheekRatio, "0.85 - 0.95", (v) => plateauScore(v, 0.85, 0.95, 25));
+
+            addMetric("Nasal Index", nasalIndex, "0.65 - 0.80", (v) => plateauScore(v, 0.65, 0.80, 20));
+
+            addMetric("Eyebrow Tilt", avgBrowTilt, "-2° to +5°", (v) => plateauScore(v, -2, 5, 1.5), "°");
+
+            addMetric("Facial Symmetry", symmetryRatio * 100, "> 95%", (v) => {
+                if (v >= 97) return 9.5;
+                if (v >= 95) return 8.5;
+                if (v >= 90) return 7;
+                if (v >= 85) return 5;
+                return Math.max(0.5, 10 - ((100-v) * 0.8));
+            }, "%");
+
+            // --- EYE ANALYSIS ---
+
+            addMetric("Eye Aspect Ratio", eyeAspect, "0.28 - 0.35", (v) => plateauScore(v, 0.28, 0.35, 40), "");
+
+            addMetric("Brow-Eye Dist", avgBrowEyeDist, "8-14mm", (v) => plateauScore(v, 8, 14, 1.5), "mm");
+
+            // --- LOWER FACE ---
+
+            addMetric("Lower Third Split", lowerThirdSplit, "~0.33", (v) => gaussScore(v, 0.33, 0.05), "");
+
+            // --- OVERALL PROPORTIONS ---
+
+            addMetric("Facial Index", facialIndex, "1.3 - 1.4", (v) => plateauScore(v, 1.3, 1.4, 12), "");
+
+            addMetric("Nose Projection", noseProjRatio, "0.55 - 0.68", (v) => plateauScore(v, 0.55, 0.68, 18), "");
+
+            // --- ABSOLUTE MEASUREMENTS ---
+
+            addMetric("Bizygomatic Width", fwhrWidthMM, "135-145mm", (v) => plateauScore(v, 135, 145, 0.8), "mm");
+
+            addMetric("Bigonial Width", jawWidthMM, "115-130mm", (v) => plateauScore(v, 115, 130, 0.8), "mm");
+
+            addMetric("IPD", ipdMM, "62-66mm", (v) => plateauScore(v, 62, 66, 1.2), "mm");
+
+            // --- PHI (GOLDEN RATIO) SCANS ---
+
+            addMetric("Mouth/Nose Phi", mouthNosePhi, "~1.618", (v) => gaussScore(v, 1.618, 0.15), "ratio");
+
+            addMetric("IPD/Nose Phi", ipdNosePhi, "~1.618", (v) => gaussScore(v, 1.618, 0.15), "ratio");
+
+            addMetric("Lip Width Phi", lipWidthPhi, "~1.618", (v) => gaussScore(v, 1.618, 0.2), "ratio");
+
+            addMetric("Face H/W Phi", faceHeightWidthPhi, "~1.618", (v) => gaussScore(v, 1.618, 0.12), "ratio");
+
+            // =====================================================
+            // WEIGHTED OVERALL SCORE
+            // =====================================================
+            let total = 0;
+            const weights = [
+                1.8, // Canthal Tilt
+                1.5, // Midface Ratio
+                1.3, // FWHR
+                0.8, // Eye Spacing
+                0.8, // Chin/Philtrum
+                0.5, // Mouth/Nose
+                0.6, // Lip Fullness
+                1.3, // Jaw/Cheek
+                0.8, // Nasal Index
+                0.7, // Eyebrow Tilt
+                1.8, // Symmetry
+                1.0, // Eye Aspect
+                0.7, // Brow-Eye
+                0.9, // Lower Third
+                0.7, // Facial Index
+                0.6, // Nose Projection
+                1.0, // Bizygomatic
+                1.0, // Bigonial
+                0.5, // IPD
+            ];
+            let weightSum = 0;
+
+            scores.forEach((s, i) => {
+                total += s * (weights[i] || 1);
+                weightSum += (weights[i] || 1);
+            });
+
+            let finalRating = total / weightSum;
+            
+            // Phi Score
+            let phiTotal = 0;
+            phiScores.forEach(s => phiTotal += s);
+            let finalPhi = phiScores.length > 0 ? (phiTotal / phiScores.length) * 10 : 0;
+
+            renderResults(finalRating, finalPhi, metrics);
+        }
+
+        function renderResults(finalRating, finalPhi, metrics) {
+            metricsGrid.innerHTML = '';
+            
+            metrics.forEach(m => {
+                let displayValue = "";
+                if (m.unit === "°") displayValue = m.value.toFixed(1) + "°";
+                else if (m.unit === "%") displayValue = m.value.toFixed(1) + "%";
+                else if (m.unit === "mm") displayValue = m.value.toFixed(1) + " mm";
+                else if (m.unit === "ratio") displayValue = "1 : " + m.value.toFixed(3);
+                else if (m.name.includes("Tilt")) displayValue = m.value.toFixed(1) + "°"; // Fallback
+                else displayValue = m.value.toFixed(2);
+
+                const el = document.createElement('div');
+                el.className = 'metric-card';
+                el.innerHTML = `
+                    <div class="metric-title">${m.name}</div>
+                    <div class="metric-value">${displayValue}</div>
+                    <div class="metric-rating ${m.ratingClass}">${m.ratingText} (Ideal: ${m.idealStr})</div>
+                `;
+                metricsGrid.appendChild(el);
+            });
+
+            finalScoreEl.innerText = finalRating.toFixed(1);
+            phiScoreEl.innerText = `PHI SYNC: ${finalPhi.toFixed(0)}%`;
+            
+            let color = "#00ff00"; // Green
+            if(finalRating < 4) color = "#ff0000"; // Red
+            else if(finalRating < 6) color = "#ffff00"; // Yellow
+            else if(finalRating < 8) color = "#aaff00"; // Light green
+
+            finalScoreEl.style.color = color;
+            finalScoreEl.style.textShadow = `0 0 20px ${color}`;
+
+            let phiColor = "#ffd700"; // Gold
+            if(finalPhi < 60) phiColor = "#ff0000";
+            else if(finalPhi < 80) phiColor = "#ffff00";
+            
+            phiScoreEl.style.color = phiColor;
+            phiScoreEl.style.textShadow = `0 0 15px ${phiColor}`;
+
+            resultsPanel.style.display = 'flex';
+            window.scrollTo({ top: resultsPanel.offsetTop, behavior: 'smooth' });
+        }
+
+        // --- MEDIAPIPE SETUP ---
+
+        function onResults(results) {
+            // Update canvas dimensions to match the actual image to prevent distortion
+            canvasElement.width = results.image.width;
+            canvasElement.height = results.image.height;
+            
+            // Un-mirror if it's a photo upload
+            if (isPhotoUpload) {
+                canvasElement.style.transform = "none";
+                videoElement.style.display = "none"; // Hide video when showing photo
+            } else {
+                canvasElement.style.transform = "scaleX(-1)";
+                videoElement.style.display = "block";
+            }
+
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            // Draw video/image frame to canvas
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+            
+            if(!modelLoaded) {
+                modelLoaded = true;
+                statusText.innerText = "SYSTEM ONLINE - ALIGN FACE";
+            }
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                currentLandmarks = results.multiFaceLandmarks[0];
+                
+                // Draw mesh
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_TESSELATION, {color: 'rgba(0, 255, 0, 0.2)', lineWidth: 1});
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_RIGHT_EYE, {color: '#00ff00', lineWidth: 2});
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_RIGHT_EYEBROW, {color: '#00ff00', lineWidth: 2});
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_LEFT_EYE, {color: '#00ff00', lineWidth: 2});
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_LEFT_EYEBROW, {color: '#00ff00', lineWidth: 2});
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_FACE_OVAL, {color: '#00ff00', lineWidth: 2});
+                drawConnectors(canvasCtx, currentLandmarks, FACEMESH_LIPS, {color: '#00ff00', lineWidth: 2});
+
+                if(!isScanning) {
+                    scanBtn.disabled = false;
+                    scanBtn.innerText = "INITIATE SCAN";
+                    if(isPhotoUpload) statusText.innerText = "FACE DETECTED - READY TO SCAN";
+                }
+            } else {
+                currentLandmarks = null;
+                if(!isScanning) {
+                    scanBtn.disabled = true;
+                    scanBtn.innerText = isPhotoUpload ? "NO FACE DETECTED IN PHOTO" : "NO FACE DETECTED";
+                    if(isPhotoUpload) statusText.innerText = "PLEASE UPLOAD A CLEARER PHOTO";
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        const faceMesh = new FaceMesh({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }});
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        faceMesh.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                if(!isScanning && !isPhotoUpload) {
+                    await faceMesh.send({image: videoElement});
+                }
+            },
+            width: 640,
+            height: 480
+        });
+
+        camera.start().catch(err => {
+            console.warn("Camera not found or permissions denied:", err);
+            statusText.innerText = "NO CAMERA DETECTED - PLEASE UPLOAD PHOTO";
+        });
+
+        // --- IMAGE UPLOAD LOGIC ---
+        
+        imageUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            isPhotoUpload = true;
+            statusText.innerText = "PROCESSING UPLOADED IMAGE...";
+            scanBtn.disabled = true;
+
+            const imgElement = new Image();
+            imgElement.src = URL.createObjectURL(file);
+            
+            imgElement.onload = async () => {
+                // Send the image to MediaPipe
+                await faceMesh.send({image: imgElement});
+            };
+        });
+
+        // --- BUTTON LOGIC ---
+        
+        scanBtn.addEventListener('click', () => {
+            if(currentLandmarks) {
+                isScanning = true;
+                scanBtn.disabled = true;
+                scanBtn.innerText = "ANALYZING...";
+                scannerLine.style.display = 'block';
+                
+                // Simulate processing delay for effect
+                setTimeout(() => {
+                    analyzeFace(currentLandmarks);
+                    scannerLine.style.display = 'none';
+                    scanBtn.innerText = "SCAN AGAIN";
+                    scanBtn.disabled = false;
+                    isScanning = false;
+                }, 2000);
+            }
+        });
+
+    </script>
+</body>
+</html>
