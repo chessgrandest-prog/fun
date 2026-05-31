@@ -66,7 +66,7 @@
     // ═══════════════════════════════════════════════════════════
     function getProxyUrl(url) {
         if (window.location.protocol === 'file:') return url;
-        return '/proxy?url=' + encodeURIComponent(url);
+        return '/proxy/' + url;
     }
 
     function renderGames() {
@@ -264,6 +264,9 @@
         if (params.get('ghost') === '1') {
             ghostIndicator.hidden = false;
             if (ghostModeBtn) ghostModeBtn.style.display = 'none';
+            // Set Google favicon so the cloaked tab shows Google icon
+            document.title = 'Google';
+            setGoogleFavicon();
             return;
         }
 
@@ -293,25 +296,18 @@
             '<link rel="icon" href="https://www.google.com/favicon.ico">' +
             '<style>*{margin:0;padding:0;overflow:hidden}iframe{width:100vw;height:100vh;border:none}</style>' +
             '</head><body>' +
-            '<iframe src="' + ghostUrl.href + '" allow="fullscreen" allowfullscreen></iframe>' +
+            '<iframe src="' + ghostUrl.href + '" allow="fullscreen"></iframe>' +
             '</body></html>'
         );
         win.document.close();
 
-        // Try to close the original tab; fallback to showing a message
+        // Try to close the original tab
         window.close();
-        // If window.close() didn't work (tab wasn't opened by script):
+        // If window.close() didn't work (tab wasn't opened by script),
+        // redirect away so the original page disappears
         setTimeout(() => {
-            document.title = 'Google';
-            setGoogleFavicon();
-            document.body.innerHTML =
-                '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;' +
-                'font-family:Inter,sans-serif;background:#0a0a12;color:rgba(255,255,255,0.6);gap:12px;text-align:center;padding:24px">' +
-                '<span style="font-size:48px">👻</span>' +
-                '<h2 style="color:#00e5ff;font-size:20px">Ghost Mode Activated</h2>' +
-                '<p style="max-width:320px;line-height:1.6">Your game hub is now open in a cloaked tab. You can safely close this tab.</p>' +
-                '</div>';
-        }, 300);
+            window.location.replace('https://www.google.com');
+        }, 500);
     }
 
     function showPopupBlockedMessage() {

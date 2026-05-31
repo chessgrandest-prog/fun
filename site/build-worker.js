@@ -22,8 +22,8 @@ let workerCode = `export default {
         const path = url.pathname;
 
         // PROXY ROUTE to bypass github blocks
-        if (path === '/proxy') {
-            const targetUrl = url.searchParams.get('url');
+        if (path.startsWith('/proxy/')) {
+            const targetUrl = request.url.substring(request.url.indexOf('/proxy/') + 7);
             if (!targetUrl) return new Response('Missing url parameter', { status: 400 });
             
             try {
@@ -41,11 +41,13 @@ let workerCode = `export default {
                 const contentType = res.headers.get('content-type') || '';
                 if (targetUrl.toLowerCase().endsWith('.html') || contentType.includes('text/html')) {
                     newHeaders.set('content-type', 'text/html;charset=UTF-8');
+                    newHeaders.set('cross-origin-embedder-policy', 'require-corp');
+                    newHeaders.set('cross-origin-opener-policy', 'same-origin');
                     let html = await res.text();
                     
                     if (!/<base\\b/i.test(html)) {
                         const basePath = targetUrl.substring(0, targetUrl.lastIndexOf('/') + 1);
-                        const baseTag = '<base href="' + basePath + '">';
+                        const baseTag = '<base href="/proxy/' + basePath + '">';
                         if (html.includes('<head>')) {
                             html = html.replace('<head>', '<head>' + baseTag);
                         } else if (html.includes('<HEAD>')) {
@@ -87,6 +89,22 @@ let workerCode = `export default {
                     }
 
                     return new Response(html, {
+                        status: res.status,
+                        statusText: res.statusText,
+                        headers: newHeaders
+                    });
+                } else if ((targetUrl.toLowerCase().endsWith('.js') || contentType.includes('javascript')) && targetUrl.includes('terraria-wasm1')) {
+                    newHeaders.set('content-type', 'application/javascript;charset=UTF-8');
+                    newHeaders.set('cross-origin-embedder-policy', 'require-corp');
+                    newHeaders.set('cross-origin-opener-policy', 'same-origin');
+                    let js = await res.text();
+                    
+                    // Rewrite hardcoded paths to relative
+                    js = js.replace(/"\\/sw\\.js"/g, '"../sw.js"');
+                    js = js.replace(/"\\/_framework\\/dotnet\\.js"/g, '"../_framework/dotnet.js"');
+                    js = js.replace(/scope:"\\/"/g, 'scope:"../"');
+                    
+                    return new Response(js, {
                         status: res.status,
                         statusText: res.statusText,
                         headers: newHeaders
@@ -140,7 +158,11 @@ for (const [route, file] of Object.entries(files)) {
     workerCode += `
         if (path === '${route}') {
             return new Response(${JSON.stringify(content)}, {
-                headers: { 'content-type': '${mime}' }
+                headers: { 
+                    'content-type': '${mime}',
+                    'cross-origin-embedder-policy': 'require-corp',
+                    'cross-origin-opener-policy': 'same-origin'
+                }
             });
         }
     `;

@@ -324,7 +324,7 @@
         // so we fetch the HTML and create a blob URL to render it properly.
         function getProxyUrl(url) {
             if (window.location.protocol === 'file:') return url;
-            return '/proxy?url=' + encodeURIComponent(url);
+            return '/proxy/' + url;
         }
 
         if (gameUrl) {
