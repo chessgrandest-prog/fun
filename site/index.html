@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ghost Arcade — Play free browser games undetected. Stealth mode, dark theme, instant play.">
+    <title>Ghost Arcade</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Ambient Background Effects -->
+    <div class="bg-effects" aria-hidden="true">
+        <div class="bg-orb bg-orb--cyan"></div>
+        <div class="bg-orb bg-orb--purple"></div>
+        <div class="bg-orb bg-orb--pink"></div>
+    </div>
+
+    <!-- Ghost Mode Active Indicator -->
+    <div class="ghost-indicator" id="ghostIndicator" hidden>
+        <span class="ghost-indicator__icon">👻</span>
+        <span>Ghost Mode Active</span>
+    </div>
+
+    <div class="container">
+
+        <!-- ═══ Header ═══ -->
+        <header class="header">
+            <div class="header__brand">
+                <div class="logo">
+                    <span class="logo__ghost" aria-hidden="true">👻</span>
+                    <h1 class="logo__text">GHOST <span class="logo__accent">ARCADE</span></h1>
+                </div>
+                <p class="header__tagline">Vanish into the game.</p>
+            </div>
+
+            <div class="header__actions">
+                <div class="search-bar">
+                    <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input type="text" class="search-bar__input" id="searchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
+                </div>
+
+                <button class="ghost-btn" id="ghostModeBtn" title="Activate Ghost Mode — disguise this tab">
+                    <span class="ghost-btn__icon" aria-hidden="true">👻</span>
+                    <span class="ghost-btn__text">Ghost Mode</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ═══ Navigation Tabs ═══ -->
+        <nav class="tabs" id="tabs" aria-label="Game categories">
+            <button class="tab active" data-tab="all" id="tab-all">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                All Games
+            </button>
+            <button class="tab" data-tab="recent" id="tab-recent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Recently Played
+            </button>
+            <button class="tab" data-tab="favorites" id="tab-favorites">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                Favorites
+            </button>
+        </nav>
+
+        <!-- ═══ Game Grid ═══ -->
+        <main>
+            <!-- Loading Skeletons (shown while fetching) -->
+            <div class="loading-grid" id="loadingGrid">
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+            </div>
+
+            <div class="game-grid" id="gameGrid"></div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" hidden>
+                <span class="empty-state__icon">👻</span>
+                <h2 class="empty-state__title">No games found</h2>
+                <p class="empty-state__text">Try a different search or check back later.</p>
+            </div>
+        </main>
+
+        <!-- ═══ Footer ═══ -->
+        <footer class="footer">
+            <p>Ghost Arcade &copy; 2025 &mdash; Play undetected.</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

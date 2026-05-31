@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading... — Ghost Arcade</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ═══ Player Page Styles (inline for fast load) ═══ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #060609;
+            --surface: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.06);
+            --text: #f0f0f5;
+            --text-dim: rgba(255, 255, 255, 0.5);
+            --cyan: #00e5ff;
+            --glow-cyan: rgba(0, 229, 255, 0.25);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Top Bar ─── */
+        .player-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .player-bar__left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .player-bar__right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ─── Buttons ─── */
+        .bar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .bar-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .bar-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--glow-cyan);
+            color: var(--cyan);
+        }
+
+        /* ─── Game Title ─── */
+        .game-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ─── Iframe ─── */
+        .game-frame {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: #000;
+        }
+
+        /* ─── Loading Overlay ─── */
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            top: 45px; /* below bar */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            z-index: 5;
+            gap: 16px;
+            transition: opacity 0.4s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.06);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-text {
+            font-size: 13px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+
+        .error-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            inset: 0;
+            top: 45px;
+            background: var(--bg);
+            z-index: 5;
+            gap: 12px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .error-state.visible {
+            display: flex;
+        }
+
+        .error-state__icon { font-size: 48px; opacity: 0.6; }
+        .error-state__title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; }
+        .error-state__text { font-size: 13px; color: var(--text-dim); max-width: 360px; line-height: 1.6; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ─── Ghost Mode Indicator ─── */
+        .ghost-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--cyan);
+            letter-spacing: 0.3px;
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 600px) {
+            .player-bar { padding: 6px 10px; }
+            .game-title { max-width: 160px; font-size: 13px; }
+            .bar-btn span { display: none; }
+            .bar-btn { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="player-bar">
+        <div class="player-bar__left">
+            <a class="bar-btn" id="backBtn" href="index.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
+                </svg>
+                <span>Back</span>
+            </a>
+            <span class="game-title" id="gameTitle">Loading...</span>
+        </div>
+        <div class="player-bar__right">
+            <span class="ghost-badge" id="ghostBadge" hidden>👻 Ghost</span>
+            <button class="bar-btn" id="favBtn" title="Toggle favorite">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="favIcon">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span id="favText">Favorite</span>
+            </button>
+            <button class="bar-btn" id="fullscreenBtn" title="Toggle fullscreen">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                </svg>
+                <span>Fullscreen</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <span class="loading-text">Loading game...</span>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" id="errorState">
+        <span class="error-state__icon">💀</span>
+        <h2 class="error-state__title">Failed to load game</h2>
+        <p class="error-state__text">The game file couldn't be fetched. It may have been moved or deleted.</p>
+        <a class="bar-btn" href="index.html" style="margin-top:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
+                <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Back to Games</span>
+        </a>
+    </div>
+
+    <!-- Game Iframe -->
+    <iframe class="game-frame" id="gameFrame" allowfullscreen></iframe>
+
+    <script>
+    (function() {
+        'use strict';
+
+        const params = new URLSearchParams(window.location.search);
+        const gameUrl = params.get('url');
+        const gameTitle = params.get('title') || 'Game';
+        const isGhost = params.get('ghost') === '1';
+
+        const titleEl = document.getElementById('gameTitle');
+        const gameFrame = document.getElementById('gameFrame');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorState = document.getElementById('errorState');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const backBtn = document.getElementById('backBtn');
+        const ghostBadge = document.getElementById('ghostBadge');
+        const favBtn = document.getElementById('favBtn');
+        const favIcon = document.getElementById('favIcon');
+        const favText = document.getElementById('favText');
+
+        // ─── Favorites logic ───
+        const STORAGE_FAV = 'ghostArcade_favorites';
+        let favorites = [];
+        try {
+            const data = localStorage.getItem(STORAGE_FAV);
+            if (data) favorites = JSON.parse(data);
+        } catch(e) {}
+
+        function updateFavUI() {
+            const isFav = gameUrl && favorites.includes(gameUrl);
+            if (isFav) {
+                favIcon.setAttribute('fill', 'currentColor');
+                favIcon.style.color = '#ff2d7b';
+                favText.style.color = '#ff2d7b';
+                favText.textContent = 'Favorited';
+            } else {
+                favIcon.setAttribute('fill', 'none');
+                favIcon.style.color = '';
+                favText.style.color = '';
+                favText.textContent = 'Favorite';
+            }
+        }
+
+        if (gameUrl) {
+            updateFavUI();
+            favBtn.addEventListener('click', () => {
+                const idx = favorites.indexOf(gameUrl);
+                if (idx > -1) {
+                    favorites.splice(idx, 1);
+                } else {
+                    favorites.push(gameUrl);
+                }
+                try {
+                    localStorage.setItem(STORAGE_FAV, JSON.stringify(favorites));
+                } catch(e) {}
+                updateFavUI();
+            });
+        }
+
+        // ─── Set title ───
+        titleEl.textContent = gameTitle;
+        document.title = gameTitle + ' — Ghost Arcade';
+
+        // ─── Ghost mode ───
+        if (isGhost) {
+            ghostBadge.hidden = false;
+            backBtn.href = 'index.html?ghost=1';
+        }
+
+        // ─── Load game via fetch + blob URL ───
+        // raw.githubusercontent.com serves .html as text/plain,
+        // so we fetch the HTML and create a blob URL to render it properly.
+        function getProxyUrl(url) {
+            if (window.location.protocol === 'file:') return url;
+            return '/proxy?url=' + encodeURIComponent(url);
+        }
+
+        if (gameUrl) {
+            loadGame(getProxyUrl(gameUrl));
+        } else {
+            showError();
+        }
+
+        async function loadGame(url) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                let html = await res.text();
+
+                // Inject <base> tag so relative URLs resolve against the original path
+                const basePath = url.substring(0, url.lastIndexOf('/') + 1);
+                const baseTag = '<base href="' + basePath + '">';
+                if (html.includes('<head>')) {
+                    html = html.replace('<head>', '<head>' + baseTag);
+                } else if (html.includes('<HEAD>')) {
+                    html = html.replace('<HEAD>', '<HEAD>' + baseTag);
+                } else if (html.includes('<html>') || html.includes('<HTML>')) {
+                    html = html.replace(/<html>/i, '<html><head>' + baseTag + '</head>');
+                } else {
+                    html = '<head>' + baseTag + '</head>' + html;
+                }
+
+                const blob = new Blob([html], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+
+                gameFrame.src = blobUrl;
+                gameFrame.addEventListener('load', () => {
+                    loadingOverlay.classList.add('hidden');
+                }, { once: true });
+
+                // Fallback: hide loader after 8s even if load event doesn't fire
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                }, 8000);
+
+            } catch (err) {
+                console.error('Game load error:', err);
+                showError();
+            }
+        }
+
+        function showError() {
+            loadingOverlay.classList.add('hidden');
+            errorState.classList.add('visible');
+        }
+
+        // ─── Fullscreen ───
+        fullscreenBtn.addEventListener('click', () => {
+            if (gameFrame.requestFullscreen) {
+                gameFrame.requestFullscreen();
+            } else if (gameFrame.webkitRequestFullscreen) {
+                gameFrame.webkitRequestFullscreen();
+            } else if (gameFrame.msRequestFullscreen) {
+                gameFrame.msRequestFullscreen();
+            }
+        });
+
+        // ─── Panic key: Escape redirects to Google ───
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '`' && e.ctrlKey) {
+                window.location.href = 'https://www.google.com';
+            }
+        });
+
+    })();
+    </script>
+</body>
+</html>
