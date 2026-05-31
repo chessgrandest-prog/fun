@@ -335,27 +335,9 @@
 
         async function loadGame(url) {
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                let html = await res.text();
-
-                // Inject <base> tag so relative URLs resolve against the original path
-                const basePath = url.substring(0, url.lastIndexOf('/') + 1);
-                const baseTag = '<base href="' + basePath + '">';
-                if (html.includes('<head>')) {
-                    html = html.replace('<head>', '<head>' + baseTag);
-                } else if (html.includes('<HEAD>')) {
-                    html = html.replace('<HEAD>', '<HEAD>' + baseTag);
-                } else if (html.includes('<html>') || html.includes('<HTML>')) {
-                    html = html.replace(/<html>/i, '<html><head>' + baseTag + '</head>');
-                } else {
-                    html = '<head>' + baseTag + '</head>' + html;
-                }
-
-                const blob = new Blob([html], { type: 'text/html' });
-                const blobUrl = URL.createObjectURL(blob);
-
-                gameFrame.src = blobUrl;
+                // The worker proxy now handles setting Content-Type to text/html and injecting <base>
+                gameFrame.src = url;
+                
                 gameFrame.addEventListener('load', () => {
                     loadingOverlay.classList.add('hidden');
                 }, { once: true });
