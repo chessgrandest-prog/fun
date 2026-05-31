@@ -82,11 +82,20 @@ export default {
                     let js = await res.text();
                     
                     // Rewrite hardcoded paths to relative
-                    js = js.replace(/"\/sw\.js"/g, '"../sw.js"');
+                    js = js.replace(/"\/sw\.js"/g, '"./sw.js"');
                     js = js.replace(/"\/_framework\/dotnet\.js"/g, '"../_framework/dotnet.js"');
-                    js = js.replace(/scope:"\/"/g, 'scope:"../"');
+                    js = js.replace(/scope:"\/"/g, 'scope:"./"');
                     
                     return new Response(js, {
+                        status: res.status,
+                        statusText: res.statusText,
+                        headers: newHeaders
+                    });
+                } else if (targetUrl.toLowerCase().endsWith('.css') || contentType.includes('text/css')) {
+                    newHeaders.set('content-type', 'text/css;charset=UTF-8');
+                    newHeaders.set('cross-origin-embedder-policy', 'require-corp');
+                    newHeaders.set('cross-origin-opener-policy', 'same-origin');
+                    return new Response(res.body, {
                         status: res.status,
                         statusText: res.statusText,
                         headers: newHeaders
