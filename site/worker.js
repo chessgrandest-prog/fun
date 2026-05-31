@@ -75,32 +75,64 @@ export default {
                         statusText: res.statusText,
                         headers: newHeaders
                     });
-                } else if ((targetUrl.toLowerCase().endsWith('.js') || contentType.includes('javascript')) && targetUrl.includes('terraria-wasm1')) {
+                } else if (targetUrl.includes('terraria-wasm1') && (targetUrl.toLowerCase().endsWith('.js') || contentType.includes('javascript'))) {
                     newHeaders.set('content-type', 'application/javascript;charset=UTF-8');
                     newHeaders.set('cross-origin-embedder-policy', 'require-corp');
                     newHeaders.set('cross-origin-opener-policy', 'same-origin');
                     let js = await res.text();
                     
-                    // Rewrite hardcoded paths to relative
-                    js = js.replace(/"\/sw\.js"/g, '"./sw.js"');
-                    js = js.replace(/"\/_framework\/dotnet\.js"/g, '"../_framework/dotnet.js"');
-                    js = js.replace(/scope:"\/"/g, 'scope:"./"');
+                    // Determine the base URL for this repo in the proxy
+                    const repoBase = '/proxy/https://raw.githubusercontent.com/chessgrandest-prog/terraria-wasm1/main/';
+                    
+                    if (targetUrl.endsWith('/sw.js') || targetUrl.endsWith('/sw.js?')) {
+                        // Rewrite sw.js: replace root-absolute cache paths with proxy paths
+                        // e.g. "/backdrop.png" -> "/proxy/https://raw.../backdrop.png"
+                        // e.g. "/_framework/" -> "/proxy/https://raw.../_framework/"
+                        js = js.replace(/"\/([^"]+)"/g, function(match, p1) {
+                            // Only rewrite paths that look like game assets, not protocol URLs
+                            if (p1.startsWith('/') || p1.startsWith('http')) return match;
+                            return '"' + repoBase + p1 + '"';
+                        });
+                        // Also fix the bare "/" root path used for cache matching
+                        js = js.replace('"/"', '"' + repoBase + '"');
+                    } else {
+                        // For index.js: rewrite service worker registration paths  
+                        js = js.replace(/"\/sw\.js"/g, '"' + repoBase + 'sw.js"');
+                        js = js.replace(/"\/_framework\/dotnet\.js"/g, '"' + repoBase + '_framework/dotnet.js"');
+                        js = js.replace(/scope:"\/"/g, 'scope:"' + repoBase + '"');
+                    }
                     
                     return new Response(js, {
                         status: res.status,
                         statusText: res.statusText,
                         headers: newHeaders
                     });
-                } else if (targetUrl.toLowerCase().endsWith('.css') || contentType.includes('text/css')) {
-                    newHeaders.set('content-type', 'text/css;charset=UTF-8');
-                    newHeaders.set('cross-origin-embedder-policy', 'require-corp');
-                    newHeaders.set('cross-origin-opener-policy', 'same-origin');
-                    return new Response(res.body, {
-                        status: res.status,
-                        statusText: res.statusText,
-                        headers: newHeaders
-                    });
                 }
+                
+                // Fix MIME types for common file types that raw.githubusercontent.com serves as text/plain
+                const lowerUrl = targetUrl.toLowerCase();
+                if (lowerUrl.endsWith('.css')) {
+                    newHeaders.set('content-type', 'text/css;charset=UTF-8');
+                } else if (lowerUrl.endsWith('.js') || lowerUrl.endsWith('.mjs')) {
+                    newHeaders.set('content-type', 'application/javascript;charset=UTF-8');
+                } else if (lowerUrl.endsWith('.wasm')) {
+                    newHeaders.set('content-type', 'application/wasm');
+                } else if (lowerUrl.endsWith('.json')) {
+                    newHeaders.set('content-type', 'application/json;charset=UTF-8');
+                } else if (lowerUrl.endsWith('.png')) {
+                    newHeaders.set('content-type', 'image/png');
+                } else if (lowerUrl.endsWith('.jpg') || lowerUrl.endsWith('.jpeg')) {
+                    newHeaders.set('content-type', 'image/jpeg');
+                } else if (lowerUrl.endsWith('.ico')) {
+                    newHeaders.set('content-type', 'image/x-icon');
+                } else if (lowerUrl.endsWith('.ttf')) {
+                    newHeaders.set('content-type', 'font/ttf');
+                } else if (lowerUrl.endsWith('.woff') || lowerUrl.endsWith('.woff2')) {
+                    newHeaders.set('content-type', lowerUrl.endsWith('.woff2') ? 'font/woff2' : 'font/woff');
+                }
+                
+                newHeaders.set('cross-origin-embedder-policy', 'require-corp');
+                newHeaders.set('cross-origin-opener-policy', 'same-origin');
                 
                 return new Response(res.body, {
                     status: res.status,
