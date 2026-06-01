@@ -1,34 +1,67 @@
 [
-  
   {
     "title": "NeonSkull Client",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/NeonSkull%20Client.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/NeonSkull%20Client.png"
-  },
-  {
-    "title": "Facial Analysis",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/NeonSkull%20Facial%20Analysis.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/NeonSkull%20Facial%20Analysis.webp"
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/NeonSkull%20Client.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/NeonSkull%20Client.png"
   },
   {
     "title": "Crossy Road",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/UGS%20Files/clcrossyroad.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/Crossy_Road.jpg"
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/crossyroad.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Crossy_Road.jpg"
   },
   {
     "title": "BTD5",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/UGS%20Files/clbtd5.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/ultimate-game-stash/refs/heads/main/games-site/images/BTD5.jpg"
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/btd5.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/BTD5.jpg"
   },
   {
-  "title": "Terraria",
-  "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Terraria.html",
-  "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/105600/capsule_616x353.jpg"
-},
+    "title": "Terraria",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Terraria.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Terraria.jpg"
+  },
+  {
+    "title": "Wordle",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Wordle.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Wordle.jpg"
+  },
+  {
+    "title": "Hollow Knight",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Hollow%20Knight.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/hollow%20knight.webp"
+  },
+  {
+    "title": "Getting Over It",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Getting%20Over%20It%20with%20Bennett%20Foddy.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Getting%20Over%20It.png"
+  },
+  {
+    "title": "Celeste",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Celeste.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Celeste.jpg"
+  },
+  {
+    "title": "Slime Rancher",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Slime%20Rancher.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Slime_Rancher.webp"
+  },
+  {
+    "title": "Five Nights at Epstein's",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Five%20Nights%20at%20Epstein's.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Five%20Nights%20at%20Epstein's.png"
+  },
+  {
+    "title": "A Difficult Game About Climbing",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/more%20games/A%20Difficult%20Game%20About%20Climbing.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/A_Difficult_Game_About_Climbing.jpg"
+  },
+  {
+    "title": "Brotato",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Brotato.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Brotato.png"
+  },
   {
     "title": "Chess",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/NeonSkull%20Chess.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/NeonSkull%20Chess.png"
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/NeonSkull%20Chess.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/NeonSkull%20Chess.png"
   }
-
 ]
