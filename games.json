@@ -10,6 +10,11 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/NeonSkull%20Client.png"
   },
   {
+    "title": "Brotato",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Brotato.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Brotato.png"
+  },
+  {
     "title": "NeonSkull Facial Analysis",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/NeonSkull%20Facial%20Analysis.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/NeonSkull%20Facial%20Analysis.webp"
@@ -1096,22 +1101,22 @@
   },
   {
   "title": "Celeste",
-  "url": "/advanced/celeste/",
+  "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Celeste.html",
   "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/504230/capsule_616x353.jpg"
 },
 {
   "title": "Hollow Knight",
-  "url": "/advanced/hollow-knight/",
+  "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Hollow%20Knight.html",
   "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/hollow%20knight.webp"
 },
 {
   "title": "Getting Over It",
-  "url": "/advanced/getting-over-it/",
+  "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/more%20games/Getting%20Over%20It%20with%20Bennett%20Foddy.html",
   "image": "https://cdn.cloudflare.steamstatic.com/steam/apps/240720/capsule_616x353.jpg"
 },
 {
   "title": "Slime Rancher",
-  "url": "/advanced/slime-rancher/",
+  "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/UGS%20Files/Slime%20Rancher.html",
   "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/images/Slime_Rancher.webp"
 },
 {
