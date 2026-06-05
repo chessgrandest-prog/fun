@@ -10,6 +10,36 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Crossy_Road.jpg"
   },
   {
+    "title": "Plague Inc",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Plague%20Inc.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Plague%20Inc.png"
+  },
+  {
+    "title": "Stardew Valley",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Stardew%20Valley.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Stardew%20Valley.png"
+  },
+  {
+    "title": "10 Minutes Till Dawn",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/10%20Minutes%20Till%20Dawn.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/10%20Minutes%20Till%20Dawn.png"
+  },
+  {
+    "title": "Minesweeper Plus",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Minesweeper%20Plus.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Minesweeper%20Plus.png"
+  },
+  {
+    "title": "Geometry Dash",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Geometry%20Dash.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Geometry%20Dash.png"
+  },
+  {
+    "title": "GTA Vice City",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/GTA%20Vice%20City.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/GTA%20Vice%20City.png"
+  },
+  {
     "title": "BTD5",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/btd5.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/BTD5.jpg"
@@ -51,7 +81,7 @@
   },
   {
     "title": "A Difficult Game About Climbing",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/more%20games/A%20Difficult%20Game%20About%20Climbing.html",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/A_Difficult_Game_About_Climbing.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/A_Difficult_Game_About_Climbing.jpg"
   },
   {
