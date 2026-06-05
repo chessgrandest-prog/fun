@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ghost Arcade — Play free browser games undetected. Stealth mode, dark theme, instant play.">
+    <title>Ghost Arcade</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Ambient Background Effects -->
+    <div class="bg-effects" aria-hidden="true">
+        <div class="bg-orb bg-orb--cyan"></div>
+        <div class="bg-orb bg-orb--purple"></div>
+        <div class="bg-orb bg-orb--pink"></div>
+    </div>
+
+    <!-- Ghost Mode Active Indicator -->
+    <div class="ghost-indicator" id="ghostIndicator" hidden>
+        <span class="ghost-indicator__icon">👻</span>
+        <span>Ghost Mode Active</span>
+    </div>
+
+    <div class="container">
+
+        <!-- ═══ Header ═══ -->
+        <header class="header">
+            <div class="header__brand">
+                <div class="logo">
+                    <span class="logo__ghost" aria-hidden="true">👻</span>
+                    <h1 class="logo__text">GHOST <span class="logo__accent">ARCADE</span></h1>
+                </div>
+                <p class="header__tagline">Vanish into the game.</p>
+            </div>
+
+            <div class="header__actions">
+                <div class="search-bar">
+                    <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input type="text" class="search-bar__input" id="searchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
+                </div>
+
+                <button class="view-btn" id="viewToggleBtn" title="Toggle Grid/List View" aria-label="Toggle layout view">
+                    <svg id="viewToggleIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </button>
+
+                <button class="ghost-btn" id="randomGameBtn" title="Launch a Random Game">
+                    <span class="ghost-btn__icon" aria-hidden="true">🎲</span>
+                    <span class="ghost-btn__text">Random Game</span>
+                </button>
+
+                <button class="ghost-btn" id="settingsBtn" title="Open Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width: 16px; height: 16px;">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span class="ghost-btn__text">Settings</span>
+                </button>
+
+                <button class="ghost-btn" id="ghostModeBtn" title="Activate Ghost Mode — disguise this tab">
+                    <span class="ghost-btn__icon" aria-hidden="true">👻</span>
+                    <span class="ghost-btn__text">Ghost Mode</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ═══ Navigation Tabs ═══ -->
+        <nav class="tabs" id="tabs" aria-label="Game categories">
+            <button class="tab active" data-tab="all" id="tab-all">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                All Games
+            </button>
+            <button class="tab" data-tab="recent" id="tab-recent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Recently Played
+            </button>
+            <button class="tab" data-tab="favorites" id="tab-favorites">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                Favorites
+            </button>
+        </nav>
+
+        <!-- ═══ Game Grid ═══ -->
+        <main>
+            <!-- Loading Skeletons (shown while fetching) -->
+            <div class="loading-grid" id="loadingGrid">
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
+            </div>
+
+            <div class="game-grid" id="gameGrid"></div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" hidden>
+                <span class="empty-state__icon">👻</span>
+                <h2 class="empty-state__title">No games found</h2>
+                <p class="empty-state__text">Try a different search or check back later.</p>
+            </div>
+        </main>
+
+        <!-- ═══ Footer ═══ -->
+        <footer class="footer">
+            <p>Ghost Arcade &copy; 2025 &mdash; Play undetected.</p>
+        </footer>
+
+    </div>
+
+    <!-- ═══ Settings Modal ═══ -->
+    <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+        <div class="modal-content">
+            <!-- Sidebar Navigation -->
+            <nav class="modal-sidebar">
+                <div class="modal-sidebar-title">Settings</div>
+                <button class="modal-tab-btn active" data-settings-tab="appearance">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+                    Appearance
+                </button>
+                <button class="modal-tab-btn" data-settings-tab="stealth">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    Stealth & Cloak
+                </button>
+                <button class="modal-tab-btn" data-settings-tab="custom-games">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 5v14M5 12h14"/></svg>
+                    Custom Games
+                </button>
+                <button class="modal-tab-btn" data-settings-tab="backup">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    Backup & Reset
+                </button>
+            </nav>
+
+            <!-- Settings Content -->
+            <div class="modal-body">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="settingsModalTitle">Settings</h2>
+                    <button class="modal-close-btn" id="closeSettingsBtn" aria-label="Close settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+
+                <!-- ─── Tab: Appearance ─── -->
+                <div class="settings-section active" id="sect-appearance">
+                    <!-- Accent Color Picker -->
+                    <div class="settings-group">
+                        <label class="settings-label">Accent Color</label>
+                        <span class="settings-desc">Choose the glow highlight color for the interface.</span>
+                        <div class="color-picker-wrapper">
+                            <button class="color-swatch active" data-color="#00e5ff" style="background: #00e5ff;" title="Cyan (Default)"></button>
+                            <button class="color-swatch" data-color="#ff2d7b" style="background: #ff2d7b;" title="Hot Pink"></button>
+                            <button class="color-swatch" data-color="#b04aff" style="background: #b04aff;" title="Deep Purple"></button>
+                            <button class="color-swatch" data-color="#10b981" style="background: #10b981;" title="Emerald Green"></button>
+                            <button class="color-swatch" data-color="#f59e0b" style="background: #f59e0b;" title="Amber Gold"></button>
+                            <div class="custom-color-btn" title="Choose custom color">
+                                <span>🎨</span>
+                                <input type="color" id="customColorInput" class="custom-color-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Size Selector -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="cardSizeSelect">Card Size</label>
+                        <span class="settings-desc">Adjust the grid game card sizing.</span>
+                        <select id="cardSizeSelect" class="settings-select">
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium (Default)</option>
+                            <option value="large">Large</option>
+                        </select>
+                    </div>
+
+                    <!-- Parallax Tilt Toggle -->
+                    <div class="settings-group">
+                        <label class="settings-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" id="parallaxToggle" checked style="width:16px; height:16px; cursor:pointer;">
+                            Enable 3D Parallax Card Tilt
+                        </label>
+                        <span class="settings-desc">Enables a dynamic 3D perspective effect when hovering over game cards.</span>
+                    </div>
+                </div>
+
+                <!-- ─── Tab: Stealth ─── -->
+                <div class="settings-section" id="sect-stealth">
+                    <!-- Decoy Preset -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="decoyPresetSelect">Decoy Preset</label>
+                        <span class="settings-desc">The cover website template loaded by the site origin.</span>
+                        <select id="decoyPresetSelect" class="settings-select">
+                            <option value="google-drive">Google Drive</option>
+                            <option value="custom-image">Custom Screenshot</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Decoy Image Upload (hidden if google-drive is selected) -->
+                    <div class="settings-group" id="customDecoyImageGroup" style="display: none;">
+                        <label class="settings-label" for="customDecoyImageInput">Upload Screenshot</label>
+                        <span class="settings-desc">Upload a full-screen screenshot of your school portal.</span>
+                        <input type="file" id="customDecoyImageInput" accept="image/*" class="settings-input" style="padding: 4px;">
+                        <img id="customDecoyPreview" src="" style="margin-top: 10px; max-width: 100%; border-radius: 4px; display: none; border: 1px solid var(--border-subtle);">
+                    </div>
+
+                    <!-- Tab Title -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="tabTitleInput">Tab Title</label>
+                        <span class="settings-desc">The title shown in the browser tab when cloaked.</span>
+                        <input type="text" id="tabTitleInput" class="settings-input" placeholder="Google Drive">
+                    </div>
+
+                    <!-- Tab Favicon -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="tabFaviconInput">Tab Favicon (URL)</label>
+                        <span class="settings-desc">The favicon shown in the browser tab when cloaked.</span>
+                        <input type="text" id="tabFaviconInput" class="settings-input" placeholder="https://ssl.gstatic.com/...">
+                    </div>
+
+                    <!-- Panic Key Configuration -->
+                    <div class="settings-group">
+                        <label class="settings-label">Panic Button Keybind</label>
+                        <span class="settings-desc">Press this combination to instantly redirect out of games. Click the input and press a key.</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <label style="font-size: 13px; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                <input type="checkbox" id="panicCtrlCheckbox" checked style="width:16px; height:16px; cursor:pointer;"> Ctrl +
+                            </label>
+                            <input type="text" id="panicKeyInput" class="settings-input" value="`" style="width: 80px; text-align: center; text-transform: uppercase;" readonly>
+                        </div>
+                    </div>
+
+                    <!-- Panic Redirect URL -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="panicRedirectInput">Panic Redirect Destination</label>
+                        <span class="settings-desc">The website to load when the panic key is pressed.</span>
+                        <input type="text" id="panicRedirectInput" class="settings-input" placeholder="https://www.google.com">
+                    </div>
+
+                    <!-- Auto Ghost Toggle -->
+                    <div class="settings-group">
+                        <label class="settings-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" id="autoGhostToggle" style="width:16px; height:16px; cursor:pointer;">
+                            Always Launch in Ghost Tab
+                        </label>
+                        <span class="settings-desc">Automatically launches dashboard in a stealthy about:blank tab.</span>
+                    </div>
+                </div>
+
+                <!-- ─── Tab: Custom Games ─── -->
+                <div class="settings-section" id="sect-custom-games">
+                    <!-- Upload Form -->
+                    <form id="customGameForm" style="display:flex; flex-direction:column; gap:12px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                        <div class="settings-group">
+                            <label class="settings-label" for="customTitle">Game Title</label>
+                            <input type="text" id="customTitle" class="settings-input" required placeholder="My Favorite Game">
+                        </div>
+                        <div class="settings-group">
+                            <label class="settings-label" for="customUrl">Game/Embed URL</label>
+                            <input type="url" id="customUrl" class="settings-input" required placeholder="https://example.com/game">
+                        </div>
+                        <div class="settings-group">
+                            <label class="settings-label" for="customImage">Image/Thumbnail URL (Optional)</label>
+                            <input type="url" id="customImage" class="settings-input" placeholder="https://example.com/thumbnail.png">
+                        </div>
+                        <button type="submit" class="settings-btn settings-btn--primary" style="align-self: flex-start;">Add Custom Game</button>
+                    </form>
+
+                    <!-- Custom Games List -->
+                    <div class="settings-group">
+                        <label class="settings-label">Your Custom Games</label>
+                        <div id="customGamesList" style="display:flex; flex-direction:column; gap:10px;">
+                            <!-- populated by script -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── Tab: Backup ─── -->
+                <div class="settings-section" id="sect-backup">
+                    <div class="settings-group">
+                        <label class="settings-label">Export Data</label>
+                        <span class="settings-desc">Download a backup of all settings, favorites, history, and custom games as a JSON file.</span>
+                        <button id="exportSettingsBtn" class="settings-btn settings-btn--primary" style="align-self: flex-start; margin-top: 8px;">
+                            📥 Export Backup
+                        </button>
+                    </div>
+
+                    <div class="settings-group" style="margin-top: 12px;">
+                        <label class="settings-label">Import Data</label>
+                        <span class="settings-desc">Restore settings and content from an exported JSON backup file. Warning: This will overwrite existing settings.</span>
+                        <div style="display: flex; gap: 12px; margin-top: 8px;">
+                            <input type="file" id="importSettingsFile" accept=".json" style="display: none;">
+                            <button id="importSettingsBtn" class="settings-btn" onclick="document.getElementById('importSettingsFile').click()">
+                                📤 Choose Backup File
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group" style="margin-top: 24px; padding-top: 20px; border-top: 1px dashed rgba(255, 45, 123, 0.25);">
+                        <label class="settings-label" style="color: var(--accent-pink);">Reset All Data</label>
+                        <span class="settings-desc">Wipe all local storage, including settings, favorites, recent play logs, and custom games. This cannot be undone.</span>
+                        <button id="resetAllDataBtn" class="settings-btn settings-btn--danger" style="align-self: flex-start; margin-top: 8px;">
+                            💥 Factory Reset All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

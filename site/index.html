@@ -3,112 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Ghost Arcade — Play free browser games undetected. Stealth mode, dark theme, instant play.">
-    <title>Ghost Arcade</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <title>My Drive - Google Drive</title>
+    <link rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
+    <style id="decoyStyles">
+        /* Styles will be replaced dynamically */
+    </style>
 </head>
 <body>
 
-    <!-- Ambient Background Effects -->
-    <div class="bg-effects" aria-hidden="true">
-        <div class="bg-orb bg-orb--cyan"></div>
-        <div class="bg-orb bg-orb--purple"></div>
-        <div class="bg-orb bg-orb--pink"></div>
+    <div id="decoyApp">
+        <!-- Rendered dynamically based on decoyPreset setting -->
     </div>
 
-    <!-- Ghost Mode Active Indicator -->
-    <div class="ghost-indicator" id="ghostIndicator" hidden>
-        <span class="ghost-indicator__icon">👻</span>
-        <span>Ghost Mode Active</span>
-    </div>
+    <script>
+        (function() {
+            'use strict';
 
-    <div class="container">
+            const STORAGE_SETTINGS = 'ghostArcade_settings';
+            const DEFAULT_SETTINGS = {
+                decoyPreset: 'google-drive',
+                tabTitle: 'Google Drive',
+                tabFavicon: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png',
+                panicRedirect: 'https://www.google.com',
+                autoGhost: false
+            };
 
-        <!-- ═══ Header ═══ -->
-        <header class="header">
-            <div class="header__brand">
-                <div class="logo">
-                    <span class="logo__ghost" aria-hidden="true">👻</span>
-                    <h1 class="logo__text">GHOST <span class="logo__accent">ARCADE</span></h1>
-                </div>
-                <p class="header__tagline">Vanish into the game.</p>
-            </div>
+            let settings = DEFAULT_SETTINGS;
+            try {
+                const data = localStorage.getItem(STORAGE_SETTINGS);
+                if (data) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+            } catch(e) {}
 
-            <div class="header__actions">
-                <div class="search-bar">
-                    <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="m21 21-4.3-4.3"/>
-                    </svg>
-                    <input type="text" class="search-bar__input" id="searchInput" placeholder="Search games..." autocomplete="off" aria-label="Search games">
-                </div>
+            const decoyApp = document.getElementById('decoyApp');
+            const decoyStyles = document.getElementById('decoyStyles');
 
-                <button class="ghost-btn" id="ghostModeBtn" title="Activate Ghost Mode — disguise this tab">
-                    <span class="ghost-btn__icon" aria-hidden="true">👻</span>
-                    <span class="ghost-btn__text">Ghost Mode</span>
-                </button>
-            </div>
-        </header>
+            // Apply Decoy Preset
+            const preset = settings.decoyPreset || 'google-drive';
+            document.title = settings.tabTitle;
+            
+            // Set Favicon
+            let link = document.querySelector("link[rel*='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+            link.href = settings.tabFavicon;
 
-        <!-- ═══ Navigation Tabs ═══ -->
-        <nav class="tabs" id="tabs" aria-label="Game categories">
-            <button class="tab active" data-tab="all" id="tab-all">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
-                All Games
-            </button>
-            <button class="tab" data-tab="recent" id="tab-recent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 12 16 14"/>
-                </svg>
-                Recently Played
-            </button>
-            <button class="tab" data-tab="favorites" id="tab-favorites">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-                Favorites
-            </button>
-        </nav>
+            // ─── Decoy Presets Templates ───
+            const DECOYS = {
+                'google-drive': {
+                    html: `
+                        <div class="header">
+                            <div class="logo">
+                                <img src="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png" alt="Drive Logo">
+                                <span>Drive</span>
+                            </div>
+                            <div class="search-bar">Search in Drive</div>
+                        </div>
+                        <div class="content">
+                            <div class="sidebar">
+                                <div class="nav-item active">My Drive</div>
+                                <div class="nav-item">Computers</div>
+                                <div class="nav-item">Shared with me</div>
+                                <div class="nav-item">Recent</div>
+                                <div class="nav-item">Starred</div>
+                                <div class="nav-item">Trash</div>
+                            </div>
+                            <div class="main-area">
+                                <h2>My Drive</h2>
+                                <div class="table-header">
+                                    <div class="col-name">Name</div>
+                                    <div class="col-owner">Owner</div>
+                                    <div class="col-date">Last modified</div>
+                                    <div class="col-size">File size</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-name">📁 English Literature</div>
+                                    <div class="col-owner">me</div>
+                                    <div class="col-date">Oct 12, 2025</div>
+                                    <div class="col-size">-</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-name">📁 Math Homework</div>
+                                    <div class="col-owner">me</div>
+                                    <div class="col-date">Nov 3, 2025</div>
+                                    <div class="col-size">-</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-name">📄 Project Notes.docx</div>
+                                    <div class="col-owner">me</div>
+                                    <div class="col-date">Yesterday</div>
+                                    <div class="col-size">14 KB</div>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                    css: `
+                        body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f8f9fa; color: #202124; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+                        .header { display: flex; align-items: center; padding: 8px 16px; background-color: #fff; border-bottom: 1px solid #e0e0e0; }
+                        .logo { display: flex; align-items: center; gap: 8px; font-size: 22px; color: #5f6368; margin-right: 48px; }
+                        .logo img { width: 40px; height: 40px; }
+                        .search-bar { flex: 1; max-width: 720px; background-color: #f1f3f4; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; color: #5f6368; }
+                        .content { display: flex; flex: 1; }
+                        .sidebar { width: 256px; padding: 16px; }
+                        .nav-item { display: flex; align-items: center; padding: 10px 24px; border-radius: 0 24px 24px 0; color: #3c4043; font-weight: 500; margin-bottom: 4px; }
+                        .nav-item.active { background-color: #e8f0fe; color: #1a73e8; }
+                        .main-area { flex: 1; background-color: #fff; border-radius: 16px; margin: 16px; padding: 24px; box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15); }
+                        .table-header { display: flex; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px; margin-bottom: 16px; color: #5f6368; font-weight: 500; font-size: 14px; }
+                        .row { display: flex; padding: 12px 0; border-bottom: 1px solid #f1f3f4; color: #3c4043; font-size: 13px; }
+                        .col-name { flex: 2; display: flex; align-items: center; gap: 12px; }
+                        .col-owner { flex: 1; }
+                        .col-date { flex: 1; }
+                        .col-size { flex: 1; text-align: right; }
+                    `
+                },
+                'custom-image': {
+                    html: `<div class="custom-decoy-container"></div>`,
+                    css: `
+                        body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+                        .custom-decoy-container { 
+                            width: 100vw; height: 100vh; 
+                            background-image: url('${settings.customDecoyImage || ""}'); 
+                            background-size: cover; 
+                            background-position: center; 
+                            background-repeat: no-repeat;
+                        }
+                    `
+                }
+            };
 
-        <!-- ═══ Game Grid ═══ -->
-        <main>
-            <!-- Loading Skeletons (shown while fetching) -->
-            <div class="loading-grid" id="loadingGrid">
-                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
-                <div class="skeleton-card"><div class="skeleton-card__image"></div><div class="skeleton-card__info"><div class="skeleton-card__title"></div></div></div>
-            </div>
+            // Render current Decoy Preset html and CSS
+            const decoyDetails = DECOYS[preset] || DECOYS['google-drive'];
+            decoyApp.innerHTML = decoyDetails.html;
+            decoyStyles.innerHTML = decoyDetails.css;
 
-            <div class="game-grid" id="gameGrid"></div>
+            // ─── Keybind stealth trigger ───
+            document.addEventListener('keydown', function(e) {
+                // Trigger transition on Right Shift key (location === 2)
+                if (e.key === 'Shift' && e.location === 2) {
+                    e.preventDefault();
 
-            <!-- Empty State -->
-            <div class="empty-state" id="emptyState" hidden>
-                <span class="empty-state__icon">👻</span>
-                <h2 class="empty-state__title">No games found</h2>
-                <p class="empty-state__text">Try a different search or check back later.</p>
-            </div>
-        </main>
+                    const targetUrl = new URL('/ghost-ui', window.location.origin);
+                    if (settings.autoGhost || params.get('ghost') === '1') {
+                        targetUrl.searchParams.set('ghost', '1');
+                    }
 
-        <!-- ═══ Footer ═══ -->
-        <footer class="footer">
-            <p>Ghost Arcade &copy; 2025 &mdash; Play undetected.</p>
-        </footer>
+                    const win = window.open('about:blank', '_blank');
+                    if (!win) {
+                        alert('⚠️ Popups blocked. Please allow popups to open the cloaked workspace!');
+                        return;
+                    }
 
-    </div>
+                    // Open tab under the user's custom settings title and icon
+                    win.document.open();
+                    win.document.write(
+                        '<!DOCTYPE html>' +
+                        '<html><head>' +
+                        '<title>' + esc(settings.tabTitle) + '</title>' +
+                        '<link rel="icon" href="' + esc(settings.tabFavicon) + '">' +
+                        '<style>*{margin:0;padding:0;overflow:hidden}iframe{width:100vw;height:100vh;border:none;background:#000;}</style>' +
+                        '</head><body>' +
+                        '<iframe src="' + targetUrl.href + '" allow="fullscreen"></iframe>' +
+                        '</body></html>'
+                    );
+                    win.document.close();
 
-    <script src="script.js"></script>
+                    // Redirect decoy tab to Real panic redirection target
+                    window.location.replace(settings.panicRedirect);
+                }
+            });
+
+            // ─── Query Params helper ───
+            const params = new URLSearchParams(window.location.search);
+            
+            // Auto ghost loader support
+            if (settings.autoGhost && params.get('ghost') !== '1') {
+                activateGhostModeFromRoot();
+            }
+
+            function activateGhostModeFromRoot() {
+                const targetUrl = new URL('/ghost-ui', window.location.origin);
+                targetUrl.searchParams.set('ghost', '1');
+
+                const win = window.open('about:blank', '_blank');
+                if (!win) return;
+
+                win.document.open();
+                win.document.write(
+                    '<!DOCTYPE html>' +
+                    '<html><head>' +
+                    '<title>' + esc(settings.tabTitle) + '</title>' +
+                    '<link rel="icon" href="' + esc(settings.tabFavicon) + '">' +
+                    '<style>*{margin:0;padding:0;overflow:hidden}iframe{width:100vw;height:100vh;border:none;background:#000;}</style>' +
+                    '</head><body>' +
+                    '<iframe src="' + targetUrl.href + '" allow="fullscreen"></iframe>' +
+                    '</body></html>'
+                );
+                win.document.close();
+                window.location.replace(settings.panicRedirect);
+            }
+
+            function esc(str) {
+                if (!str) return '';
+                return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+        })();
+    </script>
 </body>
 </html>

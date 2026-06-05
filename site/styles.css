@@ -361,7 +361,7 @@ body {
    ═══════════════════════════════════════════════════════════ */
 .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--card-size, 260px), 1fr));
     gap: 20px;
     padding-bottom: 48px;
 }
@@ -764,3 +764,543 @@ body {
         height: 18px;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   SETTINGS MODAL & FRONTEND IMPROVEMENTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Modal Backdrop ─── */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 4, 6, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration) ease;
+}
+
+.modal-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ─── Modal Container ─── */
+.modal-content {
+    background: rgba(10, 10, 18, 0.85);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 800px;
+    height: 90vh;
+    max-height: 600px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 229, 255, 0.05);
+    display: flex;
+    overflow: hidden;
+    transform: scale(0.94) translateY(10px);
+    transition: transform var(--duration) var(--ease-spring);
+    backdrop-filter: blur(24px);
+}
+
+.modal-backdrop.active .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* ─── Modal Sidebar ─── */
+.modal-sidebar {
+    width: 220px;
+    background: rgba(255, 255, 255, 0.02);
+    border-right: 1px solid var(--border-subtle);
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.modal-sidebar-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    padding: 0 12px 16px;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 12px;
+}
+
+.modal-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.25s ease;
+}
+
+.modal-tab-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.modal-tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.modal-tab-btn.active {
+    color: var(--accent-cyan);
+    background: rgba(0, 229, 255, 0.08);
+}
+
+/* ─── Modal Body ─── */
+.modal-body {
+    flex: 1;
+    padding: 32px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.modal-close-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-cyan);
+    background: rgba(0, 229, 255, 0.05);
+    transform: rotate(90deg);
+}
+
+/* ─── Settings Controls ─── */
+.settings-section {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.settings-section.active {
+    display: flex;
+}
+
+.settings-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.settings-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.settings-input,
+.settings-select {
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.settings-input:focus,
+.settings-select:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.settings-select option {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* ─── Swatches & Color Picker ─── */
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+
+.color-swatch.active {
+    border-color: #fff;
+    transform: scale(1.05);
+}
+
+.custom-color-btn {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px dashed var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 16px;
+    overflow: hidden;
+}
+
+.custom-color-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+}
+
+/* ─── Buttons inside Modal ─── */
+.settings-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-cyan);
+}
+
+.settings-btn--primary {
+    background: rgba(0, 229, 255, 0.1);
+    border-color: rgba(0, 229, 255, 0.2);
+    color: var(--accent-cyan);
+}
+
+.settings-btn--primary:hover {
+    background: var(--accent-cyan);
+    color: #000;
+    box-shadow: 0 0 20px var(--glow-cyan);
+}
+
+.settings-btn--danger {
+    background: rgba(255, 45, 123, 0.1);
+    border-color: rgba(255, 45, 123, 0.25);
+    color: var(--accent-pink);
+}
+
+.settings-btn--danger:hover {
+    background: var(--accent-pink);
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 45, 123, 0.4);
+}
+
+/* ─── Keyboard Nav Focus Outline ─── */
+.game-card.kbd-focused {
+    outline: none;
+    border-color: var(--accent-cyan) !important;
+    box-shadow: 0 0 0 3px var(--accent-cyan), 0 0 24px var(--glow-cyan) !important;
+    transform: translateY(-6px) scale(1.01);
+}
+
+/* ─── List View Layout Mode ─── */
+.game-grid.game-grid--list {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+}
+
+.game-grid--list .game-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    padding: 10px 16px;
+    animation: none; /* disable grid animation stagger */
+}
+
+.game-grid--list .game-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--border-hover);
+}
+
+.game-grid--list .game-card.kbd-focused {
+    transform: translateX(6px) !important;
+}
+
+.game-grid--list .card-image-wrap {
+    width: 80px;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.game-grid--list .card-info {
+    flex: 1;
+    padding: 0 20px;
+    text-align: left;
+}
+
+.game-grid--list .card-title {
+    font-size: 15px;
+    margin: 0;
+}
+
+.game-grid--list .card-image-overlay {
+    display: none;
+}
+
+/* Static Card Action Buttons for List View */
+.game-grid--list .game-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 5;
+}
+
+.game-grid--list .card-play-btn,
+.game-grid--list .card-fav-btn,
+.game-grid--list .card-del-btn {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    transform: none !important;
+    opacity: 1;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+}
+
+.game-grid--list .card-play-btn {
+    background: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+    color: var(--accent-cyan);
+}
+
+.game-grid--list .card-play-btn:hover {
+    background: var(--accent-cyan);
+    color: #000;
+}
+
+.game-grid--list .card-fav-btn {
+    display: flex;
+}
+
+.game-grid--list .card-del-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 45, 123, 0.1);
+    border: 1px solid rgba(255, 45, 123, 0.2);
+    color: var(--accent-pink);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.game-grid--list .card-del-btn:hover {
+    background: var(--accent-pink);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 45, 123, 0.3);
+}
+
+.game-grid--list .card-del-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ─── Toast System ─── */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    min-width: 260px;
+    padding: 14px 20px;
+    background: rgba(10, 10, 18, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: auto;
+    animation: toast-in 0.35s var(--ease-spring) both;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.toast--success {
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
+}
+.toast--success::before {
+    content: '✓';
+    color: #10b981;
+}
+
+.toast--error {
+    border-color: rgba(255, 45, 123, 0.4);
+    box-shadow: 0 10px 30px rgba(255, 45, 123, 0.1);
+}
+.toast--error::before {
+    content: '⚠️';
+}
+
+.toast--info {
+    border-color: rgba(0, 229, 255, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
+}
+.toast--info::before {
+    content: 'ℹ️';
+    color: var(--accent-cyan);
+}
+
+@keyframes toast-in {
+    from {
+        transform: translateY(20px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.toast.toast-out {
+    animation: none;
+    opacity: 0 !important;
+    transform: translateY(-20px) scale(0.9) !important;
+}
+
+/* ─── Dynamic Layout controls ─── */
+.view-btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+}
+
+.view-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-cyan);
+    background: rgba(0, 229, 255, 0.05);
+}
+
+/* ─── Custom Games Tab List items ─── */
+.custom-game-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+}
+
+.custom-game-list-item button {
+    background: transparent;
+    border: none;
+    color: var(--accent-pink);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 14px;
+}
+
+.custom-game-list-item button:hover {
+    color: #ff4791;
+}
+

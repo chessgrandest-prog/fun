@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading... — Ghost Arcade</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
+    <title>My Drive - Google Drive</title>
+    <link rel="icon" href="https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        /* ═══ Player Page Styles (inline for fast load) ═══ */
+        /* ═══ Player Page Styles ═══ */
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
@@ -45,6 +45,7 @@
             -webkit-backdrop-filter: blur(16px);
             z-index: 10;
             flex-shrink: 0;
+            gap: 12px;
         }
 
         .player-bar__left {
@@ -98,7 +99,7 @@
             font-size: 14px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.85);
-            max-width: 400px;
+            max-width: 250px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -116,7 +117,7 @@
         .loading-overlay {
             position: absolute;
             inset: 0;
-            top: 45px; /* below bar */
+            top: 45px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -189,10 +190,150 @@
             letter-spacing: 0.3px;
         }
 
+        /* ─── Game Timer ─── */
+        .game-timer {
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--cyan);
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: help;
+        }
+
+        /* ─── Quick Switcher Dropdown ─── */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            min-width: 220px;
+            background: rgba(10, 10, 18, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .dropdown-content.show {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--cyan);
+        }
+
+        .dropdown-item img {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        /* ─── Shortcuts Overlay ─── */
+        .shortcuts-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 4, 6, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .shortcuts-content {
+            background: rgba(10, 10, 18, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .shortcuts-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--cyan);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .shortcuts-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .shortcut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .shortcut-key {
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: var(--cyan);
+            font-weight: 600;
+        }
+
+        .shortcut-action {
+            color: var(--text-dim);
+        }
+
         /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .game-timer { display: none; }
+        }
+
         @media (max-width: 600px) {
             .player-bar { padding: 6px 10px; }
-            .game-title { max-width: 160px; font-size: 13px; }
+            .game-title { max-width: 130px; font-size: 13px; }
             .bar-btn span { display: none; }
             .bar-btn { padding: 8px 10px; }
         }
@@ -203,27 +344,61 @@
     <!-- Top Bar -->
     <div class="player-bar">
         <div class="player-bar__left">
-            <a class="bar-btn" id="backBtn" href="index.html">
+            <a class="bar-btn" id="backBtn" href="ghost-ui">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
                 </svg>
                 <span>Back</span>
             </a>
             <span class="game-title" id="gameTitle">Loading...</span>
+            <span class="game-timer" id="gameTimer" title="Session play time (Hover for lifetime stats)">00:00</span>
         </div>
+
         <div class="player-bar__right">
             <span class="ghost-badge" id="ghostBadge" hidden>👻 Ghost</span>
-            <button class="bar-btn" id="favBtn" title="Toggle favorite">
+
+            <!-- Quick Switcher Dropdown -->
+            <div class="dropdown" id="quickSwitcherDropdown">
+                <button class="bar-btn" id="quickSwitchBtn" title="Switch games instantly">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M4 4l17 17"/>
+                    </svg>
+                    <span>Quick Switch</span>
+                </button>
+                <div class="dropdown-content" id="quickSwitchContent">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Reload Button -->
+            <button class="bar-btn" id="reloadBtn" title="Reload game (R)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                <span>Reload</span>
+            </button>
+
+            <!-- Favorite Button -->
+            <button class="bar-btn" id="favBtn" title="Toggle favorite (F)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="favIcon">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
                 <span id="favText">Favorite</span>
             </button>
+
+            <!-- Fullscreen Button -->
             <button class="bar-btn" id="fullscreenBtn" title="Toggle fullscreen">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                 </svg>
                 <span>Fullscreen</span>
+            </button>
+
+            <!-- Help/Shortcuts Button -->
+            <button class="bar-btn" id="helpBtn" title="Keyboard Shortcuts (?)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/>
+                </svg>
             </button>
         </div>
     </div>
@@ -239,12 +414,38 @@
         <span class="error-state__icon">💀</span>
         <h2 class="error-state__title">Failed to load game</h2>
         <p class="error-state__text">The game file couldn't be fetched. It may have been moved or deleted.</p>
-        <a class="bar-btn" href="index.html" style="margin-top:8px">
+        <a class="bar-btn" href="ghost-ui" style="margin-top:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px">
                 <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
             </svg>
             <span>Back to Games</span>
         </a>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="shortcuts-overlay" id="shortcutsOverlay" style="display:none">
+        <div class="shortcuts-content">
+            <h3 class="shortcuts-title">Keyboard Shortcuts</h3>
+            <div class="shortcuts-grid">
+                <div class="shortcut-row">
+                    <span class="shortcut-key" id="shortcutPanicDesc">Ctrl + `</span>
+                    <span class="shortcut-action">Panic Redirect</span>
+                </div>
+                <div class="shortcut-row">
+                    <span class="shortcut-key">?</span>
+                    <span class="shortcut-action">Toggle Shortcuts overlay</span>
+                </div>
+                <div class="shortcut-row">
+                    <span class="shortcut-key">R</span>
+                    <span class="shortcut-action">Reload game</span>
+                </div>
+                <div class="shortcut-row">
+                    <span class="shortcut-key">F</span>
+                    <span class="shortcut-action">Favorite/Unfavorite game</span>
+                </div>
+            </div>
+            <button class="bar-btn" id="closeShortcutsBtn" style="margin-top: 16px; width: 100%; justify-content: center;">Close</button>
+        </div>
     </div>
 
     <!-- Game Iframe -->
@@ -254,11 +455,56 @@
     (function() {
         'use strict';
 
-        const params = new URLSearchParams(window.location.search);
-        const gameUrl = params.get('url');
-        const gameTitle = params.get('title') || 'Game';
-        const isGhost = params.get('ghost') === '1';
+        const STORAGE_FAV = 'ghostArcade_favorites';
+        const STORAGE_RECENT = 'ghostArcade_recent';
+        const STORAGE_SETTINGS = 'ghostArcade_settings';
+        const STORAGE_PLAYTIME = 'ghostArcade_playtime';
 
+        // ─── Settings Loader ───
+        const DEFAULT_SETTINGS = {
+            accentColor: '#00e5ff',
+            tabTitle: 'Google Drive',
+            tabFavicon: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png',
+            panicKey: '`',
+            panicCtrl: true,
+            panicRedirect: 'https://www.google.com',
+            autoGhost: false
+        };
+
+        let settings = DEFAULT_SETTINGS;
+        try {
+            const data = localStorage.getItem(STORAGE_SETTINGS);
+            if (data) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+        } catch(e) {}
+
+        // Apply Custom Accent Styling
+        applyAccentColor(settings.accentColor);
+
+        function applyAccentColor(hex) {
+            document.documentElement.style.setProperty('--cyan', hex);
+            document.documentElement.style.setProperty('--glow-cyan', hexToRgba(hex, 0.25));
+        }
+
+        function hexToRgba(hex, alpha) {
+            let c;
+            if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+                c = hex.substring(1).split('');
+                if (c.length === 3) {
+                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+                }
+                c = '0x' + c.join('');
+                return `rgba(${(c >> 16) & 255}, ${(c >> 8) & 255}, ${c & 255}, ${alpha})`;
+            }
+            return `rgba(0, 229, 255, ${alpha})`;
+        }
+
+        // ─── Query Parameters ───
+        let params = new URLSearchParams(window.location.search);
+        let gameUrl = params.get('url');
+        let gameTitle = params.get('title') || 'Game';
+        let isGhost = params.get('ghost') === '1' || settings.autoGhost;
+
+        // DOM Elements
         const titleEl = document.getElementById('gameTitle');
         const gameFrame = document.getElementById('gameFrame');
         const loadingOverlay = document.getElementById('loadingOverlay');
@@ -269,9 +515,25 @@
         const favBtn = document.getElementById('favBtn');
         const favIcon = document.getElementById('favIcon');
         const favText = document.getElementById('favText');
+        const reloadBtn = document.getElementById('reloadBtn');
+        const gameTimerEl = document.getElementById('gameTimer');
+        
+        // Quick Switcher dropdown
+        const quickSwitchBtn = document.getElementById('quickSwitchBtn');
+        const quickSwitchContent = document.getElementById('quickSwitchContent');
+        
+        // Shortcuts DOM
+        const helpBtn = document.getElementById('helpBtn');
+        const shortcutsOverlay = document.getElementById('shortcutsOverlay');
+        const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
+        const shortcutPanicDesc = document.getElementById('shortcutPanicDesc');
+
+        // Update shortcuts text descriptions
+        if (shortcutPanicDesc) {
+            shortcutPanicDesc.textContent = `${settings.panicCtrl ? 'Ctrl + ' : ''}${settings.panicKey.toUpperCase()}`;
+        }
 
         // ─── Favorites logic ───
-        const STORAGE_FAV = 'ghostArcade_favorites';
         let favorites = [];
         try {
             const data = localStorage.getItem(STORAGE_FAV);
@@ -295,67 +557,162 @@
 
         if (gameUrl) {
             updateFavUI();
-            favBtn.addEventListener('click', () => {
-                const idx = favorites.indexOf(gameUrl);
-                if (idx > -1) {
-                    favorites.splice(idx, 1);
-                } else {
-                    favorites.push(gameUrl);
-                }
+            favBtn.addEventListener('click', toggleFavorite);
+        }
+
+        function toggleFavorite() {
+            if (!gameUrl) return;
+            const idx = favorites.indexOf(gameUrl);
+            if (idx > -1) {
+                favorites.splice(idx, 1);
+            } else {
+                favorites.push(gameUrl);
+            }
+            try {
+                localStorage.setItem(STORAGE_FAV, JSON.stringify(favorites));
+            } catch(e) {}
+            updateFavUI();
+        }
+
+        // ─── Timer & Lifetime stats ───
+        let sessionSeconds = 0;
+        let lifetimeSeconds = 0;
+
+        // Load lifetime play time
+        let playtimeStats = {};
+        try {
+            const data = localStorage.getItem(STORAGE_PLAYTIME);
+            if (data) playtimeStats = JSON.parse(data);
+        } catch(e) {}
+
+        if (gameUrl) {
+            lifetimeSeconds = playtimeStats[gameUrl] || 0;
+        }
+
+        function updateTimerUI() {
+            sessionSeconds++;
+            lifetimeSeconds++;
+
+            // Save lifetime playtime
+            if (gameUrl) {
+                playtimeStats[gameUrl] = lifetimeSeconds;
                 try {
-                    localStorage.setItem(STORAGE_FAV, JSON.stringify(favorites));
+                    localStorage.setItem(STORAGE_PLAYTIME, JSON.stringify(playtimeStats));
                 } catch(e) {}
-                updateFavUI();
-            });
+            }
+
+            // Format session time
+            const formatTime = (totalSeconds) => {
+                const hrs = Math.floor(totalSeconds / 3600);
+                const mins = Math.floor((totalSeconds % 3600) / 60);
+                const secs = totalSeconds % 60;
+                const pad = (n) => String(n).padStart(2, '0');
+                if (hrs > 0) {
+                    return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+                }
+                return `${pad(mins)}:${pad(secs)}`;
+            };
+
+            gameTimerEl.textContent = formatTime(sessionSeconds);
+
+            // Lifetime string
+            const formatLifetime = (totalSeconds) => {
+                const hrs = Math.floor(totalSeconds / 3600);
+                const mins = Math.floor((totalSeconds % 3600) / 60);
+                if (hrs > 0) {
+                    return `${hrs} hr ${mins} min lifetime`;
+                }
+                return `${mins} min lifetime`;
+            };
+            gameTimerEl.title = `Session: ${formatTime(sessionSeconds)} (Total played: ${formatLifetime(lifetimeSeconds)})`;
         }
 
-        // ─── Set title ───
-        titleEl.textContent = gameTitle;
-        document.title = gameTitle + ' — Ghost Arcade';
+        // Start timer interval
+        let timerInterval = setInterval(updateTimerUI, 1000);
 
-        // ─── Ghost mode ───
-        if (isGhost) {
-            ghostBadge.hidden = false;
-            backBtn.href = 'index.html?ghost=1';
+        // ─── Set Cloaking Headers ───
+        function updatePageTitleAndFavicon() {
+            titleEl.textContent = gameTitle;
+            if (isGhost) {
+                ghostBadge.hidden = false;
+                backBtn.href = 'ghost-ui?ghost=1';
+                document.title = settings.tabTitle;
+                
+                // set preset favicon
+                let link = document.querySelector("link[rel*='icon']");
+                if (!link) {
+                    link = document.createElement('link');
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.href = settings.tabFavicon;
+            } else {
+                ghostBadge.hidden = true;
+                backBtn.href = 'ghost-ui';
+                document.title = gameTitle + ' — Ghost Arcade';
+                let link = document.querySelector("link[rel*='icon']");
+                if (link) {
+                    link.href = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👻</text></svg>';
+                }
+            }
         }
+        updatePageTitleAndFavicon();
 
-        // ─── Load game via fetch + blob URL ───
-        // raw.githubusercontent.com serves .html as text/plain,
-        // so we fetch the HTML and create a blob URL to render it properly.
+        // ─── Load Game Iframe ───
         function getProxyUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('/proxy/')) return url;
             if (window.location.protocol === 'file:') return url;
             return '/proxy/' + url;
         }
 
-        if (gameUrl) {
-            loadGame(getProxyUrl(gameUrl));
-        } else {
-            showError();
-        }
+        function loadGameInFrame(url) {
+            loadingOverlay.classList.remove('hidden');
+            errorState.classList.remove('visible');
+            gameFrame.src = '';
+            
+            if (url) {
+                try {
+                    gameFrame.src = getProxyUrl(url);
+                    gameFrame.addEventListener('load', () => {
+                        loadingOverlay.classList.add('hidden');
+                    }, { once: true });
 
-        async function loadGame(url) {
-            try {
-                // The worker proxy now handles setting Content-Type to text/html and injecting <base>
-                gameFrame.src = url;
-                
-                gameFrame.addEventListener('load', () => {
-                    loadingOverlay.classList.add('hidden');
-                }, { once: true });
-
-                // Fallback: hide loader after 8s even if load event doesn't fire
-                setTimeout(() => {
-                    loadingOverlay.classList.add('hidden');
-                }, 8000);
-
-            } catch (err) {
-                console.error('Game load error:', err);
+                    // Fallback
+                    setTimeout(() => {
+                        loadingOverlay.classList.add('hidden');
+                    }, 8000);
+                } catch (err) {
+                    console.error('Frame loading error:', err);
+                    showError();
+                }
+            } else {
                 showError();
             }
+        }
+
+        if (gameUrl) {
+            loadGameInFrame(gameUrl);
+        } else {
+            showError();
         }
 
         function showError() {
             loadingOverlay.classList.add('hidden');
             errorState.classList.add('visible');
+        }
+
+        // ─── Reload Iframe Button ───
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', reloadGame);
+        }
+
+        function reloadGame() {
+            if (gameUrl) {
+                loadGameInFrame(gameUrl);
+                // Reset session seconds
+                sessionSeconds = 0;
+            }
         }
 
         // ─── Fullscreen ───
@@ -369,12 +726,159 @@
             }
         });
 
-        // ─── Panic key: Escape redirects to Google ───
+        // ─── Help / Keyboard Shortcuts Modal ───
+        if (helpBtn) {
+            helpBtn.addEventListener('click', () => {
+                shortcutsOverlay.style.display = 'flex';
+            });
+        }
+
+        if (closeShortcutsBtn) {
+            closeShortcutsBtn.addEventListener('click', () => {
+                shortcutsOverlay.style.display = 'none';
+            });
+        }
+
+        if (shortcutsOverlay) {
+            shortcutsOverlay.addEventListener('click', (e) => {
+                if (e.target === shortcutsOverlay) {
+                    shortcutsOverlay.style.display = 'none';
+                }
+            });
+        }
+
+        // ─── Keyboard Listeners ───
         document.addEventListener('keydown', (e) => {
-            if (e.key === '`' && e.ctrlKey) {
-                window.location.href = 'https://www.google.com';
+            // Panic Button check
+            const matchesPanicCtrl = e.ctrlKey === settings.panicCtrl;
+            const matchesPanicKey = e.key.toLowerCase() === settings.panicKey.toLowerCase();
+            
+            if (matchesPanicCtrl && matchesPanicKey) {
+                e.preventDefault();
+                window.location.href = settings.panicRedirect;
+            }
+
+            // Other shortcut keys inside player
+            const activeTag = document.activeElement ? document.activeElement.tagName : '';
+            if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+
+            if (e.key === '?') {
+                e.preventDefault();
+                shortcutsOverlay.style.display = shortcutsOverlay.style.display === 'none' ? 'flex' : 'none';
+            } else if (e.key.toLowerCase() === 'r') {
+                e.preventDefault();
+                reloadGame();
+            } else if (e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                toggleFavorite();
+            } else if (e.key === 'Escape' && shortcutsOverlay.style.display === 'flex') {
+                shortcutsOverlay.style.display = 'none';
             }
         });
+
+        // ─── Quick Switcher Dropdown ───
+        if (quickSwitchBtn) {
+            quickSwitchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                quickSwitchContent.classList.toggle('show');
+                populateQuickSwitcher();
+            });
+
+            // Close switcher on click outside
+            document.addEventListener('click', (e) => {
+                if (quickSwitchContent.classList.contains('show') && !e.target.closest('#quickSwitcherDropdown')) {
+                    quickSwitchContent.classList.remove('show');
+                }
+            });
+        }
+
+        function populateQuickSwitcher() {
+            let recent = [];
+            try {
+                const data = localStorage.getItem(STORAGE_RECENT);
+                if (data) recent = JSON.parse(data);
+            } catch(e) {}
+
+            // Filter out the currently playing game
+            const otherGames = recent.filter(r => r.url !== gameUrl).slice(0, 5);
+
+            if (otherGames.length === 0) {
+                quickSwitchContent.innerHTML = `<div class="dropdown-item" style="color:var(--text-dim); cursor:default;">No other recent games</div>`;
+                return;
+            }
+
+            quickSwitchContent.innerHTML = otherGames.map(game => {
+                const thumb = game.image || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23101018"><rect width="100" height="100"/><text x="50%" y="55%" font-size="40" text-anchor="middle" dominant-baseline="middle">🎮</text></svg>';
+                return `
+                    <button class="dropdown-item" data-url="${esc(game.url)}" data-title="${esc(game.title)}" data-image="${esc(thumb)}">
+                        <img src="${esc(getProxyUrl(thumb))}" alt="${esc(game.title)}" onerror="this.style.display='none'">
+                        <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHTML(game.title)}</span>
+                    </button>
+                `;
+            }).join('');
+
+            // Click listener for dropdown items
+            quickSwitchContent.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const nextUrl = item.dataset.url;
+                    const nextTitle = item.dataset.title;
+                    const nextImage = item.dataset.image;
+
+                    // Hide dropdown
+                    quickSwitchContent.classList.remove('show');
+
+                    // Load new game without refreshing entire page
+                    gameUrl = nextUrl;
+                    gameTitle = nextTitle;
+                    
+                    // Reset session time
+                    sessionSeconds = 0;
+                    lifetimeSeconds = playtimeStats[gameUrl] || 0;
+
+                    // Update URL params
+                    const newParams = new URLSearchParams(window.location.search);
+                    newParams.set('url', gameUrl);
+                    newParams.set('title', gameTitle);
+                    const newUrl = window.location.pathname + '?' + newParams.toString();
+                    window.history.replaceState({ path: newUrl }, '', newUrl);
+
+                    // Add to recent log
+                    addRecentGameLog(gameUrl, gameTitle, nextImage);
+
+                    // Reinit UI elements
+                    updatePageTitleAndFavicon();
+                    updateFavUI();
+                    loadGameInFrame(gameUrl);
+                });
+            });
+        }
+
+        function addRecentGameLog(url, title, image) {
+            let recent = [];
+            try {
+                const data = localStorage.getItem(STORAGE_RECENT);
+                if (data) recent = JSON.parse(data);
+            } catch(e) {}
+
+            recent = recent.filter(r => r.url !== url);
+            recent.unshift({ url, title, image, playedAt: Date.now() });
+            
+            try {
+                localStorage.setItem(STORAGE_RECENT, JSON.stringify(recent.slice(0, MAX_RECENT)));
+            } catch(e) {}
+        }
+
+        function esc(str) {
+            if (!str) return '';
+            return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function escHTML(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
 
     })();
     </script>

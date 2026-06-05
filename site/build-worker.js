@@ -4,6 +4,7 @@ const path = require('path');
 const files = {
     '/': 'index.html',
     '/index.html': 'index.html',
+    '/ghost-ui': 'ghost-ui.html',
     '/styles.css': 'styles.css',
     '/script.js': 'script.js',
     '/play.html': 'play.html'
@@ -11,6 +12,7 @@ const files = {
 
 const contentTypes = {
     'index.html': 'text/html;charset=UTF-8',
+    'ghost-ui.html': 'text/html;charset=UTF-8',
     'styles.css': 'text/css;charset=UTF-8',
     'script.js': 'application/javascript;charset=UTF-8',
     'play.html': 'text/html;charset=UTF-8'
@@ -21,9 +23,19 @@ let workerCode = `export default {
         const url = new URL(request.url);
         const path = url.pathname;
 
+        let targetUrlStr = null;
+        // Auto-recover orphaned requests (like root-absolute scripts from proxied sites)
+        const referer = request.headers.get('referer');
+        if (referer && referer.includes('/proxy/http') && !path.startsWith('/proxy/') && !['/', '/ghost-ui', '/play.html', '/script.js', '/styles.css', '/games.json'].includes(path)) {
+            const originMatch = referer.match(/\\/proxy\\/(https?:\\/\\/[^\\/]+)/);
+            if (originMatch) {
+                targetUrlStr = originMatch[1] + path + url.search;
+            }
+        }
+
         // PROXY ROUTE to bypass github blocks
-        if (path.startsWith('/proxy/')) {
-            const targetUrl = request.url.substring(request.url.indexOf('/proxy/') + 7);
+        if (path.startsWith('/proxy/') || targetUrlStr) {
+            const targetUrl = targetUrlStr || request.url.substring(request.url.indexOf('/proxy/') + 7);
             if (!targetUrl) return new Response('Missing url parameter', { status: 400 });
             
             try {
@@ -58,6 +70,12 @@ let workerCode = `export default {
                             html = '<head>' + baseTag + '</head>' + html;
                         }
                     }
+
+                    // Rewrite root-relative links in HTML so scripts load with the proxy path
+                    try {
+                        const targetOrigin = new URL(targetUrl).origin;
+                        html = html.replace(/(src|href|action)=["']\\/(?!\\/)(?!proxy\\/)([^"']*)["']/gi, '$1="/proxy/' + targetOrigin + '/$2"');
+                    } catch(e) {}
 
                     // Universal SDK shim: replaces known third-party SDK scripts with a
                     // Proxy-based mock that auto-handles ANY property access or method call.
