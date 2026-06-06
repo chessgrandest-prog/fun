@@ -1,244 +1,122 @@
 <!DOCTYPE html>
-<html xmlns='http://www.w3.org/1999/xhtml' lang='' xml:lang=''>
+<html>
 <head>
     <meta charset='utf-8' />
     <meta name='viewport' content='width=device-width, user-scalable=no' />
     <title>Brotato</title>
-    <style type='text/css'>
-        body {
-            touch-action: none;
-            margin: 0;
-            border: 0 none;
-            padding: 0;
-            text-align: center;
-            background-color: black;
-        }
-        #canvas {
-            display: block;
-            margin: 0;
-            color: white;
-        }
-        #canvas:focus {
-            outline: none;
-        }
-        .godot {
-            font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-            color: #e0e0e0;
-            background-color: #3b3943;
-            background-image: linear-gradient(to bottom, #403e48, #35333c);
-            border: 1px solid #45434e;
-            box-shadow: 0 0 1px 1px #2f2d35;
-        }
-        #status {
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            visibility: hidden;
-        }
-        #status-progress {
-            width: 366px;
-            height: 7px;
-            background-color: #38363A;
-            border: 1px solid #444246;
-            padding: 1px;
-            box-shadow: 0 0 2px 1px #1B1C22;
-            border-radius: 2px;
-            visibility: visible;
-        }
-        @media only screen and (orientation:portrait) {
-            #status-progress {
-                width: 61.8%;
-            }
-        }
-        #status-progress-inner {
-            height: 100%;
-            width: 0;
-            box-sizing: border-box;
-            transition: width 0.5s linear;
-            background-color: #202020;
-            border: 1px solid #222223;
-            box-shadow: 0 0 1px 1px #27282E;
-            border-radius: 3px;
-        }
-        #status-indeterminate {
-            height: 42px;
-            visibility: visible;
-            position: relative;
-        }
-        #status-indeterminate > div {
-            width: 4.5px;
-            height: 0;
-            border-style: solid;
-            border-width: 9px 3px 0 3px;
-            border-color: #2b2b2b transparent transparent transparent;
-            transform-origin: center 21px;
-            position: absolute;
-        }
-        #status-indeterminate > div:nth-child(1) { transform: rotate( 22.5deg); }
-        #status-indeterminate > div:nth-child(2) { transform: rotate( 67.5deg); }
+    <style>
+        body { touch-action: none; margin: 0; background-color: black; text-align: center; }
+        #canvas { display: block; margin: 0; color: white; }
+        .godot { font-family: 'Noto Sans', sans-serif; color: #e0e0e0; background-color: #3b3943; }
+        #status { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; visibility: hidden; }
+        #status-progress { width: 366px; height: 7px; background-color: #38363A; border: 1px solid #444246; padding: 1px; border-radius: 2px; visibility: visible; }
+        #status-progress-inner { height: 100%; width: 0; background-color: #202020; border: 1px solid #222223; border-radius: 3px; transition: width 0.5s linear; }
+        #status-indeterminate { height: 42px; visibility: visible; position: relative; }
+        #status-indeterminate > div { width: 4.5px; height: 0; border-style: solid; border-width: 9px 3px 0 3px; border-color: #2b2b2b transparent transparent transparent; transform-origin: center 21px; position: absolute; }
+        #status-indeterminate > div:nth-child(1) { transform: rotate(22.5deg); }
+        #status-indeterminate > div:nth-child(2) { transform: rotate(67.5deg); }
         #status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
         #status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
         #status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
         #status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
         #status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
         #status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
-        #status-notice {
-            margin: 0 100px;
-            line-height: 1.3;
-            visibility: visible;
-            padding: 4px 6px;
-        }
+        #status-notice { margin: 0 100px; line-height: 1.3; padding: 4px 6px; visibility: visible; }
     </style>
-    <link id='-gd-engine-icon' rel='icon' type='image/png' href='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.icon.png' />
-    <link rel='apple-touch-icon' href='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.apple-touch-icon.png' />
+    <link rel='icon' type='image/png' href='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.icon.png' />
 </head>
 <body>
-    <canvas id='canvas'>
-        HTML5 canvas appears to be unsupported in the current browser.<br />
-        Please try updating or use a different browser.
-    </canvas>
+    <canvas id='canvas'></canvas>
     <div id='status'>
-        <div id='status-progress' style='display: none;' oncontextmenu='event.preventDefault();'><div id='status-progress-inner'></div></div>
-        <div id='status-indeterminate' style='display: none;' oncontextmenu='event.preventDefault();'>
-            <div></div><div></div><div></div><div></div>
-            <div></div><div></div><div></div><div></div>
-        </div>
-        <div id='status-notice' class='godot' style='display: none;'></div>
+        <div id='status-progress' style='display:none'><div id='status-progress-inner'></div></div>
+        <div id='status-indeterminate' style='display:none'><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+        <div id='status-notice' class='godot' style='display:none'></div>
     </div>
 
-    <!-- CDN-hosted engine script -->
-    <script type='text/javascript' src='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.js'></script>
-    <script type='text/javascript'>
-        // CDN base URL (where index.wasm and index.pck are located)
-        const CDN_BASE = "https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/";
+    <script src='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.js'></script>
+    <script>
+        // Your working Netlify URLs
+        const WASM_URL = "https://voluble-quokka-0ba6b5.netlify.app/index.wasm";
+        const PCK_URL  = "https://voluble-quokka-0ba6b5.netlify.app/index.pck";
 
-        // Intercept fetch requests
-        const originalFetch = window.fetch;
-        window.fetch = function(input, init) {
-            let url = typeof input === 'string' ? input : input.url;
-            if (url === 'index.wasm' || url.endsWith('/index.wasm') || url === 'index.pck' || url.endsWith('/index.pck')) {
-                const newUrl = CDN_BASE + (url.includes('/') ? url.split('/').pop() : url);
-                console.log('Redirecting fetch: ' + url + ' -> ' + newUrl);
-                return originalFetch.call(this, newUrl, init);
+        // Simple fetch override
+        const origFetch = window.fetch;
+        window.fetch = function(url, options) {
+            if (typeof url === 'string') {
+                if (url === 'index.wasm' || url.endsWith('/index.wasm')) return origFetch(WASM_URL, options);
+                if (url === 'index.pck' || url.endsWith('/index.pck')) return origFetch(PCK_URL, options);
             }
-            return originalFetch.call(this, input, init);
+            return origFetch(url, options);
         };
 
-        // Intercept XMLHttpRequest
+        // Also override XMLHttpRequest
         const XHR = XMLHttpRequest.prototype;
-        const originalOpen = XHR.open;
-        XHR.open = function(method, url, async, user, password) {
-            if (typeof url === 'string' && (url === 'index.wasm' || url === 'index.pck' || url.endsWith('/index.wasm') || url.endsWith('/index.pck'))) {
-                this._redirectedUrl = CDN_BASE + (url.includes('/') ? url.split('/').pop() : url);
-                console.log('Redirecting XHR: ' + url + ' -> ' + this._redirectedUrl);
-                return originalOpen.call(this, method, this._redirectedUrl, async, user, password);
+        const origOpen = XHR.open;
+        XHR.open = function(method, url) {
+            if (typeof url === 'string') {
+                if (url === 'index.wasm' || url.endsWith('/index.wasm')) return origOpen.call(this, method, WASM_URL);
+                if (url === 'index.pck' || url.endsWith('/index.pck')) return origOpen.call(this, method, PCK_URL);
             }
-            return originalOpen.call(this, method, url, async, user, password);
+            return origOpen.call(this, method, url);
         };
 
-        // Also intercept WebAssembly instantiation streaming (used by some engines)
-        if (WebAssembly.instantiateStreaming) {
-            const originalInstantiateStreaming = WebAssembly.instantiateStreaming;
-            WebAssembly.instantiateStreaming = function(response, importObject) {
-                let actualResponse = response;
-                if (response && response.url && (response.url === 'index.wasm' || response.url.endsWith('/index.wasm'))) {
-                    const newUrl = CDN_BASE + 'index.wasm';
-                    actualResponse = fetch(newUrl);
-                }
-                return originalInstantiateStreaming.call(this, actualResponse, importObject);
-            };
-        }
-
-        // Now the game should load files from CDN
-        const GODOT_CONFIG = {
-            "args": [],
-            "canvasResizePolicy": 2,
-            "executable": "index",
-            "experimentalVK": false,
-            "fileSizes": {
-                "index.pck": 144746880,
-                "index.wasm": 26156492
-            },
-            "focusCanvas": true,
-            "gdnativeLibs": []
+        // Start engine
+        const config = {
+            args: [],
+            canvasResizePolicy: 2,
+            executable: "index",
+            fileSizes: { "index.pck": 144746880, "index.wasm": 26156492 },
+            focusCanvas: true
         };
-        
-        var engine = new Engine(GODOT_CONFIG);
+        const engine = new Engine(config);
 
         (function() {
-            const INDETERMINATE_STATUS_STEP_MS = 100;
-            var statusProgress = document.getElementById('status-progress');
-            var statusProgressInner = document.getElementById('status-progress-inner');
-            var statusIndeterminate = document.getElementById('status-indeterminate');
-            var statusNotice = document.getElementById('status-notice');
+            let statusProgress = document.getElementById('status-progress');
+            let statusProgressInner = document.getElementById('status-progress-inner');
+            let statusIndeterminate = document.getElementById('status-indeterminate');
+            let statusNotice = document.getElementById('status-notice');
+            let initializing = true;
+            let statusMode = 'hidden';
+            let animationCallbacks = [];
 
-            var initializing = true;
-            var statusMode = 'hidden';
-
-            var animationCallbacks = [];
             function animate(time) {
-                animationCallbacks.forEach(callback => callback(time));
+                animationCallbacks.forEach(cb => cb(time));
                 requestAnimationFrame(animate);
             }
             requestAnimationFrame(animate);
 
             function setStatusMode(mode) {
                 if (statusMode === mode || !initializing) return;
-                [statusProgress, statusIndeterminate, statusNotice].forEach(elem => {
-                    elem.style.display = 'none';
-                });
-                animationCallbacks = animationCallbacks.filter(function(value) {
-                    return (value != animateStatusIndeterminate);
-                });
+                [statusProgress, statusIndeterminate, statusNotice].forEach(e => e.style.display = 'none');
+                animationCallbacks = animationCallbacks.filter(cb => cb !== animateStatusIndeterminate);
                 switch (mode) {
-                    case 'progress':
-                        statusProgress.style.display = 'block';
-                        break;
-                    case 'indeterminate':
-                        statusIndeterminate.style.display = 'block';
-                        animationCallbacks.push(animateStatusIndeterminate);
-                        break;
-                    case 'notice':
-                        statusNotice.style.display = 'block';
-                        break;
-                    case 'hidden':
-                        break;
-                    default:
-                        throw new Error('Invalid status mode');
+                    case 'progress': statusProgress.style.display = 'block'; break;
+                    case 'indeterminate': statusIndeterminate.style.display = 'block'; animationCallbacks.push(animateStatusIndeterminate); break;
+                    case 'notice': statusNotice.style.display = 'block'; break;
+                    case 'hidden': break;
                 }
                 statusMode = mode;
             }
 
             function animateStatusIndeterminate(ms) {
-                var i = Math.floor(ms / INDETERMINATE_STATUS_STEP_MS % 8);
-                if (statusIndeterminate.children[i].style.borderTopColor == '') {
-                    Array.prototype.slice.call(statusIndeterminate.children).forEach(child => {
-                        child.style.borderTopColor = '';
-                    });
+                let i = Math.floor(ms / 100 % 8);
+                if (statusIndeterminate.children[i].style.borderTopColor === '') {
+                    Array.from(statusIndeterminate.children).forEach(c => c.style.borderTopColor = '');
                     statusIndeterminate.children[i].style.borderTopColor = '#dfdfdf';
                 }
             }
 
             function setStatusNotice(text) {
-                while (statusNotice.lastChild) {
-                    statusNotice.removeChild(statusNotice.lastChild);
-                }
-                var lines = text.split('\n');
-                lines.forEach((line) => {
+                while (statusNotice.firstChild) statusNotice.removeChild(statusNotice.firstChild);
+                text.split('\n').forEach(line => {
                     statusNotice.appendChild(document.createTextNode(line));
                     statusNotice.appendChild(document.createElement('br'));
                 });
             }
 
             function displayFailureNotice(err) {
-                var msg = err.message || err;
-                console.error(msg);
-                setStatusNotice(msg);
+                console.error(err);
+                setStatusNotice(err.message || err);
                 setStatusMode('notice');
                 initializing = false;
             }
@@ -248,19 +126,15 @@
             } else {
                 setStatusMode('indeterminate');
                 engine.startGame({
-                    'onProgress': function (current, total) {
+                    onProgress: (current, total) => {
                         if (total > 0) {
-                            statusProgressInner.style.width = current/total * 100 + '%';
+                            statusProgressInner.style.width = (current / total * 100) + '%';
                             setStatusMode('progress');
-                            if (current === total) {
-                                setTimeout(() => {
-                                    setStatusMode('indeterminate');
-                                }, 500);
-                            }
+                            if (current === total) setTimeout(() => setStatusMode('indeterminate'), 500);
                         } else {
                             setStatusMode('indeterminate');
                         }
-                    },
+                    }
                 }).then(() => {
                     setStatusMode('hidden');
                     initializing = false;
