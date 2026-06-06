@@ -337,9 +337,178 @@
             .bar-btn span { display: none; }
             .bar-btn { padding: 8px 10px; }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           CUSTOM CURSOR
+           ═══════════════════════════════════════════════════════════ */
+        body.custom-cursor-active,
+        body.custom-cursor-active * {
+            cursor: none !important;
+        }
+
+        .custom-cursor-dot {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background-color: var(--cursor-color, var(--cyan));
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.3s;
+            opacity: 0;
+        }
+
+        .custom-cursor-ring {
+            position: fixed;
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--cursor-color, var(--cyan));
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)), height 0.3s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)), border-color 0.3s, background-color 0.3s;
+            box-shadow: 0 0 10px var(--cursor-glow, var(--glow-cyan));
+            opacity: 0;
+        }
+
+        body.cursor-hovering .custom-cursor-ring {
+            width: 50px;
+            height: 50px;
+            background-color: var(--cursor-glow, var(--glow-cyan));
+            border-color: var(--cursor-color, var(--cyan));
+        }
+
+        body.cursor-hovering .custom-cursor-dot {
+            width: 4px;
+            height: 4px;
+        }
+
+        body.cursor-clicking .custom-cursor-ring {
+            width: 28px;
+            height: 28px;
+            background-color: var(--cursor-glow, var(--glow-cyan));
+        }
+
+        /* Orb */
+        .custom-cursor-orb {
+            position: fixed;
+            width: 24px;
+            height: 24px;
+            background-color: var(--cursor-glow, var(--glow-cyan));
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)), height 0.3s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)), background-color 0.3s;
+            box-shadow: 0 0 15px var(--cursor-glow, var(--glow-cyan));
+            display: none;
+        }
+
+        body.cursor-hovering .custom-cursor-orb {
+            width: 40px;
+            height: 40px;
+            background-color: var(--cursor-color, var(--cyan));
+        }
+
+        body.cursor-clicking .custom-cursor-orb {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Cyber */
+        .custom-cursor-cyber {
+            position: fixed;
+            width: 32px;
+            height: 32px;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%) rotate(0deg);
+            transition: width 0.2s, height 0.2s;
+            display: none;
+        }
+        .cyber-line {
+            position: absolute;
+            background-color: var(--cursor-color, var(--cyan));
+            transition: all 0.2s;
+            box-shadow: 0 0 8px var(--cursor-glow, var(--glow-cyan));
+        }
+        .cyber-t, .cyber-b { width: 2px; height: 10px; left: 15px; }
+        .cyber-l, .cyber-r { width: 10px; height: 2px; top: 15px; }
+        .cyber-t { top: -2px; }
+        .cyber-b { bottom: -2px; }
+        .cyber-l { left: -2px; }
+        .cyber-r { right: -2px; }
+
+        body.cursor-hovering .custom-cursor-cyber {
+            width: 24px;
+            height: 24px;
+        }
+        body.cursor-hovering .cyber-t, body.cursor-hovering .cyber-b { height: 6px; left: 11px; }
+        body.cursor-hovering .cyber-l, body.cursor-hovering .cyber-r { width: 6px; top: 11px; }
+
+        body.cursor-clicking .custom-cursor-cyber {
+            transform: translate(-50%, -50%) scale(0.8) !important;
+        }
+
+        /* Simple */
+        .custom-cursor-simple {
+            position: fixed;
+            width: 16px;
+            height: 16px;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+            display: none;
+        }
+        .simple-v, .simple-h {
+            position: absolute;
+            background-color: var(--cursor-color, #ffffff);
+        }
+        .simple-v {
+            width: 2px;
+            height: 16px;
+            left: 7px;
+            top: 0;
+        }
+        .simple-h {
+            width: 16px;
+            height: 2px;
+            left: 0;
+            top: 7px;
+        }
+        body.cursor-hovering .custom-cursor-simple {
+            transform: translate(-50%, -50%) scale(1.3);
+        }
+        body.cursor-clicking .custom-cursor-simple {
+            transform: translate(-50%, -50%) scale(0.8);
+        }
     </style>
 </head>
 <body>
+
+    <!-- Custom Cursors -->
+    <div id="cursorContainer" hidden>
+        <!-- Ring -->
+        <div class="custom-cursor-dot" id="cursorDot"></div>
+        <div class="custom-cursor-ring" id="cursorRing"></div>
+        <!-- Orb -->
+        <div class="custom-cursor-orb" id="cursorOrb"></div>
+        <!-- Cyber -->
+        <div class="custom-cursor-cyber" id="cursorCyber">
+            <div class="cyber-line cyber-t"></div>
+            <div class="cyber-line cyber-b"></div>
+            <div class="cyber-line cyber-l"></div>
+            <div class="cyber-line cyber-r"></div>
+        </div>
+        <!-- Simple -->
+        <div class="custom-cursor-simple" id="cursorSimple">
+            <div class="simple-v"></div>
+            <div class="simple-h"></div>
+        </div>
+    </div>
 
     <!-- Top Bar -->
     <div class="player-bar">
@@ -454,6 +623,105 @@
     <script>
     (function() {
         'use strict';
+        
+        const $ = (s) => document.querySelector(s);
+
+        // ═══════════════════════════════════════════════════════════
+        // CUSTOM CURSOR LOGIC
+        // ═══════════════════════════════════════════════════════════
+        let cursorContainer = null;
+        let cursorDot = null, cursorRing = null, cursorOrb = null, cursorCyber = null, cursorSimple = null;
+        let cursorRingX = 0, cursorRingY = 0;
+        let cursorMouseX = 0, cursorMouseY = 0;
+        let cursorHasMoved = false;
+
+        function initCustomCursor(style) {
+            cursorContainer = $('#cursorContainer');
+            cursorDot = $('#cursorDot');
+            cursorRing = $('#cursorRing');
+            cursorOrb = $('#cursorOrb');
+            cursorCyber = $('#cursorCyber');
+            cursorSimple = $('#cursorSimple');
+
+            if (!cursorContainer) return;
+            cursorContainer.hidden = false;
+
+            window.addEventListener('mousemove', (e) => {
+                if (style === 'none') return;
+                cursorMouseX = e.clientX;
+                cursorMouseY = e.clientY;
+
+                if (!cursorHasMoved) {
+                    cursorRingX = cursorMouseX;
+                    cursorRingY = cursorMouseY;
+                    cursorHasMoved = true;
+                    updateCursorVisibility(true, style);
+                }
+
+                if (style === 'ring') {
+                    if (cursorDot) { cursorDot.style.left = `${cursorMouseX}px`; cursorDot.style.top = `${cursorMouseY}px`; }
+                } else if (style === 'orb') {
+                    if (cursorOrb) { cursorOrb.style.left = `${cursorMouseX}px`; cursorOrb.style.top = `${cursorMouseY}px`; }
+                } else if (style === 'cyber') {
+                    if (cursorCyber) { cursorCyber.style.left = `${cursorMouseX}px`; cursorCyber.style.top = `${cursorMouseY}px`; }
+                } else if (style === 'simple') {
+                    if (cursorSimple) { cursorSimple.style.left = `${cursorMouseX}px`; cursorSimple.style.top = `${cursorMouseY}px`; }
+                }
+            });
+
+            window.addEventListener('mousedown', () => { document.body.classList.add('cursor-clicking'); });
+            window.addEventListener('mouseup', () => { document.body.classList.remove('cursor-clicking'); });
+
+            document.addEventListener('mouseover', (e) => {
+                if (style === 'none') return;
+                const target = e.target;
+                if (target && (target.closest('button') || target.closest('a'))) {
+                    document.body.classList.add('cursor-hovering');
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target;
+                if (target && (target.closest('button') || target.closest('a'))) {
+                    document.body.classList.remove('cursor-hovering');
+                }
+            });
+
+            document.addEventListener('mouseenter', () => { if (style !== 'none' && cursorHasMoved) updateCursorVisibility(true, style); });
+            document.addEventListener('mouseleave', () => { updateCursorVisibility(false, style); });
+
+            cursorTick(style);
+        }
+
+        function updateCursorVisibility(visible, style) {
+            const opacity = visible ? '1' : '0';
+            if (cursorDot) cursorDot.style.opacity = (style === 'ring') ? opacity : '0';
+            if (cursorRing) cursorRing.style.opacity = (style === 'ring') ? opacity : '0';
+            if (cursorOrb) cursorOrb.style.display = (style === 'orb' && visible) ? 'block' : 'none';
+            if (cursorCyber) cursorCyber.style.display = (style === 'cyber' && visible) ? 'block' : 'none';
+            if (cursorSimple) cursorSimple.style.display = (style === 'simple' && visible) ? 'block' : 'none';
+        }
+
+        function cursorTick(style) {
+            if (style === 'ring' && cursorHasMoved && cursorRing) {
+                cursorRingX += (cursorMouseX - cursorRingX) * 0.15;
+                cursorRingY += (cursorMouseY - cursorRingY) * 0.15;
+                cursorRing.style.left = `${cursorRingX}px`;
+                cursorRing.style.top = `${cursorRingY}px`;
+            } else if (style === 'cyber' && cursorHasMoved && cursorCyber && !document.body.classList.contains('cursor-clicking')) {
+                const dx = cursorMouseX - cursorRingX;
+                const dy = cursorMouseY - cursorRingY;
+                cursorRingX += dx * 0.2;
+                cursorRingY += dy * 0.2;
+                const speed = Math.sqrt(dx*dx + dy*dy);
+                const rot = Math.min(speed * 2, 45);
+                cursorCyber.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+            } else if (style === 'cyber') {
+                cursorRingX = cursorMouseX;
+                cursorRingY = cursorMouseY;
+            }
+            requestAnimationFrame(() => cursorTick(style));
+        }
 
         const STORAGE_FAV = 'ghostArcade_favorites';
         const STORAGE_RECENT = 'ghostArcade_recent';
@@ -471,13 +739,41 @@
             autoGhost: false
         };
 
+        try {
+            const savedSettings = localStorage.getItem('ghostArcade_settings');
+            let cursorColor = 'match';
+            let cursorStyle = 'ring';
+            let accentColor = '#00e5ff';
+            
+            if (savedSettings) {
+                try {
+                    const settings = JSON.parse(savedSettings);
+                    if (settings.accentColor) {
+                        accentColor = settings.accentColor;
+                        document.documentElement.style.setProperty('--cyan', accentColor);
+                        document.documentElement.style.setProperty('--glow-cyan', accentColor + '40');
+                    }
+                    if (settings.cursorStyle !== undefined) cursorStyle = settings.cursorStyle;
+                    if (settings.cursorColor !== undefined) cursorColor = settings.cursorColor;
+                } catch (e) {}
+            }
+
+            const hex = cursorColor === 'match' ? accentColor : cursorColor;
+            document.documentElement.style.setProperty('--cursor-color', hex);
+            document.documentElement.style.setProperty('--cursor-glow', hex + '59');
+
+            if (cursorStyle !== 'none') {
+                document.body.classList.add('custom-cursor-active');
+                initCustomCursor(cursorStyle);
+            }
+        } catch(e) {}
+
         let settings = DEFAULT_SETTINGS;
         try {
             const data = localStorage.getItem(STORAGE_SETTINGS);
             if (data) settings = { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
         } catch(e) {}
 
-        // Apply Custom Accent Styling
         applyAccentColor(settings.accentColor);
 
         function applyAccentColor(hex) {

@@ -13,11 +13,33 @@
 </head>
 <body>
 
+    <!-- Custom Cursors -->
+    <div id="cursorContainer" hidden>
+        <!-- Ring -->
+        <div class="custom-cursor-dot" id="cursorDot"></div>
+        <div class="custom-cursor-ring" id="cursorRing"></div>
+        <!-- Orb -->
+        <div class="custom-cursor-orb" id="cursorOrb"></div>
+        <!-- Cyber -->
+        <div class="custom-cursor-cyber" id="cursorCyber">
+            <div class="cyber-line cyber-t"></div>
+            <div class="cyber-line cyber-b"></div>
+            <div class="cyber-line cyber-l"></div>
+            <div class="cyber-line cyber-r"></div>
+        </div>
+        <!-- Simple -->
+        <div class="custom-cursor-simple" id="cursorSimple">
+            <div class="simple-v"></div>
+            <div class="simple-h"></div>
+        </div>
+    </div>
+
     <!-- Ambient Background Effects -->
     <div class="bg-effects" aria-hidden="true">
         <div class="bg-orb bg-orb--cyan"></div>
         <div class="bg-orb bg-orb--purple"></div>
         <div class="bg-orb bg-orb--pink"></div>
+        <canvas id="effectsCanvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0; transition: opacity 1s ease;"></canvas>
     </div>
 
     <!-- Ghost Mode Active Indicator -->
@@ -201,6 +223,72 @@
                             Enable 3D Parallax Card Tilt
                         </label>
                         <span class="settings-desc">Enables a dynamic 3D perspective effect when hovering over game cards.</span>
+                    </div>
+
+                    <!-- Cursor Style -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="cursorStyleSelect">Cursor Style</label>
+                        <select id="cursorStyleSelect" class="settings-select" style="width:100%; padding:8px; margin-top:4px; background:var(--surface); color:white; border:1px solid var(--border); border-radius:4px; outline:none; cursor:pointer;">
+                            <option value="none">System Default</option>
+                            <option value="ring">Neon Ring</option>
+                            <option value="orb">Pulse Orb</option>
+                            <option value="cyber">Cyber Crosshair</option>
+                            <option value="simple">Simple Crosshair (Minecraft)</option>
+                        </select>
+                        <span class="settings-desc" style="margin-top:4px; display:block;">Choose a custom cursor to fit the theme.</span>
+                    </div>
+
+                    <!-- Cursor Color Picker -->
+                    <div class="settings-group" id="cursorColorGroup">
+                        <label class="settings-label">Cursor Color</label>
+                        <span class="settings-desc">Choose a color for the custom cursor or match the accent color.</span>
+                        <div class="color-picker-wrapper">
+                            <button class="color-swatch-cursor active" data-cursor-color="match" style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));" title="Match Accent Color"></button>
+                            <button class="color-swatch-cursor" data-cursor-color="#00e5ff" style="background: #00e5ff;" title="Cyan"></button>
+                            <button class="color-swatch-cursor" data-cursor-color="#ff2d7b" style="background: #ff2d7b;" title="Hot Pink"></button>
+                            <button class="color-swatch-cursor" data-cursor-color="#b04aff" style="background: #b04aff;" title="Deep Purple"></button>
+                            <button class="color-swatch-cursor" data-cursor-color="#10b981" style="background: #10b981;" title="Emerald Green"></button>
+                            <button class="color-swatch-cursor" data-cursor-color="#f59e0b" style="background: #f59e0b;" title="Amber Gold"></button>
+                            <div class="custom-color-btn" title="Choose custom color">
+                                <span>🎨</span>
+                                <input type="color" id="customCursorColorInput" class="custom-color-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Background Effect -->
+                    <div class="settings-group">
+                        <label class="settings-label" for="bgEffectSelect">Background Effect</label>
+                        <select id="bgEffectSelect" class="settings-select" style="width:100%; padding:8px; margin-top:4px; background:var(--surface); color:white; border:1px solid var(--border); border-radius:4px; outline:none; cursor:pointer;">
+                            <option value="none">Solid Dark (Max Performance)</option>
+                            <option value="orbs">Ambient Orbs</option>
+                            <option value="lightning">Lightning Storm</option>
+                            <option value="matrix">Matrix Code Rain</option>
+                            <option value="starfield">Starfield Particles</option>
+                        </select>
+                        <span class="settings-desc" style="margin-top:4px; display:block;">Choose an ambient effect for the background.</span>
+                    </div>
+
+                    <!-- Lightning Frequency Slider -->
+                    <div class="settings-group" id="groupLightningFreq" style="display:none;">
+                        <label class="settings-label" for="lightningFreqSlider">Lightning Frequency</label>
+                        <span class="settings-desc">Adjust how often lightning strikes occur.</span>
+                        <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+                            <span style="font-size:12px; opacity:0.6;">Slow</span>
+                            <input type="range" id="lightningFreqSlider" min="1" max="10" step="1" value="5" style="flex:1; cursor:pointer;">
+                            <span style="font-size:12px; opacity:0.6;">Fast</span>
+                        </div>
+                    </div>
+
+                    <!-- Effect Density Slider -->
+                    <div class="settings-group" id="groupBgDensity" style="display:none;">
+                        <label class="settings-label" for="bgDensitySlider">Effect Density / Speed</label>
+                        <span class="settings-desc">Adjust the intensity of the active background effect.</span>
+                        <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
+                            <span style="font-size:12px; opacity:0.6;">Low</span>
+                            <input type="range" id="bgDensitySlider" min="1" max="10" step="1" value="5" style="flex:1; cursor:pointer;">
+                            <span style="font-size:12px; opacity:0.6;">High</span>
+                        </div>
                     </div>
                 </div>
 

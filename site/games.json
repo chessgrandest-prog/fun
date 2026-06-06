@@ -10,6 +10,16 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Crossy_Road.jpg"
   },
   {
+    "title": "Tomb of the Mask",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tomb%20of%20the%20Mask.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tomb%20of%20the%20Mask.jpg"
+  },
+  {
+    "title": "Tiny Fishing",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tiny%20Fishing.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tiny%20Fishing.jpg"
+  },
+  {
     "title": "Plague Inc",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Plague%20Inc.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Plague%20Inc.png"
@@ -18,11 +28,6 @@
     "title": "Stardew Valley",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Stardew%20Valley.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Stardew%20Valley.webp"
-  },
-  {
-    "title": "10 Minutes Till Dawn",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/10%20Minutes%20Till%20Dawn.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/10%20Minutes%20Till%20Dawn.webp"
   },
   {
     "title": "Minesweeper Plus",
@@ -63,11 +68,6 @@
     "title": "Getting Over It",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Getting%20Over%20It%20with%20Bennett%20Foddy.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Getting%20Over%20It.png"
-  },
-  {
-    "title": "Celeste",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Celeste.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Celeste.jpg"
   },
   {
     "title": "Slime Rancher",

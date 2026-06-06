@@ -28,7 +28,12 @@
         panicCtrl: true,
         panicRedirect: 'https://www.google.com',
         autoGhost: false,
-        customDecoyImage: ''
+        customDecoyImage: '',
+        cursorStyle: 'ring',
+        cursorColor: 'match',
+        bgEffect: 'orbs',
+        lightningFrequency: 5,
+        bgDensity: 5
     };
 
     // ─── State ───
@@ -80,6 +85,16 @@
     const customDecoyImageInput = $('#customDecoyImageInput');
     const customDecoyPreview = $('#customDecoyPreview');
 
+    // Cursor & Background Settings Inputs
+    const cursorStyleSelect = $('#cursorStyleSelect');
+    const bgEffectSelect = $('#bgEffectSelect');
+    const customCursorColorInput = $('#customCursorColorInput');
+    const lightningFreqSlider = $('#lightningFreqSlider');
+    const bgDensitySlider = $('#bgDensitySlider');
+    
+    const groupLightningFreq = $('#groupLightningFreq');
+    const groupBgDensity = $('#groupBgDensity');
+
     // Custom game upload form
     const customGameForm = $('#customGameForm');
     const customGamesList = $('#customGamesList');
@@ -99,6 +114,8 @@
 
     async function init() {
         applySettings();
+        initCustomCursor();
+        initLightning();
         setupGhostMode();
         setupPanicKey();
         setupSearch();
@@ -183,6 +200,21 @@
         if (panicKeyInput) panicKeyInput.value = settings.panicKey;
         if (panicRedirectInput) panicRedirectInput.value = settings.panicRedirect;
         if (autoGhostToggle) autoGhostToggle.checked = settings.autoGhost;
+
+        if (cursorStyleSelect) cursorStyleSelect.value = settings.cursorStyle || 'none';
+        if (bgEffectSelect) bgEffectSelect.value = settings.bgEffect || 'none';
+        if (lightningFreqSlider) lightningFreqSlider.value = settings.lightningFrequency || 5;
+        if (bgDensitySlider) bgDensitySlider.value = settings.bgDensity || 5;
+
+        applyCursorColor();
+        updateCursorState();
+        if (typeof updateBgEffectState === 'function') updateBgEffectState();
+
+        // Show/Hide relevant settings
+        if (groupLightningFreq && groupBgDensity) {
+            groupLightningFreq.style.display = settings.bgEffect === 'lightning' ? 'block' : 'none';
+            groupBgDensity.style.display = (settings.bgEffect === 'matrix' || settings.bgEffect === 'starfield') ? 'block' : 'none';
+        }
 
         // Auto-ghost launcher redirection
         if (settings.autoGhost && params.get('ghost') !== '1' && window.location.pathname.includes('/ghost-ui')) {
@@ -669,6 +701,70 @@
             });
         }
 
+        // Cursor Style Select
+        if (cursorStyleSelect) {
+            cursorStyleSelect.addEventListener('change', (e) => {
+                settings.cursorStyle = e.target.value;
+                saveJSON(STORAGE.settings, settings);
+                applySettings();
+                showToast('Cursor style updated', 'info');
+            });
+        }
+
+        // Custom Cursor Swatches
+        $$('.color-swatch-cursor').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                settings.cursorColor = swatch.dataset.cursorColor;
+                saveJSON(STORAGE.settings, settings);
+                applySettings();
+                showToast('Cursor color updated!', 'success');
+            });
+        });
+
+        // Custom Cursor Color Input
+        if (customCursorColorInput) {
+            customCursorColorInput.addEventListener('input', (e) => {
+                settings.cursorColor = e.target.value;
+                saveJSON(STORAGE.settings, settings);
+                applySettings();
+            });
+            customCursorColorInput.addEventListener('change', () => {
+                showToast('Custom cursor color saved!', 'success');
+            });
+        }
+
+        // Background Effect Select
+        if (bgEffectSelect) {
+            bgEffectSelect.addEventListener('change', (e) => {
+                settings.bgEffect = e.target.value;
+                saveJSON(STORAGE.settings, settings);
+                applySettings();
+                showToast('Background effect updated', 'info');
+            });
+        }
+
+        // Lightning Frequency Slider
+        if (lightningFreqSlider) {
+            lightningFreqSlider.addEventListener('input', (e) => {
+                settings.lightningFrequency = parseInt(e.target.value);
+                saveJSON(STORAGE.settings, settings);
+            });
+            lightningFreqSlider.addEventListener('change', () => {
+                showToast('Lightning frequency updated!', 'success');
+            });
+        }
+
+        // Density Slider
+        if (bgDensitySlider) {
+            bgDensitySlider.addEventListener('input', (e) => {
+                settings.bgDensity = parseInt(e.target.value);
+                saveJSON(STORAGE.settings, settings);
+            });
+            bgDensitySlider.addEventListener('change', () => {
+                showToast('Effect density updated!', 'success');
+            });
+        }
+
         // Backup Actions
         if (exportSettingsBtn) {
             exportSettingsBtn.addEventListener('click', exportSettingsData);
@@ -1144,6 +1240,388 @@
         } catch {
             // Storage full or blocked
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CUSTOM CURSOR LOGIC
+    // ═══════════════════════════════════════════════════════════
+    let cursorContainer = null;
+    let cursorDot = null, cursorRing = null, cursorOrb = null, cursorCyber = null, cursorSimple = null;
+    let cursorRingX = 0, cursorRingY = 0;
+    let cursorMouseX = 0, cursorMouseY = 0;
+    let cursorHasMoved = false;
+
+    function initCustomCursor() {
+        cursorContainer = $('#cursorContainer');
+        cursorDot = $('#cursorDot');
+        cursorRing = $('#cursorRing');
+        cursorOrb = $('#cursorOrb');
+        cursorCyber = $('#cursorCyber');
+        cursorSimple = $('#cursorSimple');
+
+        if (!cursorContainer) return;
+        cursorContainer.hidden = false;
+
+        window.addEventListener('mousemove', (e) => {
+            if (settings.cursorStyle === 'none') return;
+            cursorMouseX = e.clientX;
+            cursorMouseY = e.clientY;
+
+            if (!cursorHasMoved) {
+                cursorRingX = cursorMouseX;
+                cursorRingY = cursorMouseY;
+                cursorHasMoved = true;
+                updateCursorVisibility(true);
+            }
+
+            if (settings.cursorStyle === 'ring') {
+                if (cursorDot) { cursorDot.style.left = `${cursorMouseX}px`; cursorDot.style.top = `${cursorMouseY}px`; }
+            } else if (settings.cursorStyle === 'orb') {
+                if (cursorOrb) { cursorOrb.style.left = `${cursorMouseX}px`; cursorOrb.style.top = `${cursorMouseY}px`; }
+            } else if (settings.cursorStyle === 'cyber') {
+                if (cursorCyber) { cursorCyber.style.left = `${cursorMouseX}px`; cursorCyber.style.top = `${cursorMouseY}px`; }
+            } else if (settings.cursorStyle === 'simple') {
+                if (cursorSimple) { cursorSimple.style.left = `${cursorMouseX}px`; cursorSimple.style.top = `${cursorMouseY}px`; }
+            }
+        });
+
+        window.addEventListener('mousedown', () => { document.body.classList.add('cursor-clicking'); });
+        window.addEventListener('mouseup', () => { document.body.classList.remove('cursor-clicking'); });
+
+        document.addEventListener('mouseover', (e) => {
+            if (settings.cursorStyle === 'none') return;
+            const target = e.target;
+            if (target && (target.closest('button') || target.closest('a') || target.closest('.game-card') || target.closest('input') || target.closest('select') || target.closest('.color-swatch') || target.closest('.color-swatch-cursor') || target.closest('.custom-color-btn'))) {
+                document.body.classList.add('cursor-hovering');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            const target = e.target;
+            if (target && (target.closest('button') || target.closest('a') || target.closest('.game-card') || target.closest('input') || target.closest('select') || target.closest('.color-swatch') || target.closest('.color-swatch-cursor') || target.closest('.custom-color-btn'))) {
+                document.body.classList.remove('cursor-hovering');
+            }
+        });
+
+        document.addEventListener('mouseenter', () => { if (settings.cursorStyle !== 'none' && cursorHasMoved) updateCursorVisibility(true); });
+        document.addEventListener('mouseleave', () => { updateCursorVisibility(false); });
+
+        cursorTick();
+    }
+
+    function updateCursorVisibility(visible) {
+        const opacity = visible ? '1' : '0';
+        if (cursorDot) cursorDot.style.opacity = (settings.cursorStyle === 'ring') ? opacity : '0';
+        if (cursorRing) cursorRing.style.opacity = (settings.cursorStyle === 'ring') ? opacity : '0';
+        if (cursorOrb) cursorOrb.style.display = (settings.cursorStyle === 'orb' && visible) ? 'block' : 'none';
+        if (cursorCyber) cursorCyber.style.display = (settings.cursorStyle === 'cyber' && visible) ? 'block' : 'none';
+        if (cursorSimple) cursorSimple.style.display = (settings.cursorStyle === 'simple' && visible) ? 'block' : 'none';
+    }
+
+    function cursorTick() {
+        if (settings.cursorStyle === 'ring' && cursorHasMoved && cursorRing) {
+            cursorRingX += (cursorMouseX - cursorRingX) * 0.15;
+            cursorRingY += (cursorMouseY - cursorRingY) * 0.15;
+            cursorRing.style.left = `${cursorRingX}px`;
+            cursorRing.style.top = `${cursorRingY}px`;
+        } else if (settings.cursorStyle === 'cyber' && cursorHasMoved && cursorCyber && !document.body.classList.contains('cursor-clicking')) {
+            const dx = cursorMouseX - cursorRingX;
+            const dy = cursorMouseY - cursorRingY;
+            cursorRingX += dx * 0.2;
+            cursorRingY += dy * 0.2;
+            const speed = Math.sqrt(dx*dx + dy*dy);
+            const rot = Math.min(speed * 2, 45);
+            cursorCyber.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+        } else if (settings.cursorStyle === 'cyber') {
+            cursorRingX = cursorMouseX;
+            cursorRingY = cursorMouseY;
+        }
+        requestAnimationFrame(cursorTick);
+    }
+
+    function updateCursorState() {
+        if (settings.cursorStyle !== 'none') {
+            document.body.classList.add('custom-cursor-active');
+            if (cursorHasMoved) updateCursorVisibility(true);
+        } else {
+            document.body.classList.remove('custom-cursor-active');
+            updateCursorVisibility(false);
+        }
+        
+        // Also ensure background effect updates when settings apply
+        if (typeof updateBgEffectState === 'function' && document.readyState === 'complete') updateBgEffectState();
+    }
+
+    function applyCursorColor() {
+        const hex = settings.cursorColor === 'match' ? settings.accentColor : settings.cursorColor;
+        document.documentElement.style.setProperty('--cursor-color', hex);
+        document.documentElement.style.setProperty('--cursor-glow', hexToRgba(hex, 0.35));
+
+        $$('.color-swatch-cursor').forEach(sw => {
+            if (settings.cursorColor === 'match' && sw.dataset.cursorColor === 'match') sw.classList.add('active');
+            else if (sw.dataset.cursorColor.toLowerCase() === settings.cursorColor.toLowerCase()) sw.classList.add('active');
+            else sw.classList.remove('active');
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // BACKGROUND EFFECTS MANAGER
+    // ═══════════════════════════════════════════════════════════
+    let effectsCanvas = null;
+    let effectsCtx = null;
+    let bgAnimationFrame = null;
+    let activeBgEffect = 'none';
+
+    function initLightning() {
+        effectsCanvas = $('#effectsCanvas');
+        if (!effectsCanvas) return;
+        effectsCtx = effectsCanvas.getContext('2d');
+        window.addEventListener('resize', resizeEffectsCanvas);
+        resizeEffectsCanvas();
+        updateBgEffectState();
+    }
+
+    function resizeEffectsCanvas() {
+        if (!effectsCanvas) return;
+        effectsCanvas.width = window.innerWidth;
+        effectsCanvas.height = window.innerHeight;
+        if (activeBgEffect === 'matrix') initMatrix();
+    }
+
+    function updateBgEffectState() {
+        const effect = settings.bgEffect || 'none';
+        
+        // Show/hide default orbs based on selection. 'orbs' is handled by CSS, not canvas.
+        const bgEffectsContainer = $('.bg-effects');
+        if (bgEffectsContainer) {
+            const orbs = bgEffectsContainer.querySelectorAll('.bg-orb');
+            orbs.forEach(orb => orb.style.display = effect === 'orbs' ? 'block' : 'none');
+        }
+        
+        // Guard: effectsCanvas may not be initialized yet (called from applySettings before initLightning)
+        if (!effectsCanvas) return;
+
+        if (effect === activeBgEffect) return;
+        stopCurrentBgEffect();
+        activeBgEffect = effect;
+
+        if (effect === 'none' || effect === 'orbs') return;
+
+        effectsCanvas.style.opacity = '1';
+        if (effect === 'lightning') startLightning();
+        else if (effect === 'matrix') startMatrix();
+        else if (effect === 'starfield') startStarfield();
+    }
+
+    function stopCurrentBgEffect() {
+        if (effectsCanvas) effectsCanvas.style.opacity = '0';
+        if (bgAnimationFrame) { cancelAnimationFrame(bgAnimationFrame); bgAnimationFrame = null; }
+        if (lightningTimeout) { clearTimeout(lightningTimeout); lightningTimeout = null; }
+        activeStrikes = [];
+    }
+
+    // --- Lightning ---
+    let lightningTimeout = null;
+    let activeStrikes = [];
+
+    class Strike {
+        constructor(w, h) {
+            this.startX = Math.random() * w * 0.8 + w * 0.1;
+            this.startY = 0;
+            this.endX = this.startX + (Math.random() - 0.5) * (w * 0.3);
+            this.endY = h * (0.8 + Math.random() * 0.2);
+            this.childBolts = [];
+            this.mainBolt = this.generateBolt(this.startX, this.startY, this.endX, this.endY, 2);
+            this.maxLife = 15 + Math.random() * 20;
+            this.life = this.maxLife;
+            this.opacity = 1;
+        }
+        generateBolt(x1, y1, x2, y2, limit) {
+            const segments = [];
+            segments.push({ x: x1, y: y1 });
+            let curX = x1, curY = y1;
+            const steps = 15 + Math.random() * 15;
+            const stepY = (y2 - y1) / steps;
+            for (let i = 1; i < steps; i++) {
+                curY += stepY;
+                curX += (Math.random() - 0.5) * 40;
+                segments.push({ x: curX, y: curY });
+                if (limit > 0 && Math.random() < 0.1) {
+                    const bx = curX + (Math.random() - 0.5) * 150;
+                    const by = curY + Math.random() * (y2 - curY);
+                    this.childBolts.push(this.generateBolt(curX, curY, bx, by, limit - 1));
+                }
+            }
+            segments.push({ x: x2, y: y2 });
+            return segments;
+        }
+        draw(ctx, color, glowColor) {
+            if (Math.random() < 0.15) this.opacity = 0.1;
+            else if (Math.random() < 0.3) this.opacity = 0.8 + Math.random() * 0.2;
+            else this.opacity = (this.life / this.maxLife) * 0.8 + 0.2;
+            
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            const allPaths = [this.mainBolt, ...this.childBolts];
+            
+            ctx.strokeStyle = color;
+            ctx.shadowColor = glowColor;
+            ctx.shadowBlur = 20;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            allPaths.forEach(path => {
+                ctx.beginPath();
+                ctx.lineWidth = path === this.mainBolt ? 4 : 2;
+                ctx.moveTo(path[0].x, path[0].y);
+                for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
+            });
+            
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#ffffff';
+            allPaths.forEach(path => {
+                ctx.beginPath();
+                ctx.lineWidth = path === this.mainBolt ? 1.5 : 0.75;
+                ctx.moveTo(path[0].x, path[0].y);
+                for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+        update() { this.life--; return this.life > 0; }
+    }
+
+    function startLightning() {
+        scheduleNextStrike();
+        lightningTick();
+    }
+
+    function scheduleNextStrike() {
+        if (activeBgEffect !== 'lightning') return;
+        let freq = settings.lightningFrequency || 5;
+        let t = 11 - freq;
+        const nextTime = (t * t * 100) + Math.random() * (t * t * 200);
+        lightningTimeout = setTimeout(() => {
+            activeStrikes.push(new Strike(effectsCanvas.width, effectsCanvas.height));
+            if (Math.random() < 0.4) {
+                setTimeout(() => { if (activeBgEffect === 'lightning') activeStrikes.push(new Strike(effectsCanvas.width, effectsCanvas.height)); }, 200 + Math.random() * 300);
+            }
+            scheduleNextStrike();
+        }, nextTime);
+    }
+
+    function lightningTick() {
+        if (activeBgEffect !== 'lightning') return;
+        effectsCtx.clearRect(0, 0, effectsCanvas.width, effectsCanvas.height);
+        
+        const color = settings.accentColor || '#00e5ff';
+        const glowColor = hexToRgba(color, 0.8);
+        
+        activeStrikes = activeStrikes.filter(strike => {
+            const alive = strike.update();
+            if (alive) strike.draw(effectsCtx, color, glowColor);
+            return alive;
+        });
+        
+        let drawFlash = false;
+        activeStrikes.forEach(strike => {
+            if (strike.life === strike.maxLife - 1 || strike.life === strike.maxLife - 3) drawFlash = true;
+        });
+        
+        if (drawFlash) {
+            effectsCtx.fillStyle = hexToRgba(color, 0.08);
+            effectsCtx.fillRect(0, 0, effectsCanvas.width, effectsCanvas.height);
+        }
+        bgAnimationFrame = requestAnimationFrame(lightningTick);
+    }
+
+    // --- Matrix ---
+    let matrixColumns = [];
+    let matrixFontSize = 16;
+    function initMatrix() {
+        if (!effectsCanvas) return;
+        const columns = Math.floor(effectsCanvas.width / matrixFontSize) + 1;
+        matrixColumns = [];
+        for (let i=0; i<columns; i++) {
+            matrixColumns[i] = Math.random() * -100; // Start offscreen
+        }
+    }
+    function startMatrix() {
+        initMatrix();
+        matrixTick();
+    }
+    function matrixTick() {
+        if (activeBgEffect !== 'matrix') return;
+        effectsCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        effectsCtx.fillRect(0, 0, effectsCanvas.width, effectsCanvas.height);
+        
+        const color = settings.accentColor || '#00e5ff';
+        effectsCtx.fillStyle = color;
+        effectsCtx.font = matrixFontSize + 'px monospace';
+        
+        const density = settings.bgDensity || 5;
+        const dropSpeed = 0.5 + (density * 0.15);
+
+        for (let i = 0; i < matrixColumns.length; i++) {
+            const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+            const x = i * matrixFontSize;
+            const y = matrixColumns[i] * matrixFontSize;
+            
+            effectsCtx.fillText(char, x, y);
+            if (y > effectsCanvas.height && Math.random() > 0.975) matrixColumns[i] = 0;
+            matrixColumns[i] += dropSpeed;
+        }
+        bgAnimationFrame = requestAnimationFrame(matrixTick);
+    }
+
+    // --- Starfield ---
+    let stars = [];
+    function startStarfield() {
+        stars = [];
+        const density = settings.bgDensity || 5;
+        const count = 50 + (density * 25);
+        for (let i = 0; i < count; i++) {
+            stars.push({
+                x: Math.random() * effectsCanvas.width,
+                y: Math.random() * effectsCanvas.height,
+                size: Math.random() * 2,
+                speed: 0.1 + Math.random() * 0.5,
+                opacity: Math.random()
+            });
+        }
+        starfieldTick();
+    }
+    function starfieldTick() {
+        if (activeBgEffect !== 'starfield') return;
+        effectsCtx.clearRect(0, 0, effectsCanvas.width, effectsCanvas.height);
+        
+        const color = settings.accentColor || '#00e5ff';
+        const density = settings.bgDensity || 5;
+        const globalSpeed = 0.5 + (density * 0.1);
+
+        stars.forEach(star => {
+            star.y -= star.speed * globalSpeed;
+            // Parallax
+            star.x += (effectsCanvas.width / 2 - cursorMouseX) * 0.0005 * star.speed;
+            
+            if (star.y < 0) {
+                star.y = effectsCanvas.height;
+                star.x = Math.random() * effectsCanvas.width;
+            }
+            if (star.x < 0) star.x = effectsCanvas.width;
+            if (star.x > effectsCanvas.width) star.x = 0;
+            
+            star.opacity += (Math.random() - 0.5) * 0.05;
+            if (star.opacity < 0.1) star.opacity = 0.1;
+            if (star.opacity > 1) star.opacity = 1;
+
+            effectsCtx.fillStyle = hexToRgba(color, star.opacity);
+            effectsCtx.beginPath();
+            effectsCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            effectsCtx.fill();
+        });
+        bgAnimationFrame = requestAnimationFrame(starfieldTick);
     }
 
 })();
