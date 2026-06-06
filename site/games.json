@@ -10,6 +10,11 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Crossy_Road.jpg"
   },
   {
+    "title": "Plants vs. Zombies 2",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Plants%20vs.%20Zombies%202.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Plants%20vs.%20Zombies%202.jpg"
+  },
+  {
     "title": "Tomb of the Mask",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tomb%20of%20the%20Mask.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tomb%20of%20the%20Mask.jpg"
@@ -87,7 +92,7 @@
   {
     "title": "Brotato",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Brotato.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Brotato.png"
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Brotato.webp"
   },
   {
     "title": "Chess",
