@@ -15,8 +15,13 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Plants%20vs.%20Zombies%202.webp"
   },
   {
+    "title": "Cookie Clicker",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Cookie%20Clicker.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Cookie%20Clicker.webp"
+  },
+  {
     "title": "Tomb of the Mask",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tomb%20Of%20The%20Mask.html",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Tomb%20Of%20The%20Mask.png",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tomb%20of%20the%20Mask.png"
   },
   {
