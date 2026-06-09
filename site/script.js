@@ -777,6 +777,11 @@
         if (resetAllDataBtn) {
             resetAllDataBtn.addEventListener('click', factoryResetAll);
         }
+
+        const inspectSavesBtn = $('#inspectSavesBtn');
+        if (inspectSavesBtn) {
+            inspectSavesBtn.addEventListener('click', inspectSaveData);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -1032,13 +1037,219 @@
     // ═══════════════════════════════════════════════════════════
     // IMPORT / EXPORT / RESET DATA
     // ═══════════════════════════════════════════════════════════
-    function exportSettingsData() {
+    // Helpers for binary data in IndexedDB
+    function arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+    
+    function base64ToArrayBuffer(base64) {
+        const binary_string = window.atob(base64);
+        const len = binary_string.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    function serializeValue(val) {
+        if (val instanceof Uint8Array) {
+            const copy = new Uint8Array(val.length);
+            copy.set(val);
+            return { __type: 'Uint8Array', data: arrayBufferToBase64(copy.buffer) };
+        } else if (val instanceof ArrayBuffer) {
+            return { __type: 'ArrayBuffer', data: arrayBufferToBase64(val) };
+        } else if (val instanceof Date) {
+            return { __type: 'Date', data: val.toISOString() };
+        } else if (typeof val === 'object' && val !== null) {
+            const newVal = Array.isArray(val) ? [] : {};
+            for (let k in val) {
+                newVal[k] = serializeValue(val[k]);
+            }
+            return newVal;
+        }
+        return val;
+    }
+
+    function deserializeValue(val) {
+        if (val && typeof val === 'object') {
+            if (val.__type === 'Uint8Array') {
+                return new Uint8Array(base64ToArrayBuffer(val.data));
+            } else if (val.__type === 'ArrayBuffer') {
+                return base64ToArrayBuffer(val.data);
+            } else if (val.__type === 'Date') {
+                return new Date(val.data);
+            }
+            const newVal = Array.isArray(val) ? [] : {};
+            for (let k in val) {
+                newVal[k] = deserializeValue(val[k]);
+            }
+            return newVal;
+        }
+        return val;
+    }
+
+    function exportIDB(dbName) {
+        return new Promise((resolve) => {
+            const request = indexedDB.open(dbName);
+            request.onerror = () => resolve({ error: 'Failed to open' });
+            request.onsuccess = async (e) => {
+                const db = e.target.result;
+                const storeNames = Array.from(db.objectStoreNames);
+                const dbData = { __version: db.version, stores: {} };
+                
+                if (storeNames.length === 0) {
+                    db.close();
+                    return resolve(dbData);
+                }
+
+                for (const storeName of storeNames) {
+                    const transaction = db.transaction(storeName, 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    
+                    // IMPORTANT: Start BOTH requests synchronously before awaiting either.
+                    // IDB transactions auto-commit when there are no pending requests in
+                    // the current microtask. If we await getRecords() first, the transaction
+                    // closes before getAllKeys() is called, returning empty keys and losing
+                    // all file path information (breaking Emscripten IDBFS saves).
+                    const recordsPromise = new Promise(r => {
+                        const req = store.getAll();
+                        req.onsuccess = () => r(req.result);
+                        req.onerror = () => r([]);
+                    });
+                    const keysPromise = new Promise(r => {
+                        const req = store.getAllKeys();
+                        req.onsuccess = () => r(req.result);
+                        req.onerror = () => r([]);
+                    });
+                    
+                    const [records, keys] = await Promise.all([recordsPromise, keysPromise]);
+                    
+                    dbData.stores[storeName] = {
+                        records: records.map(val => serializeValue(val)),
+                        keys: keys.length ? keys : null,
+                        keyPath: store.keyPath,
+                        autoIncrement: store.autoIncrement
+                    };
+                }
+                
+                db.close();
+                resolve(dbData);
+            };
+        });
+    }
+
+    function importIDB(dbName, dbData) {
+        return new Promise((resolve) => {
+            if (!dbData.stores) return resolve();
+            const version = dbData.__version || 1;
+            
+            const request = indexedDB.open(dbName, version);
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                for (const storeName in dbData.stores) {
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        const info = dbData.stores[storeName];
+                        const options = { autoIncrement: info.autoIncrement };
+                        if (info.keyPath != null) {
+                            options.keyPath = info.keyPath;
+                        }
+                        db.createObjectStore(storeName, options);
+                    }
+                }
+            };
+            request.onsuccess = async (e) => {
+                const db = e.target.result;
+                const storeNames = Object.keys(dbData.stores).filter(s => db.objectStoreNames.contains(s));
+                
+                for (const storeName of storeNames) {
+                    const storeData = dbData.stores[storeName];
+                    const transaction = db.transaction(storeName, 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    
+                    store.clear();
+                    
+                    if (storeData.records) {
+                        for (let i = 0; i < storeData.records.length; i++) {
+                            const val = deserializeValue(storeData.records[i]);
+                            try {
+                                if (storeData.keys && storeData.keys[i] !== undefined && storeData.keyPath == null) {
+                                    store.put(val, storeData.keys[i]);
+                                } else {
+                                    store.put(val);
+                                }
+                            } catch(err) {
+                                console.error('IDB Put error', err);
+                            }
+                        }
+                    }
+                    
+                    await new Promise(r => {
+                        transaction.oncomplete = () => r();
+                        transaction.onerror = () => r();
+                    });
+                }
+                db.close();
+                resolve();
+            };
+            request.onerror = () => resolve();
+        });
+    }
+
+    async function exportSettingsData() {
+        const exportBtn = document.getElementById('exportSettingsBtn');
+        if (exportBtn) {
+            exportBtn.textContent = '⏳ Preparing Backup...';
+            exportBtn.disabled = true;
+        }
+
         const data = {
             favorites: favorites,
             recent: recentlyPlayed,
             settings: settings,
-            customGames: customGames
+            customGames: customGames,
+            localStorage: {},
+            indexedDB: {}
         };
+
+        const coreKeys = Object.values(STORAGE);
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!coreKeys.includes(key)) {
+                data.localStorage[key] = localStorage.getItem(key);
+            }
+        }
+
+        try {
+            if (window.indexedDB && indexedDB.databases) {
+                const dbs = await indexedDB.databases();
+                console.log('[Ghost Arcade Export] Found IndexedDB databases:', dbs);
+                for (const dbInfo of dbs) {
+                    if (dbInfo.name) {
+                        console.log(`[Ghost Arcade Export] Exporting DB: "${dbInfo.name}"`);
+                        const dbExport = await exportIDB(dbInfo.name);
+                        data.indexedDB[dbInfo.name] = dbExport;
+                        // Log summary
+                        for (const [storeName, storeData] of Object.entries(dbExport.stores || {})) {
+                            const numRecords = storeData.records ? storeData.records.length : 0;
+                            const hasKeys = storeData.keys && storeData.keys.length > 0;
+                            console.log(`  → Store "${storeName}": ${numRecords} records, keys captured: ${hasKeys}`, hasKeys ? storeData.keys.slice(0, 5) : '(none!)');
+                        }
+                    }
+                }
+            } else {
+                console.warn('[Ghost Arcade Export] indexedDB.databases() not available in this browser.');
+            }
+        } catch (e) {
+            console.warn('Could not export IndexedDB', e);
+        }
 
         const jsonString = JSON.stringify(data, null, 4);
         const blob = new Blob([jsonString], { type: 'application/json' });
@@ -1053,7 +1264,11 @@
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        showToast('Backup file downloaded successfully!', 'success');
+        if (exportBtn) {
+            exportBtn.textContent = '📥 Export Backup';
+            exportBtn.disabled = false;
+        }
+        showToast('Backup downloaded! Check browser console (F12) for export summary.', 'success');
     }
 
     function importSettingsData(e) {
@@ -1061,37 +1276,116 @@
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function (evt) {
+        reader.onload = async function (evt) {
             try {
                 const parsed = JSON.parse(evt.target.result);
                 
-                // basic validation
-                if (parsed.settings || parsed.favorites || parsed.customGames) {
+                if (parsed.settings || parsed.favorites || parsed.customGames || parsed.localStorage || parsed.indexedDB) {
+                    showToast('Restoring data and game saves, please wait...', 'info');
+
                     if (parsed.settings) localStorage.setItem(STORAGE.settings, JSON.stringify(parsed.settings));
                     if (parsed.favorites) localStorage.setItem(STORAGE.favorites, JSON.stringify(parsed.favorites));
                     if (parsed.recent) localStorage.setItem(STORAGE.recent, JSON.stringify(parsed.recent));
                     if (parsed.customGames) localStorage.setItem(STORAGE.customGames, JSON.stringify(parsed.customGames));
 
-                    showToast('Settings restored successfully! Reloading...', 'success');
+                    if (parsed.localStorage) {
+                        for (const [key, value] of Object.entries(parsed.localStorage)) {
+                            localStorage.setItem(key, value);
+                        }
+                    }
+
+                    if (parsed.indexedDB) {
+                        for (const [dbName, dbData] of Object.entries(parsed.indexedDB)) {
+                            if (dbData.error) continue;
+                            await importIDB(dbName, dbData);
+                        }
+                    }
+
+                    showToast('Settings & Saves restored! Reloading...', 'success');
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1200);
+                    }, 1500);
                 } else {
                     showToast('Invalid backup file structure.', 'error');
                 }
             } catch (err) {
+                console.error(err);
                 showToast('Failed to parse backup JSON file.', 'error');
             }
         };
         reader.readAsText(file);
     }
 
-    function factoryResetAll() {
-        if (confirm('⚠️ WARNING: This will permanently wipe all your custom settings, favorites lists, game logs, and added games. Are you absolutely sure?')) {
-            localStorage.removeItem(STORAGE.favorites);
-            localStorage.removeItem(STORAGE.recent);
-            localStorage.removeItem(STORAGE.settings);
-            localStorage.removeItem(STORAGE.customGames);
+    async function inspectSaveData() {
+        const btn = document.getElementById('inspectSavesBtn');
+        if (btn) { btn.textContent = '⏳ Scanning...'; btn.disabled = true; }
+
+        let report = '=== Ghost Arcade Save Inspector ===\n\n';
+
+        // localStorage summary
+        const coreKeys = Object.values(STORAGE);
+        const gameLocalStorageKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!coreKeys.includes(key)) gameLocalStorageKeys.push(key);
+        }
+        report += `localStorage game keys (${gameLocalStorageKeys.length}):\n`;
+        gameLocalStorageKeys.forEach(k => report += `  • ${k}\n`);
+        report += '\n';
+
+        // IndexedDB summary
+        if (window.indexedDB && indexedDB.databases) {
+            try {
+                const dbs = await indexedDB.databases();
+                report += `IndexedDB databases found: ${dbs.length}\n`;
+                for (const dbInfo of dbs) {
+                    if (!dbInfo.name) continue;
+                    report += `\n📦 DB: "${dbInfo.name}" (v${dbInfo.version})\n`;
+                    const dbExport = await exportIDB(dbInfo.name);
+                    if (dbExport.error) {
+                        report += `   ❌ Error: ${dbExport.error}\n`;
+                        continue;
+                    }
+                    for (const [storeName, storeData] of Object.entries(dbExport.stores || {})) {
+                        const numRecords = storeData.records ? storeData.records.length : 0;
+                        const keys = storeData.keys || [];
+                        report += `   Store "${storeName}": ${numRecords} records\n`;
+                        if (keys.length > 0) {
+                            report += `   Keys (first 10):\n`;
+                            keys.slice(0, 10).forEach(k => report += `     - ${JSON.stringify(k)}\n`);
+                            if (keys.length > 10) report += `     ... and ${keys.length - 10} more\n`;
+                        } else {
+                            report += `   ⚠️ NO KEYS found — save data cannot be restored!\n`;
+                        }
+                    }
+                }
+            } catch(e) {
+                report += `IndexedDB scan error: ${e}\n`;
+            }
+        } else {
+            report += 'IndexedDB.databases() not available in this browser.\n';
+        }
+
+        if (btn) { btn.textContent = '🔍 Inspect Save Data'; btn.disabled = false; }
+
+        console.log(report);
+        alert(report);
+    }
+
+    async function factoryResetAll() {
+        if (confirm('⚠️ WARNING: This will permanently wipe all your custom settings, favorites lists, game logs, added games, and ALL GAME SAVES. Are you absolutely sure?')) {
+            localStorage.clear();
+
+            try {
+                if (window.indexedDB && indexedDB.databases) {
+                    const dbs = await indexedDB.databases();
+                    for (const dbInfo of dbs) {
+                        if (dbInfo.name) {
+                            indexedDB.deleteDatabase(dbInfo.name);
+                        }
+                    }
+                }
+            } catch (e) {}
 
             showToast('All local data wiped. Resetting page...', 'error');
             setTimeout(() => {
