@@ -1,146 +1,101 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset='utf-8' />
-    <meta name='viewport' content='width=device-width, user-scalable=no' />
+  <head>
+    <meta charset="utf-8" />
     <title>Brotato</title>
     <style>
-        body { touch-action: none; margin: 0; background-color: black; text-align: center; }
-        #canvas { display: block; margin: 0; color: white; }
-        .godot { font-family: 'Noto Sans', sans-serif; color: #e0e0e0; background-color: #3b3943; }
-        #status { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; visibility: hidden; }
-        #status-progress { width: 366px; height: 7px; background-color: #38363A; border: 1px solid #444246; padding: 1px; border-radius: 2px; visibility: visible; }
-        #status-progress-inner { height: 100%; width: 0; background-color: #202020; border: 1px solid #222223; border-radius: 3px; transition: width 0.5s linear; }
-        #status-indeterminate { height: 42px; visibility: visible; position: relative; }
-        #status-indeterminate > div { width: 4.5px; height: 0; border-style: solid; border-width: 9px 3px 0 3px; border-color: #2b2b2b transparent transparent transparent; transform-origin: center 21px; position: absolute; }
-        #status-indeterminate > div:nth-child(1) { transform: rotate(22.5deg); }
-        #status-indeterminate > div:nth-child(2) { transform: rotate(67.5deg); }
-        #status-indeterminate > div:nth-child(3) { transform: rotate(112.5deg); }
-        #status-indeterminate > div:nth-child(4) { transform: rotate(157.5deg); }
-        #status-indeterminate > div:nth-child(5) { transform: rotate(202.5deg); }
-        #status-indeterminate > div:nth-child(6) { transform: rotate(247.5deg); }
-        #status-indeterminate > div:nth-child(7) { transform: rotate(292.5deg); }
-        #status-indeterminate > div:nth-child(8) { transform: rotate(337.5deg); }
-        #status-notice { margin: 0 100px; line-height: 1.3; padding: 4px 6px; visibility: visible; }
+      body {
+        margin: 0;
+        background: #000;
+        color: #fff;
+        font-family: sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      #canvas {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+      }
     </style>
-    <link rel='icon' type='image/png' href='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.icon.png' />
-</head>
-<body>
-    <canvas id='canvas'></canvas>
-    <div id='status'>
-        <div id='status-progress' style='display:none'><div id='status-progress-inner'></div></div>
-        <div id='status-indeterminate' style='display:none'><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-        <div id='status-notice' class='godot' style='display:none'></div>
-    </div>
-
-    <script src='https://cdn.jsdelivr.net/gh/chessgrandest-prog/fun@7abb7b7cca70e7108679c744e56aa23edb27877c/Brotato/index.js'></script>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <div id="loading">(loading files)</div>
+    <script src="https://cdn.jsdelivr.net/gh/shxyder/inital@main/Brotato.js"></script>
     <script>
-        // Your working Netlify URLs
-        const WASM_URL = "https://voluble-quokka-0ba6b5.netlify.app/index.wasm";
-        const PCK_URL  = "https://voluble-quokka-0ba6b5.netlify.app/index.pck";
-
-        // Simple fetch override
-        const origFetch = window.fetch;
-        window.fetch = function(url, options) {
-            if (typeof url === 'string') {
-                if (url === 'index.wasm' || url.endsWith('/index.wasm')) return origFetch(WASM_URL, options);
-                if (url === 'index.pck' || url.endsWith('/index.pck')) return origFetch(PCK_URL, options);
-            }
-            return origFetch(url, options);
-        };
-
-        // Also override XMLHttpRequest
-        const XHR = XMLHttpRequest.prototype;
-        const origOpen = XHR.open;
-        XHR.open = function(method, url) {
-            if (typeof url === 'string') {
-                if (url === 'index.wasm' || url.endsWith('/index.wasm')) return origOpen.call(this, method, WASM_URL);
-                if (url === 'index.pck' || url.endsWith('/index.pck')) return origOpen.call(this, method, PCK_URL);
-            }
-            return origOpen.call(this, method, url);
-        };
-
-        // Start engine
-        const config = {
+      const REPO = "https://cdn.jsdelivr.net/gh/shxyder/inital@main/";
+      const PCK_P = Array.from(
+        { length: 10 },
+        (_, i) => `Brotato.pck.part${(i + 1).toString().padStart(2, "0")}`,
+      );
+      const WASM_P = ["Brotato.wasm.part1", "Brotato.wasm.part2"];
+      let _p = null,
+        _w = null;
+      const _f = window.fetch;
+      window.fetch = (i, n) => {
+        const u = typeof i === "string" ? i : i.url;
+        if (u.endsWith("Brotato.wasm") && !u.includes(".part"))
+          return Promise.resolve(
+            new Response(_w, {
+              status: 200,
+              headers: { "Content-Type": "application/wasm" },
+            }),
+          );
+        if (u.endsWith("Brotato.pck") && !u.includes(".part"))
+          return Promise.resolve(
+            new Response(_p, {
+              status: 200,
+              headers: { "Content-Type": "application/octet-stream" },
+            }),
+          );
+        return _f.apply(window, [i, n]);
+      };
+      async function init() {
+        console.log("*game init*");
+        try {
+          const pc = [];
+          for (const p of PCK_P) {
+            const r = await _f(REPO + p);
+            pc.push(await r.arrayBuffer());
+          }
+          _p = new Blob(pc);
+          const wc = [];
+          for (const p of WASM_P) {
+            const r = await _f(REPO + p);
+            wc.push(await r.arrayBuffer());
+          }
+          const t = wc.reduce((a, v) => a + v.byteLength, 0),
+            m = new Uint8Array(t);
+          let o = 0;
+          for (const c of wc) {
+            m.set(new Uint8Array(c), o);
+            o += c.byteLength;
+          }
+          _w = m.buffer;
+          new Engine({
             args: [],
             canvasResizePolicy: 2,
-            executable: "index",
-            fileSizes: { "index.pck": 144746880, "index.wasm": 26156492 },
-            focusCanvas: true
-        };
-        const engine = new Engine(config);
-
-        (function() {
-            let statusProgress = document.getElementById('status-progress');
-            let statusProgressInner = document.getElementById('status-progress-inner');
-            let statusIndeterminate = document.getElementById('status-indeterminate');
-            let statusNotice = document.getElementById('status-notice');
-            let initializing = true;
-            let statusMode = 'hidden';
-            let animationCallbacks = [];
-
-            function animate(time) {
-                animationCallbacks.forEach(cb => cb(time));
-                requestAnimationFrame(animate);
-            }
-            requestAnimationFrame(animate);
-
-            function setStatusMode(mode) {
-                if (statusMode === mode || !initializing) return;
-                [statusProgress, statusIndeterminate, statusNotice].forEach(e => e.style.display = 'none');
-                animationCallbacks = animationCallbacks.filter(cb => cb !== animateStatusIndeterminate);
-                switch (mode) {
-                    case 'progress': statusProgress.style.display = 'block'; break;
-                    case 'indeterminate': statusIndeterminate.style.display = 'block'; animationCallbacks.push(animateStatusIndeterminate); break;
-                    case 'notice': statusNotice.style.display = 'block'; break;
-                    case 'hidden': break;
-                }
-                statusMode = mode;
-            }
-
-            function animateStatusIndeterminate(ms) {
-                let i = Math.floor(ms / 100 % 8);
-                if (statusIndeterminate.children[i].style.borderTopColor === '') {
-                    Array.from(statusIndeterminate.children).forEach(c => c.style.borderTopColor = '');
-                    statusIndeterminate.children[i].style.borderTopColor = '#dfdfdf';
-                }
-            }
-
-            function setStatusNotice(text) {
-                while (statusNotice.firstChild) statusNotice.removeChild(statusNotice.firstChild);
-                text.split('\n').forEach(line => {
-                    statusNotice.appendChild(document.createTextNode(line));
-                    statusNotice.appendChild(document.createElement('br'));
-                });
-            }
-
-            function displayFailureNotice(err) {
-                console.error(err);
-                setStatusNotice(err.message || err);
-                setStatusMode('notice');
-                initializing = false;
-            }
-
-            if (!Engine.isWebGLAvailable()) {
-                displayFailureNotice('WebGL not available');
-            } else {
-                setStatusMode('indeterminate');
-                engine.startGame({
-                    onProgress: (current, total) => {
-                        if (total > 0) {
-                            statusProgressInner.style.width = (current / total * 100) + '%';
-                            setStatusMode('progress');
-                            if (current === total) setTimeout(() => setStatusMode('indeterminate'), 500);
-                        } else {
-                            setStatusMode('indeterminate');
-                        }
-                    }
-                }).then(() => {
-                    setStatusMode('hidden');
-                    initializing = false;
-                }, displayFailureNotice);
-            }
-        })();
+            executable: "Brotato",
+            fileSizes: {
+              "Brotato.pck": _p.size,
+              "Brotato.wasm": _w.byteLength,
+            },
+            mainPack: "Brotato.pck",
+            wasmBinaryFile: "Brotato.wasm",
+            focusCanvas: true,
+          })
+            .startGame()
+            .then(() => {
+              document.getElementById("loading").style.display = "none";
+              document.getElementById("canvas").style.display = "block";
+            });
+        } catch (e) {}
+      }
+      if (typeof Engine !== "undefined") init();
     </script>
-</body>
+  </body>
 </html>
