@@ -1,98 +1,18 @@
 [
   {
-    "title": "NeonSkull Client",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/NeonSkull%20Client.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/NeonSkull%20Client.png"
+    "title": "10 Minutes Till Dawn",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/10%20Minutes%20Till%20Dawn.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/10%20Minutes%20Till%20Dawn.webp"
   },
   {
-    "title": "Crossy Road",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/crossyroad.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Crossy_Road.jpg"
+    "title": "A Game About Climbing",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/A%20Game%20About%20Climbing.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/A%20Game%20About%20Climbing.png"
   },
   {
-    "title": "Plants vs. Zombies 2",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Plants%20vs.%20Zombies%202.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Plants%20vs.%20Zombies%202.webp"
-  },
-  {
-    "title": "Cookie Clicker",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Cookie%20Clicker.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Cookie%20Clicker.webp"
-  },
-  {
-    "title": "Tomb of the Mask",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Tomb%20Of%20The%20Mask.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Tomb%20Of%20The%20Mask.png"
-  },
-  {
-    "title": "Tiny Fishing",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tiny%20Fishing.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tiny%20Fishing.png"
-  },
-  {
-    "title": "Plague Inc",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Plague%20Inc.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Plague%20Inc.png"
-  },
-  {
-    "title": "Stardew Valley",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Stardew%20Valley.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Stardew%20Valley.webp"
-  },
-  {
-    "title": "Minesweeper Plus",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Minesweeper%20Plus.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Minesweeper%20Plus.webp"
-  },
-  {
-    "title": "Geometry Dash",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/Geometry%20Dash.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/Geometry%20Dash.webp"
-  },
-  {
-    "title": "GTA Vice City",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/GTA_Vice_City.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/thumbnails/GTA%20Vice%20City.webp"
-  },
-  {
-    "title": "BTD5",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/btd5.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/BTD5.jpg"
-  },
-  {
-    "title": "Terraria",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Terraria.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Terraria.jpg"
-  },
-  {
-    "title": "Wordle",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Wordle.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Wordle.jpg"
-  },
-  {
-    "title": "Hollow Knight",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Hollow%20Knight.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/hollow%20knight.webp"
-  },
-  {
-    "title": "Getting Over It",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Getting%20Over%20It%20with%20Bennett%20Foddy.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Getting%20Over%20It.png"
-  },
-  {
-    "title": "Slime Rancher",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Slime%20Rancher.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Slime_Rancher.webp"
-  },
-  {
-    "title": "Five Nights at Epstein's",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Five%20Nights%20at%20Epstein's.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Five%20Nights%20at%20Epstein's.png"
-  },
-  {
-    "title": "A Difficult Game About Climbing",
-    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/refs/heads/main/site/games/A_Difficult_Game_About_Climbing.html",
-    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/A_Difficult_Game_About_Climbing.jpg"
+    "title": "Bloons TD 5",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Bloons%20TD%205.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Bloons%20TD%205.jpg"
   },
   {
     "title": "Brotato",
@@ -100,8 +20,98 @@
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Brotato.png"
   },
   {
-    "title": "Chess",
+    "title": "Celeste",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Celeste.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Celeste.jpg"
+  },
+  {
+    "title": "Cookie Clicker",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Cookie%20Clicker.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Cookie%20Clicker.jpg"
+  },
+  {
+    "title": "Crossy Road",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Crossy%20Road.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Crossy%20Road.jpg"
+  },
+  {
+    "title": "Five Nights at Epstein's",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Five%20Nights%20at%20Epstein's.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Five%20Nights%20at%20Epstein's.jpg"
+  },
+  {
+    "title": "Geometry Dash",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Geometry%20Dash.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Geometry%20Dash.jpg"
+  },
+  {
+    "title": "Getting Over It",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Getting%20Over%20It.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Getting%20Over%20It.webp"
+  },
+  {
+    "title": "GTA Vice City",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/GTA%20Vice%20City.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/GTA%20Vice%20City.webp"
+  },
+  {
+    "title": "Hollow Knight",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Hollow%20Knight.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Hollow%20Knight.jpg"
+  },
+  {
+    "title": "Minesweeper Plus",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Minesweeper%20Plus.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Minesweeper%20Plus.webp"
+  },
+  {
+    "title": "NeonSkull Chess",
     "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/NeonSkull%20Chess.html",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/NeonSkull%20Chess.png"
+  },
+  {
+    "title": "NeonSkull Client",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/NeonSkull%20Client.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/NeonSkull%20Client.jpg"
+  },
+  {
+    "title": "Plague Inc",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Plague%20Inc.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Plague%20Inc.jpg"
+  },
+  {
+    "title": "Plants vs. Zombies 2",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Plants%20vs.%20Zombies%202.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Plants%20vs.%20Zombies%202.png"
+  },
+  {
+    "title": "Slime Rancher",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Slime%20Rancher.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Slime%20Rancher.webp"
+  },
+  {
+    "title": "Stardew Valley",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Stardew%20Valley.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Stardew%20Valley.jpg"
+  },
+  {
+    "title": "Terraria",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Terraria.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Terraria.jpg"
+  },
+  {
+    "title": "Tiny Fishing",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tiny%20Fishing.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tiny%20Fishing.jpg"
+  },
+  {
+    "title": "Tomb of the Mask",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Tomb%20of%20the%20Mask.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Tomb%20of%20the%20Mask.png"
+  },
+  {
+    "title": "Wordle",
+    "url": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games/Wordle.html",
+    "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/Wordle.jpg"
   }
 ]
