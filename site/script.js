@@ -38,9 +38,13 @@
 
     // ─── State ───
     let allGames = [];
+    let allMovies = [];
     let currentTab = 'all';
+    let currentMode = 'arcade'; // 'arcade' | 'cinema'
     let favorites = loadJSON(STORAGE.favorites, []);
+    let movieFavorites = loadJSON('ghostArcade_movie_favorites', []);
     let recentlyPlayed = loadJSON(STORAGE.recent, []);
+    let recentlyWatched = loadJSON('ghostArcade_recent_movies', []);
     let settings = loadJSON(STORAGE.settings, DEFAULT_SETTINGS);
     let customGames = loadJSON(STORAGE.customGames, []);
 
@@ -121,6 +125,7 @@
         setupSearch();
         setupTabs();
         setupToolbarActions();
+        setupModeToggle();
         setupSettingsModal();
         setupCustomGamesPanel();
         setupKeyboardNavigation();
@@ -139,6 +144,16 @@
         } catch (err) {
             console.error('Failed to load games:', err);
             allGames = [];
+        }
+
+        // Load movies
+        try {
+            const mRes = await fetch('movies.json');
+            if (!mRes.ok) throw new Error(`HTTP ${mRes.status}`);
+            allMovies = await mRes.json();
+        } catch (err) {
+            console.error('Failed to load movies:', err);
+            allMovies = [];
         }
 
         // Merge custom games and mark them as custom
@@ -416,15 +431,20 @@
     }
 
     function getGamesForTab() {
+        const isCinema = currentMode === 'cinema';
+        const source = isCinema ? allMovies : allGames;
+        const recentSource = isCinema ? recentlyWatched : recentlyPlayed;
+        const favSource = isCinema ? movieFavorites : favorites;
+
         switch (currentTab) {
             case 'recent':
-                return recentlyPlayed
-                    .map(r => allGames.find(g => g.url === r.url) || r)
+                return recentSource
+                    .map(r => source.find(g => g.url === r.url) || r)
                     .filter(Boolean);
             case 'favorites':
-                return allGames.filter(g => favorites.includes(g.url));
+                return source.filter(g => favSource.includes(g.url));
             default:
-                return allGames;
+                return source;
         }
     }
 
@@ -434,22 +454,25 @@
         const text = $('.empty-state__text');
         if (!icon) return;
 
+        const isCinema = currentMode === 'cinema';
+        const thing = isCinema ? 'movies' : 'games';
+
         if (searchInput.value.trim()) {
             icon.textContent = '🔍';
             title.textContent = 'No matches';
             text.textContent = 'Try a different search term.';
         } else if (currentTab === 'recent') {
-            icon.textContent = '🕐';
-            title.textContent = 'No recent games';
-            text.textContent = 'Start playing to see your history here!';
+            icon.textContent = isCinema ? '🍿' : '🕐';
+            title.textContent = isCinema ? 'No watch history' : 'No recent games';
+            text.textContent = isCinema ? 'Start watching to see your history here!' : 'Start playing to see your history here!';
         } else if (currentTab === 'favorites') {
             icon.textContent = '💜';
-            title.textContent = 'No favorites yet';
-            text.textContent = 'Click the heart on any game to save it here.';
+            title.textContent = `No favorites yet`;
+            text.textContent = `Click the heart on any ${thing.slice(0,-1)} to save it here.`;
         } else {
-            icon.textContent = '👻';
-            title.textContent = 'No games found';
-            text.textContent = 'Check back later for new games.';
+            icon.textContent = isCinema ? '🎬' : '👻';
+            title.textContent = `No ${thing} found`;
+            text.textContent = 'Check back later!';
         }
     }
 
@@ -478,19 +501,71 @@
         // Random Game Button
         if (randomGameBtn) {
             randomGameBtn.addEventListener('click', () => {
-                const games = allGames;
-                if (games.length === 0) {
-                    showToast('No games loaded to select randomly.', 'error');
+                const isCinema = currentMode === 'cinema';
+                const pool = isCinema ? allMovies : allGames;
+                const thing = isCinema ? 'movie' : 'game';
+                if (pool.length === 0) {
+                    showToast(`No ${thing}s loaded to select randomly.`, 'error');
                     return;
                 }
-                const randIndex = Math.floor(Math.random() * games.length);
-                const game = games[randIndex];
-                showToast(`Launching random game: ${game.title} 🎲`, 'success');
+                const randIndex = Math.floor(Math.random() * pool.length);
+                const game = pool[randIndex];
+                showToast(`Launching random ${thing}: ${game.title} ${isCinema ? '🍿' : '🎲'}`, 'success');
                 setTimeout(() => {
                     playGame(game.url, game.title, game.image);
-                }, 8000); // give them a moment to read the toast
+                }, 8000);
             });
         }
+    }
+
+    // ─── Mode Toggle (Arcade / Cinema) ───
+    function setupModeToggle() {
+        const arcadeBtn = $('#modeArcadeBtn');
+        const cinemaBtn = $('#modeCinemaBtn');
+        if (!arcadeBtn || !cinemaBtn) return;
+
+        function switchMode(mode) {
+            currentMode = mode;
+            currentTab = 'all'; // reset tab when switching modes
+
+            const isCinema = mode === 'cinema';
+
+            // Update toggle button states
+            arcadeBtn.classList.toggle('active', !isCinema);
+            cinemaBtn.classList.toggle('active', isCinema);
+
+            // Update body class for CSS theming
+            document.body.classList.toggle('cinema-mode', isCinema);
+
+            // Update header text
+            const logoAccent = $('#logoAccent');
+            const headerTagline = $('#headerTagline');
+            const randomBtnText = $('#randomBtnText');
+            const searchInput_ = $('#searchInput');
+            const pageTitle = $('#pageTitle');
+
+            if (logoAccent) logoAccent.textContent = isCinema ? 'CINEMA' : 'ARCADE';
+            if (headerTagline) headerTagline.textContent = isCinema ? 'Vanish into the film.' : 'Vanish into the game.';
+            if (randomBtnText) randomBtnText.textContent = isCinema ? 'Random Movie' : 'Random Game';
+            if (searchInput_) searchInput_.placeholder = isCinema ? 'Search movies...' : 'Search games...';
+            if (pageTitle) pageTitle.textContent = isCinema ? 'Ghost Cinema' : 'Ghost Arcade';
+
+            // Update tab labels
+            const tabLabelAll = $('.tab-label-all');
+            const tabLabelRecent = $('.tab-label-recent');
+            if (tabLabelAll) tabLabelAll.textContent = isCinema ? 'All Movies' : 'All Games';
+            if (tabLabelRecent) tabLabelRecent.textContent = isCinema ? 'Recently Watched' : 'Recently Played';
+
+            // Reset tab UI selection
+            tabButtons.forEach(b => b.classList.remove('active'));
+            const allTab = $('#tab-all');
+            if (allTab) allTab.classList.add('active');
+
+            renderGames();
+        }
+
+        arcadeBtn.addEventListener('click', () => switchMode('arcade'));
+        cinemaBtn.addEventListener('click', () => switchMode('cinema'));
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -1414,20 +1489,38 @@
     }
 
     function toggleFavorite(url) {
-        if (favorites.includes(url)) {
-            favorites = favorites.filter(f => f !== url);
+        const isCinema = currentMode === 'cinema';
+        if (isCinema) {
+            if (movieFavorites.includes(url)) {
+                movieFavorites = movieFavorites.filter(f => f !== url);
+            } else {
+                movieFavorites.push(url);
+            }
+            saveJSON('ghostArcade_movie_favorites', movieFavorites);
         } else {
-            favorites.push(url);
+            if (favorites.includes(url)) {
+                favorites = favorites.filter(f => f !== url);
+            } else {
+                favorites.push(url);
+            }
+            saveJSON(STORAGE.favorites, favorites);
         }
-        saveJSON(STORAGE.favorites, favorites);
         renderGames();
     }
 
     function playGame(url, title, image) {
-        recentlyPlayed = recentlyPlayed.filter(g => g.url !== url);
-        recentlyPlayed.unshift({ url, title, image, lastPlayed: Date.now() });
-        if (recentlyPlayed.length > MAX_RECENT) recentlyPlayed.pop();
-        saveJSON(STORAGE.recent, recentlyPlayed);
+        const isCinema = currentMode === 'cinema';
+        if (isCinema) {
+            recentlyWatched = recentlyWatched.filter(g => g.url !== url);
+            recentlyWatched.unshift({ url, title, image, lastPlayed: Date.now() });
+            if (recentlyWatched.length > MAX_RECENT) recentlyWatched.pop();
+            saveJSON('ghostArcade_recent_movies', recentlyWatched);
+        } else {
+            recentlyPlayed = recentlyPlayed.filter(g => g.url !== url);
+            recentlyPlayed.unshift({ url, title, image, lastPlayed: Date.now() });
+            if (recentlyPlayed.length > MAX_RECENT) recentlyPlayed.pop();
+            saveJSON(STORAGE.recent, recentlyPlayed);
+        }
         window.location.href = `play.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`;
     }
 
@@ -1917,5 +2010,239 @@
         });
         bgAnimationFrame = requestAnimationFrame(starfieldTick);
     }
+    
+    // ═══════════════════════════════════════════════════════════
+    // USER ACCOUNTS & PROFILE
+    // ═══════════════════════════════════════════════════════════
+    function initProfile() {
+        const profileBtn = $('#profileBtn');
+        const profileModal = $('#profileModal');
+        const closeProfileBtn = $('#closeProfileBtn');
+        const authForm = $('#authForm');
+        const authUsername = $('#authUsername');
+        const authPassword = $('#authPassword');
+        const authSubmitBtn = $('#authSubmitBtn');
+        const showLoginBtn = $('#showLoginBtn');
+        const showRegisterBtn = $('#showRegisterBtn');
+        const authError = $('#authError');
+        
+        const authView = $('#authView');
+        const profileView = $('#profileView');
+        const profilePicPreview = $('#profilePicPreview');
+        const profileUsernameDisplay = $('#profileUsernameDisplay');
+        const profilePicUpload = $('#profilePicUpload');
+        const logoutBtn = $('#logoutBtn');
+        const profileText = $('#profileText');
+
+        const forceSyncPushBtn = $('#forceSyncPushBtn');
+        const forceSyncPullBtn = $('#forceSyncPullBtn');
+        const playtimeStatsList = $('#playtimeStatsList');
+        const syncStatus = $('#syncStatus');
+
+        let isLoginMode = true;
+
+        if (!profileBtn) return; // not on ghost-ui
+
+        // Modal toggling
+        profileBtn.addEventListener('click', () => {
+            profileModal.classList.add('active');
+            refreshPlaytimeStats();
+        });
+
+        closeProfileBtn.addEventListener('click', () => {
+            profileModal.classList.remove('active');
+        });
+
+        profileModal.addEventListener('click', (e) => {
+            if (e.target === profileModal) profileModal.classList.remove('active');
+        });
+
+        // Auth Tabs
+        showLoginBtn.addEventListener('click', () => {
+            isLoginMode = true;
+            showLoginBtn.classList.add('active');
+            showRegisterBtn.classList.remove('active');
+            authSubmitBtn.textContent = 'Login';
+            authError.style.display = 'none';
+        });
+
+        showRegisterBtn.addEventListener('click', () => {
+            isLoginMode = false;
+            showRegisterBtn.classList.add('active');
+            showLoginBtn.classList.remove('active');
+            authSubmitBtn.textContent = 'Register';
+            authError.style.display = 'none';
+        });
+
+        // Check Auth Status on Load
+        async function checkAuthStatus() {
+            try {
+                const res = await fetch('/api/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    setLoggedInUser(data.user);
+                } else {
+                    setLoggedOut();
+                }
+            } catch (e) {
+                setLoggedOut();
+            }
+        }
+
+        function setLoggedInUser(user) {
+            authView.style.display = 'none';
+            profileView.style.display = 'flex';
+            profileUsernameDisplay.textContent = user.username;
+            profileText.textContent = user.username;
+            if (user.profile_picture_url) {
+                profilePicPreview.src = user.profile_picture_url;
+            }
+        }
+
+        function setLoggedOut() {
+            authView.style.display = 'flex';
+            profileView.style.display = 'none';
+            profileText.textContent = 'Login';
+        }
+
+        // Form Submit
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authError.style.display = 'none';
+            const endpoint = isLoginMode ? '/api/login' : '/api/register';
+            
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: authUsername.value.trim(),
+                        password: authPassword.value
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    authError.textContent = data.error || 'Authentication failed';
+                    authError.style.display = 'block';
+                } else {
+                    if (isLoginMode) {
+                        showToast('Logged in successfully', 'success');
+                        setLoggedInUser(data.user);
+                        if (window.GhostArcadeSync) {
+                            window.GhostArcadeSync.pull().then(refreshPlaytimeStats);
+                        }
+                    } else {
+                        showToast('Registration successful! Please login.', 'success');
+                        showLoginBtn.click();
+                    }
+                    authPassword.value = '';
+                }
+            } catch (err) {
+                authError.textContent = 'Network error occurred.';
+                authError.style.display = 'block';
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            await fetch('/api/logout', { method: 'POST' });
+            setLoggedOut();
+            profilePicPreview.src = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>";
+            showToast('Logged out', 'info');
+        });
+
+        // Profile Picture Upload
+        profilePicUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+                const res = await fetch('/api/profile/picture', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (res.ok && data.url) {
+                    profilePicPreview.src = data.url;
+                    showToast('Profile picture updated!', 'success');
+                } else {
+                    showToast(data.error || 'Failed to upload picture', 'error');
+                }
+            } catch (err) {
+                showToast('Network error uploading picture', 'error');
+            }
+        });
+
+        // Playtime Stats
+        function refreshPlaytimeStats() {
+            playtimeStatsList.innerHTML = '';
+            let stats = {};
+            try {
+                const data = localStorage.getItem('ghostArcade_playtime');
+                if (data) stats = JSON.parse(data);
+            } catch(e) {}
+
+            const entries = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+            
+            if (entries.length === 0) {
+                playtimeStatsList.innerHTML = '<div style="color:var(--text-dim); text-align:center;">No games played yet.</div>';
+                return;
+            }
+
+            entries.forEach(([url, seconds]) => {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                let timeStr = '';
+                if (hrs > 0) timeStr += `${hrs}h `;
+                timeStr += `${mins}m`;
+
+                // find game title
+                let title = 'Unknown Game';
+                const gameObj = allGames.find(g => g.url === url);
+                if (gameObj) title = gameObj.title;
+
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.padding = '4px 0';
+                row.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                row.innerHTML = `<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">${escHTML(title)}</span><span style="color:var(--cyan); font-family:monospace;">${timeStr}</span>`;
+                playtimeStatsList.appendChild(row);
+            });
+        }
+
+        // Sync Buttons
+        forceSyncPushBtn.addEventListener('click', async () => {
+            syncStatus.textContent = 'Pushing to cloud...';
+            if (window.GhostArcadeSync) {
+                const success = await window.GhostArcadeSync.push();
+                if (success) {
+                    syncStatus.textContent = 'Push successful!';
+                } else {
+                    syncStatus.textContent = 'Push failed. See console.';
+                }
+                setTimeout(() => syncStatus.textContent = '', 3000);
+            }
+        });
+
+        forceSyncPullBtn.addEventListener('click', async () => {
+            syncStatus.textContent = 'Pulling from cloud...';
+            if (window.GhostArcadeSync) {
+                await window.GhostArcadeSync.pull();
+                refreshPlaytimeStats();
+                syncStatus.textContent = 'Pull successful!';
+                setTimeout(() => syncStatus.textContent = '', 3000);
+            }
+        });
+
+        checkAuthStatus();
+    }
+
+    document.addEventListener('DOMContentLoaded', initProfile);
 
 })();

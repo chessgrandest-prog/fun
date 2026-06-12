@@ -1472,3 +1472,91 @@ body.cursor-clicking .custom-cursor-simple {
     transform: scale(1.05);
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   CINEMA MODE
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Mode Toggle Pill ─── */
+.mode-toggle {
+    display: flex;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.mode-toggle__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.mode-toggle__btn:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.04);
+}
+
+.mode-toggle__btn.active {
+    background: rgba(0, 229, 255, 0.12);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+}
+
+/* ─── Cinema Mode accent override (warm gold theme) ─── */
+body.cinema-mode {
+    --accent-cyan: #f59e0b;
+    --glow-cyan: rgba(245, 158, 11, 0.25);
+    --accent-pink: #ef4444;
+    --glow-pink: rgba(239, 68, 68, 0.25);
+}
+
+body.cinema-mode .mode-toggle__btn.active {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+}
+
+/* Wider card aspect ratio for movie posters (portrait mode) */
+body.cinema-mode .card-image-wrap {
+    aspect-ratio: 2 / 3;
+}
+
+body.cinema-mode .game-card {
+    --card-aspect: 2/3;
+}
+
+body.cinema-mode .bg-orb--cyan {
+    background: radial-gradient(circle at center, rgba(245, 158, 11, 0.12), transparent 70%);
+}
+
+body.cinema-mode .bg-orb--purple {
+    background: radial-gradient(circle at center, rgba(239, 68, 68, 0.08), transparent 70%);
+}
+
+/* Cinema mode transition animation */
+body.cinema-mode .logo__accent {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.cinema-mode .tab.active {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+

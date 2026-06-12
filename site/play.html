@@ -249,6 +249,26 @@
             cursor: pointer;
         }
 
+        .dropdown-panel-item {
+            padding: 12px 14px;
+            color: var(--text-dim);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        .dropdown-panel-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
         .dropdown-item:last-child {
             border-bottom: none;
         }
@@ -263,6 +283,59 @@
             height: 18px;
             border-radius: 4px;
             object-fit: cover;
+        }
+
+        /* Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+            margin-top: 8px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--glow-cyan);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 18px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 2px; bottom: 2px;
+            background-color: #fff;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--cyan);
+            box-shadow: 0 0 8px var(--glow-cyan);
+        }
+        input:checked + .slider:before {
+            transform: translateX(16px);
         }
 
         /* ─── Shortcuts Overlay ─── */
@@ -336,6 +409,8 @@
             .game-title { max-width: 130px; font-size: 13px; }
             .bar-btn span { display: none; }
             .bar-btn { padding: 8px 10px; }
+        }
+
         }
 
         /* ═══════════════════════════════════════════════════════════
@@ -539,6 +614,42 @@
                 </div>
             </div>
 
+            <!-- Autoclicker Dropdown -->
+            <div class="dropdown" id="autoclickerDropdown">
+                <button class="bar-btn" id="autoclickerBtn" title="Autoclicker">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="autoclickerIcon">
+                        <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+                        <path d="m13 13 6 6"/>
+                    </svg>
+                    <span>AutoClick</span>
+                </button>
+                <div class="dropdown-content" id="autoclickerContent" style="min-width: 260px;">
+                    <div class="dropdown-panel-item">
+                        <div class="dropdown-panel-header">
+                            <span>Enable Autoclicker</span>
+                            <label class="switch">
+                                <input type="checkbox" id="autoclickerToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-dim);">Clicks exactly where your mouse is.</div>
+                    </div>
+                    <div class="dropdown-panel-item">
+                        <div class="dropdown-panel-header">
+                            <span>Speed: <span id="cpsValue">50</span> CPS</span>
+                        </div>
+                        <input type="range" id="cpsSlider" min="1" max="100" value="50">
+                    </div>
+                    <div class="dropdown-panel-item">
+                        <div class="dropdown-panel-header">
+                            <span>Hotkey</span>
+                            <button id="hotkeyBtn" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--cyan);padding:3px 10px;border-radius:4px;font-family:monospace;font-size:12px;cursor:pointer;font-weight:600;">Alt + C</button>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-dim);" id="hotkeyHint">Click the button, then press your desired key combo.</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Reload Button -->
             <button class="bar-btn" id="reloadBtn" title="Reload game (R)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -601,6 +712,10 @@
                     <span class="shortcut-action">Panic Redirect</span>
                 </div>
                 <div class="shortcut-row">
+                    <span class="shortcut-key" id="shortcutAutoclickDesc">Alt + C</span>
+                    <span class="shortcut-action">Toggle Autoclicker</span>
+                </div>
+                <div class="shortcut-row">
                     <span class="shortcut-key">?</span>
                     <span class="shortcut-action">Toggle Shortcuts overlay</span>
                 </div>
@@ -620,6 +735,7 @@
     <!-- Game Iframe -->
     <iframe class="game-frame" id="gameFrame" allowfullscreen></iframe>
 
+    <script src="/sync.js"></script>
     <script>
     (function() {
         'use strict';
@@ -828,6 +944,172 @@
         if (shortcutPanicDesc) {
             shortcutPanicDesc.textContent = `${settings.panicCtrl ? 'Ctrl + ' : ''}${settings.panicKey.toUpperCase()}`;
         }
+
+        // ═══════════════════════════════════════════════════════════
+        // AUTOCLICKER LOGIC
+        // ═══════════════════════════════════════════════════════════
+        const autoclickerBtn = document.getElementById('autoclickerBtn');
+        const autoclickerContent = document.getElementById('autoclickerContent');
+        const autoclickerToggle = document.getElementById('autoclickerToggle');
+        const cpsSlider = document.getElementById('cpsSlider');
+        const cpsValueEl = document.getElementById('cpsValue');
+        const autoclickerIcon = document.getElementById('autoclickerIcon');
+        const hotkeyBtn = document.getElementById('hotkeyBtn');
+        const hotkeyHint = document.getElementById('hotkeyHint');
+        
+        let autoclickerActive = false;
+        let currentCps = 50;
+
+        // Hotkey config (saved to localStorage)
+        const STORAGE_AUTOCLICKER = 'ghostArcade_autoclicker';
+        let acHotkey = { altKey: true, ctrlKey: false, shiftKey: false, key: 'c' };
+        let isRecordingHotkey = false;
+
+        // Load saved autoclicker settings
+        try {
+            const saved = localStorage.getItem(STORAGE_AUTOCLICKER);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.hotkey) acHotkey = parsed.hotkey;
+                if (parsed.cps) {
+                    currentCps = parsed.cps;
+                    cpsSlider.value = currentCps;
+                    cpsValueEl.textContent = currentCps;
+                }
+            }
+        } catch(e) {}
+
+        function formatHotkey(hk) {
+            const parts = [];
+            if (hk.ctrlKey) parts.push('Ctrl');
+            if (hk.altKey) parts.push('Alt');
+            if (hk.shiftKey) parts.push('Shift');
+            parts.push(hk.key.length === 1 ? hk.key.toUpperCase() : hk.key);
+            return parts.join(' + ');
+        }
+
+        function saveAutoclickerSettings() {
+            try {
+                localStorage.setItem(STORAGE_AUTOCLICKER, JSON.stringify({ hotkey: acHotkey, cps: currentCps }));
+            } catch(e) {}
+        }
+
+        hotkeyBtn.textContent = formatHotkey(acHotkey);
+        const shortcutAutoclickDesc = document.getElementById('shortcutAutoclickDesc');
+        if (shortcutAutoclickDesc) shortcutAutoclickDesc.textContent = formatHotkey(acHotkey);
+
+        // Hotkey recording
+        hotkeyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isRecordingHotkey = true;
+            hotkeyBtn.textContent = '...';
+            hotkeyBtn.style.borderColor = 'var(--cyan)';
+            hotkeyBtn.style.boxShadow = '0 0 8px var(--glow-cyan)';
+            hotkeyHint.textContent = 'Press any key combo now...';
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (isRecordingHotkey) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Ignore bare modifier keys
+                if (['Alt', 'Control', 'Shift', 'Meta'].includes(e.key)) return;
+                acHotkey = { altKey: e.altKey, ctrlKey: e.ctrlKey, shiftKey: e.shiftKey, key: e.key.toLowerCase() };
+                hotkeyBtn.textContent = formatHotkey(acHotkey);
+                hotkeyBtn.style.borderColor = '';
+                hotkeyBtn.style.boxShadow = '';
+                hotkeyHint.textContent = 'Click the button, then press your desired key combo.';
+                isRecordingHotkey = false;
+                saveAutoclickerSettings();
+                if (shortcutAutoclickDesc) shortcutAutoclickDesc.textContent = formatHotkey(acHotkey);
+                // Sync new hotkey to iframe
+                try {
+                    if (gameFrame.contentWindow) {
+                        gameFrame.contentWindow.postMessage({ type: 'AUTOCLICKER_HOTKEY', hotkey: acHotkey }, '*');
+                    }
+                } catch(ex) {}
+                return;
+            }
+        }, true);
+
+        // Dropdown toggle
+        autoclickerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (autoclickerContent.classList.contains('show')) {
+                autoclickerContent.classList.remove('show');
+            } else {
+                document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+                autoclickerContent.classList.add('show');
+            }
+        });
+
+        autoclickerContent.addEventListener('click', (e) => e.stopPropagation());
+        
+        function updateAutoclickerState(active) {
+            autoclickerActive = active;
+            autoclickerToggle.checked = active;
+            
+            if (active) {
+                autoclickerIcon.style.color = 'var(--cyan)';
+                autoclickerIcon.style.filter = 'drop-shadow(0 0 5px var(--cyan))';
+            } else {
+                autoclickerIcon.style.color = '';
+                autoclickerIcon.style.filter = '';
+            }
+
+            // Send message to game iframe
+            try {
+                if (gameFrame.contentWindow) {
+                    gameFrame.contentWindow.postMessage({ type: 'AUTOCLICKER_TOGGLE', active: active }, '*');
+                }
+            } catch(e) {}
+        }
+
+        autoclickerToggle.addEventListener('change', (e) => {
+            updateAutoclickerState(e.target.checked);
+        });
+
+        cpsSlider.addEventListener('input', (e) => {
+            currentCps = parseInt(e.target.value);
+            cpsValueEl.textContent = currentCps;
+            saveAutoclickerSettings();
+            try {
+                if (gameFrame.contentWindow) {
+                    gameFrame.contentWindow.postMessage({ type: 'AUTOCLICKER_SET', cps: currentCps }, '*');
+                }
+            } catch(e) {}
+        });
+
+        // Toggle via custom hotkey (when play.html has focus)
+        document.addEventListener('keydown', (e) => {
+            if (isRecordingHotkey) return;
+            if (e.altKey === acHotkey.altKey && e.ctrlKey === acHotkey.ctrlKey && e.shiftKey === acHotkey.shiftKey && e.key.toLowerCase() === acHotkey.key) {
+                e.preventDefault();
+                updateAutoclickerState(!autoclickerActive);
+            }
+        });
+
+        // Listen for hotkey toggles from inside the iframe
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'AUTOCLICKER_STATE_CHANGED') {
+                autoclickerActive = e.data.active;
+                autoclickerToggle.checked = autoclickerActive;
+                if (autoclickerActive) {
+                    autoclickerIcon.style.color = 'var(--cyan)';
+                    autoclickerIcon.style.filter = 'drop-shadow(0 0 5px var(--cyan))';
+                } else {
+                    autoclickerIcon.style.color = '';
+                    autoclickerIcon.style.filter = '';
+                }
+            }
+        });
+
+        // Send hotkey config to iframe once it loads
+        gameFrame.addEventListener('load', () => {
+            try {
+                gameFrame.contentWindow.postMessage({ type: 'AUTOCLICKER_HOTKEY', hotkey: acHotkey }, '*');
+            } catch(e) {}
+        });
 
         // ─── Favorites logic ───
         let favorites = [];
@@ -1174,6 +1456,32 @@
             const d = document.createElement('div');
             d.textContent = str;
             return d.innerHTML;
+        }
+
+        // ─── Cloud Syncing ───
+        if (window.GhostArcadeSync) {
+            // Initial pull on load
+            window.GhostArcadeSync.pull().then(() => {
+                // If pull imported localStorage, we should update timer variables
+                try {
+                    const data = localStorage.getItem(STORAGE_PLAYTIME);
+                    if (data) {
+                        playtimeStats = JSON.parse(data);
+                        if (gameUrl) lifetimeSeconds = playtimeStats[gameUrl] || 0;
+                    }
+                } catch(e) {}
+            });
+
+            // Auto-sync every 5 minutes
+            setInterval(() => {
+                window.GhostArcadeSync.push();
+            }, 5 * 60 * 1000);
+
+            // Sync on closing game
+            window.addEventListener('beforeunload', (e) => {
+                window.GhostArcadeSync.push();
+                // We do not prevent default here, just try to fire off the fetch before the page unloads
+            });
         }
 
     })();

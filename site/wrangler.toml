@@ -1,0 +1,12 @@
+name = "ghost-arcade"
+main = "worker.js"
+compatibility_date = "2024-03-20"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "arcade-db"
+database_id = "e813937d-29ec-4a35-9e00-e0c861d85e22"
+
+
+[vars]
+JWT_SECRET = "super-secret-arcade-key-2026" # It is recommended to move this to wrangler secrets for production

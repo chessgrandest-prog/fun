@@ -7,7 +7,8 @@ const files = {
     '/ghost-ui': 'ghost-ui.html',
     '/styles.css': 'styles.css',
     '/script.js': 'script.js',
-    '/play.html': 'play.html'
+    '/play.html': 'play.html',
+    '/sync.js': 'sync.js'
 };
 
 const contentTypes = {
@@ -15,18 +16,22 @@ const contentTypes = {
     'ghost-ui.html': 'text/html;charset=UTF-8',
     'styles.css': 'text/css;charset=UTF-8',
     'script.js': 'application/javascript;charset=UTF-8',
-    'play.html': 'text/html;charset=UTF-8'
+    'play.html': 'text/html;charset=UTF-8',
+    'sync.js': 'application/javascript;charset=UTF-8'
 };
 
-let workerCode = `export default {
+let workerCode = fs.readFileSync(path.join(__dirname, 'worker-api-functions.js'), 'utf8') + `
+export default {
     async fetch(request, env, ctx) {
         const url = new URL(request.url);
         const path = url.pathname;
 
+        ` + fs.readFileSync(path.join(__dirname, 'worker-api-routes.js'), 'utf8') + `
+
         let targetUrlStr = null;
         // Auto-recover orphaned requests (like root-absolute scripts from proxied sites)
         const referer = request.headers.get('referer');
-        if (referer && referer.includes('/proxy/http') && !path.startsWith('/proxy/') && !['/', '/ghost-ui', '/play.html', '/script.js', '/styles.css', '/games.json'].includes(path)) {
+        if (referer && referer.includes('/proxy/http') && !path.startsWith('/proxy/') && !['/', '/ghost-ui', '/play.html', '/script.js', '/styles.css', '/games.json', '/movies.json'].includes(path)) {
             const originMatch = referer.match(/\\/proxy\\/(https?:\\/\\/[^\\/]+)/);
             if (originMatch) {
                 targetUrlStr = originMatch[1] + path + url.search;
@@ -106,6 +111,81 @@ let workerCode = `export default {
                         }
                     }
 
+                    // Inject Autoclicker Listener
+                    const autoclickerScript = '<scr' + 'ipt>' +
+                        '(function() {' +
+                            'var active = false;' +
+                            'var cps = 50;' +
+                            'var mx = 0, my = 0;' +
+                            'var lastClick = 0;' +
+                            'var raf = null;' +
+                            'var hotkey = { altKey: true, ctrlKey: false, shiftKey: false, key: "c" };' +
+                            'window.addEventListener("mousemove", function(e) { mx = e.clientX; my = e.clientY; });' +
+                            'function doClick() {' +
+                                'var el = document.elementFromPoint(mx, my);' +
+                                'if (el) {' +
+                                    'if (el.id === "bigCookie" && typeof Game !== "undefined" && typeof Game.ClickCookie === "function") {' +
+                                        'Game.ClickCookie();' +
+                                    '} else {' +
+                                        'var opts = { bubbles: true, cancelable: true, clientX: mx, clientY: my, button: 0, view: window };' +
+                                        'el.dispatchEvent(new PointerEvent("pointerdown", opts));' +
+                                        'el.dispatchEvent(new MouseEvent("mousedown", opts));' +
+                                        'el.dispatchEvent(new PointerEvent("pointerup", opts));' +
+                                        'el.dispatchEvent(new MouseEvent("mouseup", opts));' +
+                                        'el.click();' +
+                                    '}' +
+                                '}' +
+                            '}' +
+                            'function loop(ts) {' +
+                                'if (!active) return;' +
+                                'var interval = 1000 / cps;' +
+                                'var maxPerFrame = Math.ceil(cps / 30) + 1;' +
+                                'var count = 0;' +
+                                'while (ts - lastClick >= interval && count < maxPerFrame) {' +
+                                    'doClick();' +
+                                    'lastClick += interval;' +
+                                    'count++;' +
+                                '}' +
+                                'if (ts - lastClick > 1000) lastClick = ts;' +
+                                'raf = requestAnimationFrame(loop);' +
+                            '}' +
+                            'function start() {' +
+                                'lastClick = performance.now();' +
+                                'raf = requestAnimationFrame(loop);' +
+                            '}' +
+                            'function stop() {' +
+                                'if (raf) cancelAnimationFrame(raf);' +
+                                'raf = null;' +
+                            '}' +
+                            'window.addEventListener("message", function(e) {' +
+                                'if (!e.data || !e.data.type) return;' +
+                                'if (e.data.type === "AUTOCLICKER_SET") {' +
+                                    'cps = parseInt(e.data.cps) || 50;' +
+                                '} else if (e.data.type === "AUTOCLICKER_TOGGLE") {' +
+                                    'active = e.data.active;' +
+                                    'if (active) start(); else stop();' +
+                                '} else if (e.data.type === "AUTOCLICKER_HOTKEY") {' +
+                                    'hotkey = e.data.hotkey;' +
+                                '}' +
+                            '});' +
+                            'window.addEventListener("keydown", function(e) {' +
+                                'if (e.altKey === hotkey.altKey && e.ctrlKey === hotkey.ctrlKey && e.shiftKey === hotkey.shiftKey && e.key.toLowerCase() === hotkey.key) {' +
+                                    'active = !active;' +
+                                    'if (active) start(); else stop();' +
+                                    'window.parent.postMessage({ type: "AUTOCLICKER_STATE_CHANGED", active: active }, "*");' +
+                                '}' +
+                            '});' +
+                        '})();' +
+                    '</' + 'script>';
+                    
+                    if (html.includes('</body>')) {
+                        html = html.replace('</body>', autoclickerScript + '</body>');
+                    } else if (html.includes('</BODY>')) {
+                        html = html.replace('</BODY>', autoclickerScript + '</BODY>');
+                    } else {
+                        html += autoclickerScript;
+                    }
+
                     return new Response(html, {
                         status: res.status,
                         statusText: res.statusText,
@@ -180,11 +260,12 @@ let workerCode = `export default {
             }
         }
 
-        // DYNAMIC GAMES.JSON (fetches from your GitHub automatically)
-        if (path === '/games.json') {
+        // DYNAMIC GAMES.JSON & MOVIES.JSON (fetches from your GitHub automatically)
+        if (path === '/games.json' || path === '/movies.json') {
             try {
-                // IMPORTANT: Adjust this URL if your games.json is in a different folder on GitHub!
-                const githubUrl = 'https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/games.json';
+                // IMPORTANT: Adjust this URL if your files are in a different folder on GitHub!
+                const filename = path.substring(1);
+                const githubUrl = 'https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/' + filename;
                 
                 const res = await fetch(githubUrl, {
                     headers: { 'User-Agent': 'GhostArcadeWorker/1.0' },
@@ -200,7 +281,7 @@ let workerCode = `export default {
                     }
                 });
             } catch (err) {
-                return new Response(JSON.stringify({ error: 'Failed to load games list' }), { 
+                return new Response(JSON.stringify({ error: 'Failed to load ' + path }), { 
                     status: 500,
                     headers: { 'Content-Type': 'application/json' }
                 });
