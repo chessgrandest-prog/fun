@@ -3,25 +3,25 @@
     "id": "movie-1",
     "title": "A Charlie Brown Christmas",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/a_charlie_brown_christmas.jpg",
-    "url": "https://drive.google.com/file/d/1e2UIrJdsz_0k5tp2v0EnPZiPv2ZQSTzg/preview"
+    "url": "https://archive.org/download/ghost-cinema-movies-v1/vid_5a52b08d30.mp4"
   },
   {
     "id": "movie-2",
     "title": "A Bugs Life",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/a_bugs_life.jpg",
-    "url": "https://drive.google.com/file/d/1AIq4OqiMWiY9zZSayF5VID7pfTwSH6BM/preview"
+    "url": "https://archive.org/download/ghost-cinema-movies-v1/vid_f6426dfd23.mp4"
   },
   {
     "id": "movie-3",
     "title": "A Dog's Purpose",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/a_dog_s_purpose.jpg",
-    "url": "https://drive.google.com/file/d/0B-uFeCO4yCFISTFmNlE3akNDbU0/preview"
+    "url": "https://archive.org/download/ghost-cinema-movies-v1/vid_0bf8611cf1.m4v"
   },
   {
     "id": "movie-4",
     "title": "Avengers Endgame",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/avengers_endgame.jpg",
-    "url": "https://drive.google.com/file/d/1ehi9tidOYHb1RMldxtBw6-L3UhyEKVm9/preview"
+    "url": "https://archive.org/download/ghost-cinema-movies-v1/vid_8b2805bc4c.mkv"
   },
   {
     "id": "movie-5",
@@ -33,7 +33,7 @@
     "id": "movie-6",
     "title": "American Pyscho",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/american_pyscho.jpg",
-    "url": "https://drive.google.com/file/d/1s50asvSbX5yrIK2UItleN6TfxyykRo7m/preview"
+    "url": "https://archive.org/download/ghost-cinema-movies-v1/vid_485f6b63c2.mp4"
   },
   {
     "id": "movie-7",
@@ -679,7 +679,7 @@
   },
   {
     "id": "movie-114",
-    "title": "DîDI",
+    "title": "D\u00eeDI",
     "image": "https://raw.githubusercontent.com/chessgrandest-prog/fun/main/site/thumbnails/d_di.jpg",
     "url": "https://drive.google.com/file/d/1APyXeopDrGpY-fKPGwj9ZIRAdqsCf37T/preview"
   },
